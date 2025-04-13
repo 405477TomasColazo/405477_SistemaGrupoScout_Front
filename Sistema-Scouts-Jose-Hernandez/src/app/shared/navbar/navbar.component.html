@@ -1,0 +1,48 @@
+<nav class="bg-blue-700 text-white shadow-lg">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <div class="flex items-center space-x-2">
+        <!-- Logo -->
+        <img src='media/lis.jpg' alt="Logo Scout" class="h-12 w-12 rounded-full">
+        <span class="font-bold text-xl">Grupo Scout</span>
+      </div>
+
+      <div class="flex items-center space-x-6">
+        <!-- Enlaces de navegación -->
+        <a href="#" class="hover:text-green-300 transition">Inicio</a>
+        <a href="#quienes-somos" class="hover:text-green-300 transition">Quiénes Somos</a>
+        <a href="#secciones" class="hover:text-green-300 transition">Secciones</a>
+        <a href="#noticias" class="hover:text-green-300 transition">Noticias</a>
+        <a href="#contacto" class="hover:text-green-300 transition">Contacto</a>
+
+        <!-- No logueado: Botón de login -->
+        <ng-container *ngIf="!isLoggedIn">
+          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+            Iniciar Sesión
+          </button>
+        </ng-container>
+
+        <!-- Logueado: Menú del usuario -->
+        <ng-container *ngIf="isLoggedIn">
+          <div class="relative group">
+            <button class="flex items-center space-x-2 focus:outline-none">
+              <span>{{ user.name }}</span>
+              <img src='/media/lis.jpg' alt="Perfil" class="h-10 w-10 rounded-full border-2 border-green-400">
+            </button>
+
+            <!-- Dropdown menú -->
+            <div class="absolute right-0 top-full w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+              <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Perfil</a>
+              <a href="/family-gestion" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Grupo Familiar</a>
+              <ng-container *ngIf="isAdmin">
+                <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Administración</a>
+              </ng-container>
+              <hr class="my-1">
+              <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar Sesión</button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</nav>
