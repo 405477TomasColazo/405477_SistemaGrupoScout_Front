@@ -1,53 +1,35 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {filter, Observable, of, switchMap} from 'rxjs';
 import { FamilyGroup, MemberProtagonist, Tutor, Relationship } from '../models/family-group.model';
+import {AuthService} from '../auth/auth.service';
+import {User} from '../models/user.model';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FamilyGroupService {
-  private apiUrl = '';
+  private apiUrl = 'http://localhost:8080/familyGroup';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,private authService: AuthService) {}
 
   // Obtener grupo familiar completo
   getFamilyGroup(): Observable<FamilyGroup> {
-    const familyGroup:FamilyGroup = {id: 0, mainContact: {
-        contactPhone: '13131531',
-        email: 'tomi@email.com',
-        id: 1,
-        userId: 1,
-        name: 'Tomi',
-        lastName: 'Colazo',
-        birthdate: new Date(),
-        dni: '42258104',
-        relationships: []
-      }, members: [{
-        memberType: 'Beneficiario',
-        section: 'Manada',
-        accountBalance: 15623,
-        id: 2,
-        userId: 1,
-        name: 'Mateo',
-        lastName: 'Zarza',
-        birthdate: new Date(),
-        dni: '13135135',
-        relationships: []
-      }], tutors: [], user: {
-        id: '1',
-        lastName: 'Colazo',
-        email: 'tomi@email.com',
-        roles: []
-      }}
-    return of(familyGroup);
-    // return this.http.get<FamilyGroup>(`${this.apiUrl}/current`);
+    return this.authService.currentUser$.pipe(
+      // Filtramos nulls por si el usuario no está logueado
+      filter((user): user is User => !!user),
+      // Hacemos el request una vez que tenemos el user
+      switchMap(user =>
+        this.http.get<FamilyGroup>(`${this.apiUrl}/${user.id}`)
+      )
+    );
   }
 
   // Gestión de tutores
   addTutor(tutor: Tutor): Observable<Tutor> {
-    return this.http.post<Tutor>(`${this.apiUrl}/tutors`, tutor);
+    console.log(tutor);
+    return this.http.post<Tutor>(`${this.apiUrl}/tutor`, tutor);
   }
 
   updateTutor(tutor: Tutor): Observable<Tutor> {
@@ -60,7 +42,7 @@ export class FamilyGroupService {
 
   // Gestión de beneficiarios
   addMember(member: MemberProtagonist): Observable<MemberProtagonist> {
-    return this.http.post<MemberProtagonist>(`${this.apiUrl}/members`, member);
+    return this.http.post<MemberProtagonist>(`${this.apiUrl}/member`, member);
   }
 
   updateMember(member: MemberProtagonist): Observable<MemberProtagonist> {
@@ -73,7 +55,7 @@ export class FamilyGroupService {
 
   // Gestión de relaciones
   addRelationship(relationship: Relationship): Observable<Relationship> {
-    return this.http.post<Relationship>(`${this.apiUrl}/relationships`, relationship);
+    return this.http.post<Relationship>(`${this.apiUrl}/relationship`, relationship);
   }
 
   deleteRelationship(relationship: Relationship): Observable<void> {

@@ -4,6 +4,7 @@ import {FamilyGroup, Member, MemberProtagonist, Relationship, Tutor} from '../..
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FamilyGroupService} from '../../core/services/family-group.service';
 import {ToastrService} from 'ngx-toastr';
+import {AuthService} from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-family-gestion',
@@ -21,6 +22,7 @@ export class FamilyGestionComponent implements OnInit {
   // Initialize with default values
   familyGroup: FamilyGroup = {} as FamilyGroup;
   seccionActiva: 'beneficiarios' | 'tutores' | 'relaciones' = 'beneficiarios';
+  userID: number = 0;
 
   // Gestión de modales
   modalAbierto = false;
@@ -49,17 +51,27 @@ export class FamilyGestionComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private familyGroupService: FamilyGroupService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.cargarDatosGrupoFamiliar();
     this.inicializarFormularios();
+
   }
 
   cargarDatosGrupoFamiliar(): void {
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        console.log(user);
+        this.userID = user.id;
+      }
+    })
+
     this.familyGroupService.getFamilyGroup().subscribe({
       next: (data) => {
+        console.log(data);
         this.familyGroup = data;
       },
       error: (error) => {
@@ -162,7 +174,8 @@ export class FamilyGestionComponent implements OnInit {
       return;
     }
 
-    const tutorData = this.tutorForm.value;
+    let tutorData = this.tutorForm.value;
+    tutorData.userId = this.userID;
 
     if (this.modoEdicion) {
       this.familyGroupService.updateTutor(tutorData).subscribe({
@@ -227,7 +240,8 @@ export class FamilyGestionComponent implements OnInit {
       return;
     }
 
-    const beneficiarioData = this.beneficiarioForm.value;
+    let beneficiarioData = this.beneficiarioForm.value;
+    beneficiarioData.userId = this.userID;
 
     if (this.modoEdicion) {
       this.familyGroupService.updateMember(beneficiarioData).subscribe({
