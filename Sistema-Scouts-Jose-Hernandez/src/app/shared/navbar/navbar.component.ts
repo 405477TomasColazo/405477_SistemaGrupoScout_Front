@@ -1,21 +1,46 @@
-import {Component} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {User} from '../../core/models/user.model';
+import {LoginModalComponent} from '../login-modal/login-modal.component';
+import {AuthService} from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
   imports: [
-    NgIf
+    NgIf,
+    LoginModalComponent
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent  {
-  isLoggedIn: boolean = true;
+export class NavbarComponent implements OnInit {
+  showLoginModal: boolean = false;
+  isLoggedIn: boolean = false;
   isAdmin: boolean = false;
-  user:User = {email: 'pepito@email.com', id: '1', name: 'Pepe', roles: []}
+  user: User | null = null;
+  authService: AuthService = inject(AuthService);
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user =>{
+      this.user = user;
+      this.isLoggedIn = !!user;
+      this.isAdmin = user ? user.roles.includes('ADMIN') : false;
+    })
+  }
+
+  openLoginModal() {
+    this.showLoginModal = true;
+  }
+
+  closeLoginModal() {
+    this.showLoginModal = false;
+  }
+
+
 
   logout() {
-    this.isLoggedIn = false;
+    this.authService.logout();
   }
+
+
 }

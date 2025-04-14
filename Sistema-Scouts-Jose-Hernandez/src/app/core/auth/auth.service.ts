@@ -10,7 +10,7 @@ import {User} from '../models/user.model';
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  private apiUrl = 'api/auth';
+  private apiUrl = 'http://localhost:8080/auth';
 
   constructor(private http: HttpClient,
               private tokenService: TokenService) {
@@ -20,14 +20,14 @@ export class AuthService {
     }
   }
 
-  login(email: string, password: string): Observable<User> {
-    return this.http.post<{token: string, user: User}>(`${this.apiUrl}/login`, { email, password })
+  login(email: string, password: string): Observable<User | null> {
+    return this.http.post<{token: string}>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         tap(response => {
-          this.tokenService.saveToken(response.token);
-          this.currentUserSubject.next(response.user);
+          this.tokenService.saveToken(response.token);  // Guarda el token
+          this.loadUserFromToken();  // Carga los datos del usuario desde el token
         }),
-        map(response => response.user)
+        map(() => this.getCurrentUser())  // Devuelve el usuario actual después de hacer login
       );
   }
 
@@ -47,16 +47,35 @@ export class AuthService {
   private loadUserFromToken(): void {
     const token = this.tokenService.getToken();
     if (token) {
-      // Aquí decodificarías el JWT para obtener la info del usuario
-      // O harías una petición al backend para obtener el usuario actual
-      this.http.get<User>(`${this.apiUrl}/me`).subscribe({
-        next: (user) => this.currentUserSubject.next(user),
+      // Decodifica el token JWT (en base64) para obtener la información del usuario
+      const decodedToken = this.decodeToken(token);
+      const email: string = decodedToken.sub;  // O usa decodedToken.email dependiendo de cómo lo hayas configurado
+      const roles = decodedToken.roles || [];
+
+      // Llamas al backend para obtener el usuario por email
+      this.getUserByEmail(email).subscribe({
+        next: (user) => {
+          user.roles = roles;
+          // Después de recibir el usuario, actualizas el currentUserSubject
+          this.currentUserSubject.next(user);
+        },
         error: () => {
+          // Si ocurre un error, puedes manejarlo (por ejemplo, eliminar el token y limpiar el usuario)
           this.tokenService.removeToken();
           this.currentUserSubject.next(null);
         }
       });
     }
+  }
+  getUserByEmail(email: string): Observable<User> {
+    return this.http.get<User>(`http://localhost:8080/user/${email}`);
+  }
+
+  private decodeToken(token: string): any {
+    // Decodifica el JWT y extrae la información del payload
+    const payload = token.split('.')[1];  // Obtiene el payload (parte del medio del token)
+    const decoded = atob(payload);  // Decodifica en base64
+    return JSON.parse(decoded);  // Parsea el JSON decodificado
   }
 
   hasRole(role: string): boolean {

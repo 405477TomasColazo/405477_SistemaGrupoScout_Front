@@ -1,8 +1,9 @@
 export interface User {
   id: string;
-  name: string;
+  lastName: string;
   email: string;
+  createdAt?: string;
+  lastLogin?: string;
   profilePicture?: string;
   roles: string[];
-  familyGroupId?: string;
 }

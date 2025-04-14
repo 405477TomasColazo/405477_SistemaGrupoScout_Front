@@ -17,7 +17,8 @@
 
         <!-- No logueado: Botón de login -->
         <ng-container *ngIf="!isLoggedIn">
-          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+          (click)="openLoginModal()">
             Iniciar Sesión
           </button>
         </ng-container>
@@ -26,7 +27,7 @@
         <ng-container *ngIf="isLoggedIn">
           <div class="relative group">
             <button class="flex items-center space-x-2 focus:outline-none">
-              <span>{{ user.name }}</span>
+              <span>{{ user?.lastName }}</span>
               <img src='/media/lis.jpg' alt="Perfil" class="h-10 w-10 rounded-full border-2 border-green-400">
             </button>
 
@@ -46,3 +47,4 @@
     </div>
   </div>
 </nav>
+<app-login-modal *ngIf="showLoginModal" (closeModal)="closeLoginModal()"></app-login-modal>

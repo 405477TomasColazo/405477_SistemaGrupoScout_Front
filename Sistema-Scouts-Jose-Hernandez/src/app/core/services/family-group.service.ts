@@ -37,7 +37,7 @@ export class FamilyGroupService {
         relationships: []
       }], tutors: [], user: {
         id: '1',
-        name: 'Colazo',
+        lastName: 'Colazo',
         email: 'tomi@email.com',
         roles: []
       }}
