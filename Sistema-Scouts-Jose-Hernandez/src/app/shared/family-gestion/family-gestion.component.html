@@ -7,7 +7,7 @@
     </div>
 
     <!-- Alertas -->
-    <div *ngIf="mostrarAlerta" class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm" role="alert">
+    <div *ngIf="showAlert" class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm" role="alert">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -15,7 +15,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <p class="font-medium">{{ mensajeAlerta }}</p>
+          <p class="font-medium">{{ alertText }}</p>
         </div>
         <div class="ml-auto">
           <button (click)="cerrarAlerta()" class="text-green-500 hover:text-green-700 focus:outline-none">
@@ -52,16 +52,24 @@
         <div *ngIf="seccionActiva === 'tutores'" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-600">
           <div class="p-6">
             <div class="flex items-center mb-4">
-              <img src="/api/placeholder/64/64" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-blue-400">
+              <img src="/media/lis.jpg" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-blue-400">
               <div>
                 <h3 class="text-xl font-semibold text-gray-800">{{familyGroup.mainContact.name}} {{familyGroup.mainContact.lastName}}</h3>
                 <p class="text-blue-600">Tutor Principal</p>
               </div>
-              <button (click)="editarTutor(familyGroup.mainContact)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
+              <div class="ml-auto flex space-x-2">
+                <button (click)="showInfoTutor(familyGroup.mainContact)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
+                  <svg  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                </button>
+                <button (click)="editarTutor(familyGroup.mainContact)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div class="space-y-2 text-gray-700">
@@ -78,10 +86,10 @@
                 <span>{{ familyGroup.mainContact.contactPhone }}</span>
               </div>
               <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-gray-500 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
-                <span>{{ formatDate(familyGroup.mainContact.birthdate) }}</span>
+                <span>{{ familyGroup.mainContact.address }}</span>
               </div>
               <div class="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,12 +105,18 @@
         <div *ngIf="seccionActiva === 'tutores' && familyGroup.tutors.length!=0" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-green-600" >
           <div *ngFor="let tutor of familyGroup.tutors" class="p-6" >
             <div class="flex items-center mb-4">
-              <img src="/api/placeholder/64/64" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-green-400">
+              <img src="/media/lis.jpg" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-green-400">
               <div>
                 <h3 class="text-xl font-semibold text-gray-800">{{ tutor.name }} {{ tutor.lastName }}</h3>
                 <p class="text-green-600">Tutor Adicional</p>
               </div>
               <div class="ml-auto flex space-x-2">
+                <button (click)="showInfoTutor(tutor)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
+                  <svg  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                </button>
                 <button (click)="editarTutor(tutor)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -130,10 +144,10 @@
                 <span>{{ tutor.contactPhone }}</span>
               </div>
               <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-gray-500 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
-                <span>{{ formatDate(tutor.birthdate) }}</span>
+                <span>{{ tutor.address }}</span>
               </div>
               <div class="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,7 +240,7 @@
 
           <div class="mb-6">
             <label for="beneficiarioSelect" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar beneficiario</label>
-            <select id="beneficiarioSelect" [(ngModel)]="beneficiarioSeleccionado" (change)="cargarRelacionesBeneficiario()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select id="beneficiarioSelect" [(ngModel)]="selectedProtagonist" (change)="cargarRelacionesBeneficiario()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option [ngValue]="undefined">Selecciona un beneficiario</option>
               <option *ngFor="let beneficiario of familyGroup.members" [ngValue]="beneficiario">
                 {{ beneficiario.name }} {{ beneficiario.lastName }} - {{ beneficiario.section }}
@@ -234,15 +248,15 @@
             </select>
           </div>
 
-          <div *ngIf="beneficiarioSeleccionado" class="space-y-6">
+          <div *ngIf="selectedProtagonist" class="space-y-6">
             <div class="bg-gray-50 p-4 rounded-md mb-4">
-              <h3 class="font-semibold text-lg text-gray-800 mb-2">Tutores asignados a {{ beneficiarioSeleccionado.name }}</h3>
+              <h3 class="font-semibold text-lg text-gray-800 mb-2">Tutores asignados a {{ selectedProtagonist.name }}</h3>
 
-              <div *ngIf="getTutoresRelacionados(beneficiarioSeleccionado.id).length === 0" class="text-gray-500 italic">
+              <div *ngIf="getTutoresRelacionados(selectedProtagonist.id).length === 0" class="text-gray-500 italic">
                 No hay tutores asignados aún.
               </div>
 
-              <div *ngFor="let relacion of beneficiarioSeleccionado.relationships" class="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
+              <div *ngFor="let relacion of selectedProtagonist.relationships" class="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
                 <div class="flex items-center">
                   <img src="/api/placeholder/48/48" alt="Tutor" class="h-12 w-12 rounded-full object-cover mr-4 border-2 border-green-400">
                   <div>
@@ -261,7 +275,7 @@
             <div class="border-t border-gray-200 pt-6">
               <h3 class="font-semibold text-lg text-gray-800 mb-4">Asignar nuevo tutor</h3>
 
-              <form [formGroup]="relacionForm" (ngSubmit)="guardarRelacion()" class="space-y-4">
+              <form [formGroup]="relationshipForm" (ngSubmit)="guardarRelacion()" class="space-y-4">
                 <div>
                   <label for="tutorSelect" class="block text-sm font-medium text-gray-700 mb-2">Tutor</label>
                   <select id="tutorSelect" formControlName="tutorId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -287,7 +301,7 @@
                 </div>
 
                 <div class="flex justify-end">
-                  <button type="submit" [disabled]="!relacionForm.valid" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
+                  <button type="submit" [disabled]="!relationshipForm.valid" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
                     Asignar Tutor
                   </button>
                 </div>
@@ -298,12 +312,113 @@
       </div>
     </ng-container>
 
-    <!-- Modal para nuevo/editar tutor -->
-    <div *ngIf="modalAbierto && tipoMiembroActual === 'tutor'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!--    Modal para ver info del tutor-->
+    <div *ngIf="infoModal && actualMemberType === 'tutor'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-800">
-            {{ modoEdicion ? 'Editar tutor' : 'Agregar nuevo tutor' }}
+            Información de {{selectedTutor?.name || 'Tutor'}}
+          </h3>
+        </div>
+
+        <div *ngIf="selectedTutor" class="p-6 space-y-4">
+          <!-- Información personal -->
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-2">Información personal</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Nombre completo</p>
+                <p class="text-base text-gray-800">{{selectedTutor.name}} {{selectedTutor.lastName}}</p>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500">DNI</p>
+                <p class="text-base text-gray-800">{{selectedTutor.dni || 'No especificado'}}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información de contacto -->
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-2">Información de contacto</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Correo electrónico</p>
+                <p class="text-base text-gray-800">{{selectedTutor.email || 'No especificado'}}</p>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-500">Teléfono</p>
+                <p class="text-base text-gray-800">{{selectedTutor.contactPhone || 'No especificado'}}</p>
+              </div>
+            </div>
+            <div class="mt-2">
+              <p class="text-sm font-medium text-gray-500">Dirección</p>
+              <p class="text-base text-gray-800">{{selectedTutor.address || 'No especificada'}}</p>
+            </div>
+          </div>
+
+          <!-- Información adicional -->
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-2">Información adicional</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Fecha de nacimiento</p>
+                <p class="text-base text-gray-800">
+                  <ng-container *ngIf="selectedTutor.birthdate">
+                    {{selectedTutor.birthdate | date:'dd/MM/yyyy'}}
+                  </ng-container>
+                  <ng-container *ngIf="!selectedTutor.birthdate">
+                    No especificada
+                  </ng-container>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Relaciones -->
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-2">Relaciones</h4>
+            <div *ngIf="selectedTutor.relationships && selectedTutor.relationships.length > 0" class="space-y-2">
+              <div *ngFor="let relation of selectedTutor.relationships" class="p-3 bg-gray-50 rounded-md">
+                <p class="text-sm">
+                  <span class="font-medium">{{relation.relationship || 'Tutor'}}</span> de
+                  <span class="font-medium">{{getProtagonistName(relation.memberId) || 'Protagonista'}}</span>
+                </p>
+              </div>
+            </div>
+            <div *ngIf="!selectedTutor.relationships || selectedTutor.relationships.length === 0" class="p-3 bg-gray-50 rounded-md">
+              <p class="text-sm text-gray-500">No se encontraron relaciones</p>
+            </div>
+          </div>
+
+          <!-- Notas -->
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-2">Notas</h4>
+            <div class="p-3 bg-gray-50 rounded-md">
+              <p *ngIf="selectedTutor.notes" class="text-sm text-gray-800 whitespace-pre-line">{{selectedTutor.notes}}</p>
+              <p *ngIf="!selectedTutor.notes" class="text-sm text-gray-500">No hay notas adicionales</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pantalla de carga o error si no hay tutor seleccionado -->
+        <div *ngIf="!selectedTutor" class="p-6 flex flex-col items-center justify-center">
+          <p class="text-gray-500 mb-4">No se encontró información del tutor</p>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
+          <button type="button" (click)="cerrarModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para nuevo/editar tutor -->
+    <div *ngIf="editModal && actualMemberType === 'tutor'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-800">
+            {{ editMode ? 'Editar tutor' : 'Agregar nuevo tutor' }}
           </h3>
         </div>
 
@@ -370,7 +485,7 @@
               Cancelar
             </button>
             <button type="submit" [disabled]="tutorForm.invalid" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
-              {{ modoEdicion ? 'Actualizar' : 'Agregar' }}
+              {{ editMode ? 'Actualizar' : 'Agregar' }}
             </button>
           </div>
         </form>
@@ -378,21 +493,21 @@
     </div>
 
     <!-- Modal para nuevo/editar beneficiario -->
-    <div *ngIf="modalAbierto && tipoMiembroActual === 'beneficiario'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div *ngIf="editModal && actualMemberType === 'beneficiario'" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-800">
-            {{ modoEdicion ? 'Editar beneficiario' : 'Agregar nuevo beneficiario' }}
+            {{ editMode ? 'Editar beneficiario' : 'Agregar nuevo beneficiario' }}
           </h3>
         </div>
 
-        <form [formGroup]="beneficiarioForm" (ngSubmit)="guardarBeneficiario()">
+        <form [formGroup]="protagonistForm" (ngSubmit)="guardarBeneficiario()">
           <div class="p-6 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label for="beneName" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                 <input type="text" id="beneName" formControlName="name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <p *ngIf="beneficiarioForm.get('name')?.invalid && beneficiarioForm.get('name')?.touched" class="text-red-600 text-xs mt-1">
+                <p *ngIf="protagonistForm.get('name')?.invalid && protagonistForm.get('name')?.touched" class="text-red-600 text-xs mt-1">
                   El nombre es requerido
                 </p>
               </div>
@@ -400,7 +515,7 @@
               <div>
                 <label for="beneLastName" class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
                 <input type="text" id="beneLastName" formControlName="lastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <p *ngIf="beneficiarioForm.get('lastName')?.invalid && beneficiarioForm.get('lastName')?.touched" class="text-red-600 text-xs mt-1">
+                <p *ngIf="protagonistForm.get('lastName')?.invalid && protagonistForm.get('lastName')?.touched" class="text-red-600 text-xs mt-1">
                   El apellido es requerido
                 </p>
               </div>
@@ -409,7 +524,7 @@
             <div>
               <label for="beneDni" class="block text-sm font-medium text-gray-700 mb-1">DNI</label>
               <input type="text" id="beneDni" formControlName="dni" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <p *ngIf="beneficiarioForm.get('dni')?.invalid && beneficiarioForm.get('dni')?.touched" class="text-red-600 text-xs mt-1">
+              <p *ngIf="protagonistForm.get('dni')?.invalid && protagonistForm.get('dni')?.touched" class="text-red-600 text-xs mt-1">
                 DNI requerido
               </p>
             </div>
@@ -417,7 +532,7 @@
             <div>
               <label for="beneBirthdate" class="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
               <input type="date" id="beneBirthdate" formControlName="birthdate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <p *ngIf="beneficiarioForm.get('birthdate')?.invalid && beneficiarioForm.get('birthdate')?.touched" class="text-red-600 text-xs mt-1">
+              <p *ngIf="protagonistForm.get('birthdate')?.invalid && protagonistForm.get('birthdate')?.touched" class="text-red-600 text-xs mt-1">
                 Fecha de nacimiento requerida
               </p>
             </div>
@@ -430,7 +545,7 @@
                 <option value="Protagonista">Protagonista</option>
                 <option value="Participante">Participante</option>
               </select>
-              <p *ngIf="beneficiarioForm.get('memberType')?.invalid && beneficiarioForm.get('memberType')?.touched" class="text-red-600 text-xs mt-1">
+              <p *ngIf="protagonistForm.get('memberType')?.invalid && protagonistForm.get('memberType')?.touched" class="text-red-600 text-xs mt-1">
                 Tipo de miembro requerido
               </p>
             </div>
@@ -444,7 +559,7 @@
                 <option value="Caminantes">Caminantes</option>
                 <option value="Rovers">Rovers</option>
               </select>
-              <p *ngIf="beneficiarioForm.get('section')?.invalid && beneficiarioForm.get('section')?.touched" class="text-red-600 text-xs mt-1">
+              <p *ngIf="protagonistForm.get('section')?.invalid && protagonistForm.get('section')?.touched" class="text-red-600 text-xs mt-1">
                 Sección requerida
               </p>
             </div>
@@ -469,8 +584,8 @@
             <button type="button" (click)="cerrarModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
               Cancelar
             </button>
-            <button type="submit" [disabled]="beneficiarioForm.invalid" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
-              {{ modoEdicion ? 'Actualizar' : 'Agregar' }}
+            <button type="submit" [disabled]="protagonistForm.invalid" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
+              {{ editMode ? 'Actualizar' : 'Agregar' }}
             </button>
           </div>
         </form>
@@ -503,7 +618,7 @@
     </div>
 
     <!-- Modal de confirmación para eliminar relación -->
-    <div *ngIf="modalConfirmacionRelacionAbierto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div *ngIf="confirmationRelationshipModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-800">Confirmar eliminación de relación</h3>
@@ -511,8 +626,8 @@
 
         <div class="p-6">
           <p class="text-gray-700">
-            ¿Estás seguro que deseas eliminar la relación entre <span class="font-semibold">{{ beneficiarioSeleccionado?.name }}</span> y
-            <span class="font-semibold">{{ getTutorNombre(relacionAEliminar?.tutorId) }}</span>?
+            ¿Estás seguro que deseas eliminar la relación entre <span class="font-semibold">{{ selectedProtagonist?.name }}</span> y
+            <span class="font-semibold">{{ getTutorNombre(relationshipToDelete?.tutorId) }}</span>?
             Esta acción no se puede deshacer.
           </p>
         </div>

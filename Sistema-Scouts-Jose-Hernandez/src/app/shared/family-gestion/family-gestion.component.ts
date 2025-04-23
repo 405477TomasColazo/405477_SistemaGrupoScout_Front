@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FamilyGroup, Member, MemberProtagonist, Relationship, Tutor} from '../../core/models/family-group.model';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {FamilyGroupService} from '../../core/services/family-group.service';
@@ -13,7 +13,8 @@ import {AuthService} from '../../core/auth/auth.service';
     NgClass,
     FormsModule,
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    DatePipe
   ],
   templateUrl: './family-gestion.component.html',
   styleUrl: './family-gestion.component.css'
@@ -25,9 +26,11 @@ export class FamilyGestionComponent implements OnInit {
   userID: number = 0;
 
   // Gestión de modales
-  modalAbierto = false;
-  modoEdicion = false;
-  tipoMiembroActual: 'tutor' | 'beneficiario' | null = null;
+  infoModal: boolean = false;
+  editModal = false;
+  editMode = false;
+  actualMemberType: 'tutor' | 'beneficiario' | null = null;
+  selectedTutor: Tutor | null = null;
 
   // Gestión de confirmaciones
   modalConfirmacionAbierto = false;
@@ -35,18 +38,18 @@ export class FamilyGestionComponent implements OnInit {
   miembroAEliminar: Member | null = null;
 
   // Gestión de relaciones
-  beneficiarioSeleccionado: MemberProtagonist | null = null;
-  relacionForm: FormGroup = {} as FormGroup;
-  modalConfirmacionRelacionAbierto = false;
-  relacionAEliminar: Relationship | null = null;
+  selectedProtagonist: MemberProtagonist | null = null;
+  relationshipForm: FormGroup = {} as FormGroup;
+  confirmationRelationshipModalOpen = false;
+  relationshipToDelete: Relationship | null = null;
 
   // Formularios
   tutorForm: FormGroup = {} as FormGroup;
-  beneficiarioForm: FormGroup = {} as FormGroup;
+  protagonistForm: FormGroup = {} as FormGroup;
 
   // Alertas
-  mostrarAlerta = false;
-  mensajeAlerta = '';
+  showAlert = false;
+  alertText = '';
 
   constructor(
     private fb: FormBuilder,
@@ -56,12 +59,12 @@ export class FamilyGestionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarDatosGrupoFamiliar();
-    this.inicializarFormularios();
+    this.loadFamilyGroup();
+    this.startForm();
 
   }
 
-  cargarDatosGrupoFamiliar(): void {
+  loadFamilyGroup(): void {
     this.authService.currentUser$.subscribe(user => {
       if (user) {
         console.log(user);
@@ -81,7 +84,7 @@ export class FamilyGestionComponent implements OnInit {
     });
   }
 
-  inicializarFormularios(): void {
+  startForm(): void {
     // Formulario para tutores
     this.tutorForm = this.fb.group({
       id: [null],
@@ -92,16 +95,18 @@ export class FamilyGestionComponent implements OnInit {
       dni: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       contactPhone: ['', Validators.required],
+      address: ['', [Validators.required]],
       notes: ['']
     });
 
     // Formulario para beneficiarios
-    this.beneficiarioForm = this.fb.group({
+    this.protagonistForm = this.fb.group({
       id: [null],
       userId: [null],
       name: ['', Validators.required],
       lastName: ['', Validators.required],
       birthdate: ['', Validators.required],
+      address: ['', [Validators.required]],
       dni: ['', Validators.required],
       memberType: ['', Validators.required],
       section: ['', Validators.required],
@@ -110,7 +115,7 @@ export class FamilyGestionComponent implements OnInit {
     });
 
     // Formulario para relaciones
-    this.relacionForm = this.fb.group({
+    this.relationshipForm = this.fb.group({
       tutorId: [null, Validators.required],
       relationship: ['', Validators.required]
     });
@@ -120,39 +125,41 @@ export class FamilyGestionComponent implements OnInit {
   cambiarSeccion(seccion: 'beneficiarios' | 'tutores' | 'relaciones'): void {
     this.seccionActiva = seccion;
     if (seccion === 'relaciones') {
-      this.beneficiarioSeleccionado = null;
-      this.relacionForm.reset();
+      this.selectedProtagonist = null;
+      this.relationshipForm.reset();
     }
   }
 
   // Métodos para modales
   abrirModalNuevoMiembro(tipo: 'tutor' | 'beneficiario'): void {
-    this.modoEdicion = false;
-    this.tipoMiembroActual = tipo;
-    this.modalAbierto = true;
+    this.editMode = false;
+    this.actualMemberType = tipo;
+    this.editModal = true;
 
     // Resetear el formulario correspondiente
     if (tipo === 'tutor') {
       this.tutorForm.reset();
     } else {
-      this.beneficiarioForm.reset({
+      this.protagonistForm.reset({
         accountBalance: 0
       });
     }
   }
 
   cerrarModal(): void {
-    this.modalAbierto = false;
-    this.tipoMiembroActual = null;
+    this.editModal = false;
+    this.actualMemberType = null;
     this.miembroAEditar = null;
+    this.infoModal = false;
+    this.selectedTutor = null;
   }
 
   // Métodos para tutores
   editarTutor(tutor: Tutor): void {
-    this.modoEdicion = true;
-    this.tipoMiembroActual = 'tutor';
+    this.editMode = true;
+    this.actualMemberType = 'tutor';
     this.miembroAEditar = tutor;
-    this.modalAbierto = true;
+    this.editModal = true;
 
     // Llenar el formulario con los datos del tutor
     this.tutorForm.patchValue({
@@ -177,7 +184,7 @@ export class FamilyGestionComponent implements OnInit {
     let tutorData = this.tutorForm.value;
     tutorData.userId = this.userID;
 
-    if (this.modoEdicion) {
+    if (this.editMode) {
       this.familyGroupService.updateTutor(tutorData).subscribe({
         next: (response) => {
           // Actualizar el tutor en el arreglo local
@@ -214,13 +221,13 @@ export class FamilyGestionComponent implements OnInit {
 
   // Métodos para beneficiarios
   editarBeneficiario(beneficiario: MemberProtagonist): void {
-    this.modoEdicion = true;
-    this.tipoMiembroActual = 'beneficiario';
+    this.editMode = true;
+    this.actualMemberType = 'beneficiario';
     this.miembroAEditar = beneficiario;
-    this.modalAbierto = true;
+    this.editModal = true;
 
     // Llenar el formulario con los datos del beneficiario
-    this.beneficiarioForm.patchValue({
+    this.protagonistForm.patchValue({
       id: beneficiario.id,
       userId: beneficiario.userId,
       name: beneficiario.name,
@@ -235,15 +242,15 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   guardarBeneficiario(): void {
-    if (this.beneficiarioForm.invalid) {
-      this.beneficiarioForm.markAllAsTouched();
+    if (this.protagonistForm.invalid) {
+      this.protagonistForm.markAllAsTouched();
       return;
     }
 
-    let beneficiarioData = this.beneficiarioForm.value;
+    let beneficiarioData = this.protagonistForm.value;
     beneficiarioData.userId = this.userID;
 
-    if (this.modoEdicion) {
+    if (this.editMode) {
       this.familyGroupService.updateMember(beneficiarioData).subscribe({
         next: (response) => {
           // Actualizar el beneficiario en el arreglo local
@@ -322,8 +329,8 @@ export class FamilyGestionComponent implements OnInit {
 
   // Métodos para relaciones
   cargarRelacionesBeneficiario(): void {
-    if (this.beneficiarioSeleccionado) {
-      this.relacionForm.reset();
+    if (this.selectedProtagonist) {
+      this.relationshipForm.reset();
     }
   }
 
@@ -345,16 +352,16 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   guardarRelacion(): void {
-    if (this.relacionForm.invalid || !this.beneficiarioSeleccionado) {
-      this.relacionForm.markAllAsTouched();
+    if (this.relationshipForm.invalid || !this.selectedProtagonist) {
+      this.relationshipForm.markAllAsTouched();
       return;
     }
 
-    const tutorId = this.relacionForm.value.tutorId;
-    const relationship = this.relacionForm.value.relationship;
+    const tutorId = this.relationshipForm.value.tutorId;
+    const relationship = this.relationshipForm.value.relationship;
 
     // Verificar si ya existe esta relación
-    const yaExiste = this.beneficiarioSeleccionado.relationships?.some(
+    const yaExiste = this.selectedProtagonist.relationships?.some(
       r => r.tutorId === tutorId
     );
 
@@ -364,7 +371,7 @@ export class FamilyGestionComponent implements OnInit {
     }
 
     const nuevaRelacion: Relationship = {
-      memberId: this.beneficiarioSeleccionado.id,
+      memberId: this.selectedProtagonist.id,
       tutorId: tutorId,
       relationship: relationship
     };
@@ -372,14 +379,14 @@ export class FamilyGestionComponent implements OnInit {
     this.familyGroupService.addRelationship(nuevaRelacion).subscribe({
       next: (response) => {
         // Asegurarse de que el beneficiario tenga un array de relaciones
-        if (!this.beneficiarioSeleccionado!.relationships) {
-          this.beneficiarioSeleccionado!.relationships = [];
+        if (!this.selectedProtagonist!.relationships) {
+          this.selectedProtagonist!.relationships = [];
         }
 
         // Agregar la relación al beneficiario seleccionado
-        this.beneficiarioSeleccionado!.relationships.push(response);
+        this.selectedProtagonist!.relationships.push(response);
         this.mostrarMensajeExito('Relación agregada exitosamente');
-        this.relacionForm.reset();
+        this.relationshipForm.reset();
       },
       error: (error) => {
         this.toastr.error('Error al agregar la relación', 'Error');
@@ -389,18 +396,18 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   eliminarRelacion(relacion: Relationship): void {
-    this.relacionAEliminar = relacion;
-    this.modalConfirmacionRelacionAbierto = true;
+    this.relationshipToDelete = relacion;
+    this.confirmationRelationshipModalOpen = true;
   }
 
   confirmarEliminacionRelacion(): void {
-    if (!this.relacionAEliminar || !this.beneficiarioSeleccionado) return;
+    if (!this.relationshipToDelete || !this.selectedProtagonist) return;
 
-    this.familyGroupService.deleteRelationship(this.relacionAEliminar).subscribe({
+    this.familyGroupService.deleteRelationship(this.relationshipToDelete).subscribe({
       next: () => {
         // Eliminar la relación del array local
-        this.beneficiarioSeleccionado!.relationships = this.beneficiarioSeleccionado!.relationships!.filter(
-          r => !(r.memberId === this.relacionAEliminar!.memberId && r.tutorId === this.relacionAEliminar!.tutorId)
+        this.selectedProtagonist!.relationships = this.selectedProtagonist!.relationships!.filter(
+          r => !(r.memberId === this.relationshipToDelete!.memberId && r.tutorId === this.relationshipToDelete!.tutorId)
         );
         this.mostrarMensajeExito('Relación eliminada exitosamente');
         this.cancelarEliminacionRelacion();
@@ -413,8 +420,8 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   cancelarEliminacionRelacion(): void {
-    this.modalConfirmacionRelacionAbierto = false;
-    this.relacionAEliminar = null;
+    this.confirmationRelationshipModalOpen = false;
+    this.relationshipToDelete = null;
   }
 
   // Métodos de utilidad
@@ -431,8 +438,8 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   mostrarMensajeExito(mensaje: string): void {
-    this.mensajeAlerta = mensaje;
-    this.mostrarAlerta = true;
+    this.alertText = mensaje;
+    this.showAlert = true;
     this.toastr.success(mensaje, 'Éxito');
 
     // Ocultar automáticamente después de 5 segundos
@@ -442,7 +449,22 @@ export class FamilyGestionComponent implements OnInit {
   }
 
   cerrarAlerta(): void {
-    this.mostrarAlerta = false;
-    this.mensajeAlerta = '';
+    this.showAlert = false;
+    this.alertText = '';
+  }
+
+  showInfoTutor(tutor: Tutor) {
+    this.selectedTutor = tutor;
+    this.infoModal = true;
+    this.actualMemberType = 'tutor'
+  }
+
+  getProtagonistName(memberId: number) {
+    for (const member of this.familyGroup.members) {
+      if (member.id === memberId) {
+        return member.name + " " + member.lastName;
+      }
+    }
+    return "";
   }
 }

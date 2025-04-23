@@ -18,6 +18,7 @@ export interface Member {
   userId: number;
   name: string;
   lastName: string;
+  address: string;
   birthdate: Date;
   dni: string;
   notes?: string;
