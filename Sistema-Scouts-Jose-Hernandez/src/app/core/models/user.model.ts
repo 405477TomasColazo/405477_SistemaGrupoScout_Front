@@ -18,3 +18,15 @@ export interface Invitation {
   sentDate?: string;
   tutor?: Tutor;
 }
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  lastName: string;
+  tutor: Tutor;
+}
+
+export interface InvitationRequest{
+  email: string;
+  lastName: string;
+}

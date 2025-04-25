@@ -14,8 +14,8 @@ export interface FamilyGroup {
   tutors: Tutor[];
 }
 export interface Member {
-  id: number;
-  userId: number;
+  id?: number;
+  userId?: number;
   name: string;
   lastName: string;
   address: string;

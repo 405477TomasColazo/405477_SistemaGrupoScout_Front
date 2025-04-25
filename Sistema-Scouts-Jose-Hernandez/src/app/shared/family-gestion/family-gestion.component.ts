@@ -293,8 +293,8 @@ export class FamilyGestionComponent implements OnInit {
     const esUnTutor = this.miembroAEliminar === this.familyGroup.mainContact ||
       this.familyGroup.tutors.some(t => t.id === this.miembroAEliminar!.id);
 
-    if (esUnTutor) {
-      this.familyGroupService.deleteTutor(this.miembroAEliminar.id).subscribe({
+    if (esUnTutor && this.miembroAEliminar) {
+      this.familyGroupService.deleteTutor(this.miembroAEliminar.id ?? 0).subscribe({
         next: () => {
           // Eliminar el tutor del arreglo local
           this.familyGroup.tutors = this.familyGroup.tutors.filter(t => t.id !== this.miembroAEliminar!.id);
@@ -307,7 +307,7 @@ export class FamilyGestionComponent implements OnInit {
         }
       });
     } else {
-      this.familyGroupService.deleteMember(this.miembroAEliminar.id).subscribe({
+      this.familyGroupService.deleteMember(this.miembroAEliminar.id ?? 0).subscribe({
         next: () => {
           // Eliminar el beneficiario del arreglo local
           this.familyGroup.members = this.familyGroup.members.filter(m => m.id !== this.miembroAEliminar!.id);
@@ -371,7 +371,7 @@ export class FamilyGestionComponent implements OnInit {
     }
 
     const nuevaRelacion: Relationship = {
-      memberId: this.selectedProtagonist.id,
+      memberId: this.selectedProtagonist.id ?? 0,
       tutorId: tutorId,
       relationship: relationship
     };
