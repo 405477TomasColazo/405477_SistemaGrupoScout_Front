@@ -12,7 +12,7 @@ export interface Payment {
   memberId: number;
   amount: number;
   paymentDate: string;
-  status: 'completed' | 'processing' | 'failed';
+  status: 'completed' | 'processing' | 'failed' | 'pending';
   referenceId?: string; // Referencia externa del pago (ej: ID de MercadoPago)
   paymentMethod?: string;
   items: PaymentItem[]; // Cuotas incluidas en este pago

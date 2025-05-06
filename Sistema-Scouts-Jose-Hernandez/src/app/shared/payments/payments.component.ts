@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
-import { DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FamilyGroup, MemberProtagonist} from '../../core/models/family-group.model';
 import {Fee, Payment, PaymentFilters} from '../../core/models/payments.model';
 import {Subscription} from 'rxjs';
@@ -7,6 +7,7 @@ import {PaymentService} from '../../core/services/payment.service';
 import {FamilyGroupService} from '../../core/services/family-group.service';
 
 import {FormsModule} from '@angular/forms';
+
 declare var MercadoPago: any;
 @Component({
   selector: 'app-payments',
@@ -249,8 +250,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
   retryPayment(payment: Payment): void {
     // Se pueden recuperar los conceptos del pago fallido
-    const feeIds = payment.items.map(item => item.feeId);
-    this.selectedFees = feeIds;
+    this.selectedFees = payment.items.map(item => item.feeId);
     this.closeDetailsModal();
     this.openPaymentModal();
   }
@@ -268,10 +268,11 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     return member ? `${member.name} ${member.lastName}` : 'Miembro no encontrado';
   }
 
-  getStatusText(status: "completed" | "processing" | "failed"): string {
+  getStatusText(status: "completed" | "processing" | "failed" | "pending"): string {
     const statusMap = {
       completed: "Completado",
       processing: "Procesando",
+      pending: "Pendiente",
       failed: "Fallido"
     };
     return statusMap[status];
@@ -429,6 +430,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     // Primero verificamos si la transacción fue exitosa
 
     const transaccionExitosa = response.status === 'success';
+
 
     // if (transaccionExitosa) {
       // Guardamos la información del pago seleccionado antes de limpiar
