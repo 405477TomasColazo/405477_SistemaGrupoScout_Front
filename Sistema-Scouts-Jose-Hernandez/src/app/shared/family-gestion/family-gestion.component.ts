@@ -110,7 +110,6 @@ export class FamilyGestionComponent implements OnInit {
       dni: ['', Validators.required],
       memberType: ['', Validators.required],
       section: ['', Validators.required],
-      accountBalance: [0],
       notes: ['']
     });
 
@@ -232,11 +231,11 @@ export class FamilyGestionComponent implements OnInit {
       userId: beneficiario.userId,
       name: beneficiario.name,
       lastName: beneficiario.lastName,
+      address: beneficiario.address,
       birthdate: this.formatDateForInput(beneficiario.birthdate),
       dni: beneficiario.dni,
       memberType: beneficiario.memberType,
       section: beneficiario.section,
-      accountBalance: beneficiario.accountBalance,
       notes: beneficiario.notes || ''
     });
   }
@@ -467,4 +466,11 @@ export class FamilyGestionComponent implements OnInit {
     }
     return "";
   }
+
+  showInfoProtagonist(protagonist: MemberProtagonist) {
+    this.selectedProtagonist = protagonist;
+    this.infoModal = true;
+    this.actualMemberType = 'beneficiario';
+  }
+
 }
