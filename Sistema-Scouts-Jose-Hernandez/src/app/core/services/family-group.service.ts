@@ -63,4 +63,8 @@ export class FamilyGroupService {
       `${this.apiUrl}/relationships/${relationship.memberId}/${relationship.tutorId}`
     );
   }
+
+  getFamilyGroupById(userId: number):Observable<FamilyGroup> {
+    return this.http.get<FamilyGroup>(`${this.apiUrl}/${userId}`);
+  }
 }
