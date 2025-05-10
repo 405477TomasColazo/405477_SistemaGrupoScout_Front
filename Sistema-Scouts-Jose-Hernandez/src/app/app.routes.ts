@@ -4,6 +4,7 @@ import {FamilyGestionComponent} from './shared/family-gestion/family-gestion.com
 import {RegistryManagementComponent} from './shared/registry-management/registry-management.component';
 import {RegistryComponent} from './shared/registry/registry.component';
 import {PaymentsComponent} from './shared/payments/payments.component';
+import {EducatorDashboardComponent} from './shared/educator-dashboard/educator-dashboard.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   {path: 'invitations', component:RegistryManagementComponent},
   {path: 'registro', component:RegistryComponent},
   {path: 'payments', component:PaymentsComponent},
+  {path: 'educators', component:EducatorDashboardComponent},
 ];

@@ -23,6 +23,7 @@ export interface Member {
   dni: string;
   notes?: string;
   relationships: Relationship[];
+  status?: string;
 }
 
 export interface MemberProtagonist extends Member {
@@ -34,4 +35,9 @@ export interface MemberProtagonist extends Member {
 export interface Tutor extends Member {
   contactPhone: string;
   email: string;
+}
+
+export interface MemberWithFamily extends MemberProtagonist {
+  familyGroup: FamilyGroup;
+  tutores: (Tutor & { relationship: string })[];
 }

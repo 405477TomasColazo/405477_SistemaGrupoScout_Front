@@ -1,4 +1,4 @@
-import {Tutor} from './family-group.model';
+import {Relationship, Tutor} from './family-group.model';
 
 export interface User {
   id: number;
@@ -29,4 +29,28 @@ export interface RegisterRequest {
 export interface InvitationRequest{
   email: string;
   lastName: string;
+}
+
+export interface SectionMember{
+  id: number;
+  userId: number;
+  name: string;
+  lastName: string;
+  dni:string;
+  section:string
+  birthdate:Date;
+  notes: string;
+  relationships:Relationship[];
+  accountBalance:number;
+  isEducator:boolean;
+  address:string;
+}
+
+export interface EducatorExtended extends SectionMember {
+  email: string;
+  contactPhone: string;
+}
+
+export interface MiembroConDetalles extends SectionMember {
+  tutoresInfo?: (Tutor & { relationship: string })[];
 }
