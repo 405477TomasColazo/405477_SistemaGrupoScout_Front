@@ -1,0 +1,255 @@
+<div class="container mx-auto p-4">
+  <!-- Alertas -->
+  <div *ngIf="showAlert" class="mb-4 p-4 rounded-md"
+       [ngClass]="{'bg-green-100 text-green-700': alertType === 'success', 'bg-red-100 text-red-700': alertType === 'error'}">
+    <div class="flex items-center">
+      <svg *ngIf="alertType === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <svg *ngIf="alertType === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      {{ alertText }}
+    </div>
+  </div>
+
+  <!-- Header del Dashboard -->
+  <div class="bg-white shadow rounded-lg mb-6">
+    <div class="px-6 py-4">
+      <h1 class="text-2xl font-bold text-gray-800">Dashboard Administrativo</h1>
+    </div>
+  </div>
+
+  <!-- Tarjetas de resumen -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div *ngFor="let stat of resumenEstadisticas" class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div [ngClass]="stat.bgColor" class="p-3 rounded-full">
+          <svg *ngIf="stat.icon === 'users'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [ngClass]="stat.textColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg *ngIf="stat.icon === 'money'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [ngClass]="stat.textColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg *ngIf="stat.icon === 'trend'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [ngClass]="stat.textColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-gray-500 text-sm font-medium">{{ stat.titulo }}</p>
+          <div class="flex items-baseline">
+            <p class="text-2xl font-semibold text-gray-900">{{ stat.valor }}</p>
+            <p [ngClass]="{'text-green-600': stat.cambio.startsWith('+'), 'text-red-600': !stat.cambio.startsWith('+')}" class="ml-2 text-sm font-medium">
+              {{ stat.cambio }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de filtros para los gráficos -->
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <h2 class="text-lg font-semibold text-gray-800">Filtros de Dashboard</h2>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Selector de período -->
+        <div>
+          <label for="periodoFilter" class="block text-sm font-medium text-gray-700 mb-1">Período</label>
+          <select
+            id="periodoFilter"
+            [(ngModel)]="filtroSeleccionado"
+            (change)="aplicarFiltro()"
+            class="w-full md:w-48 rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+            <option value="total">Total acumulado</option>
+            <option *ngFor="let periodo of periodos" [value]="periodo.valor">{{ periodo.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- Botones de filtro rápido -->
+        <div class="flex items-center space-x-2">
+          <button
+            *ngFor="let filtro of filtrosRapidos"
+            (click)="seleccionarFiltroRapido(filtro.valor)"
+            [class]="filtroSeleccionado === filtro.valor
+            ? 'bg-blue-100 text-blue-700 border-blue-300'
+            : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'"
+            class="px-3 py-2 rounded-md text-sm font-medium border transition duration-150 ease-in-out">
+            {{ filtro.nombre }}
+          </button>
+        </div>
+
+        <!-- Selector de año (opcional) -->
+        <div *ngIf="mostrarSelectorAnio">
+          <label for="anioFilter" class="block text-sm font-medium text-gray-700 mb-1">Año</label>
+          <select
+            id="anioFilter"
+            [(ngModel)]="anioSeleccionado"
+            (change)="aplicarFiltro()"
+            class="w-full md:w-28 rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+            <option *ngFor="let anio of aniosDisponibles" [value]="anio">{{ anio }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etiqueta que muestra el periodo actualmente seleccionado -->
+    <div class="mt-3 text-sm text-gray-500">
+      <span>Mostrando datos para: <span class="font-medium">{{ etiquetaPeriodoActual }}</span></span>
+      <div *ngIf="fechaActualizacion" class="text-xs text-gray-400 mt-1">
+        Última actualización: {{ fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos con menús de opciones -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Gráfico de pagos de cuotas -->
+    <div class="bg-white rounded-lg shadow p-6 lg:col-span-1">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Pago de Cuotas Mensuales</h2>
+
+        <!-- Menú de opciones del gráfico -->
+        <div class="relative" *ngIf="pagosCuotasChart">
+          <button
+            (click)="toggleMenuGrafico('pagosCuotas')"
+            class="p-1 rounded-full hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+
+          <!-- Menú desplegable -->
+          <div *ngIf="menuGraficoAbierto === 'pagosCuotas'" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-10 border border-gray-200">
+            <button
+              (click)="descargarGrafico('pagosCuotasChart', 'Pago de Cuotas')"
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Descargar como imagen
+            </button>
+            <button
+              (click)="exportarDatosCSV(pagosCuotasData, 'pago_cuotas')"
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Exportar datos CSV
+            </button>
+            <!-- Eliminamos el botón resetZoom que causaba errores -->
+          </div>
+        </div>
+      </div>
+      <div class="h-64">
+        <canvas #pagosCuotasChart></canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico de miembros por sección -->
+    <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Miembros Activos por Sección</h2>
+
+        <!-- Menú de opciones del gráfico -->
+        <div class="relative" *ngIf="miembrosSeccionChart">
+          <button
+            (click)="toggleMenuGrafico('miembrosSeccion')"
+            class="p-1 rounded-full hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+
+          <!-- Menú desplegable -->
+          <div *ngIf="menuGraficoAbierto === 'miembrosSeccion'" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-1 z-10 border border-gray-200">
+            <button
+              (click)="descargarGrafico('miembrosSeccionChart', 'Miembros por Sección')"
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Descargar como imagen
+            </button>
+            <button
+              (click)="exportarDatosCSV(miembrosSeccionData, 'miembros_seccion')"
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Exportar datos CSV
+            </button>
+            <!-- Eliminamos el botón resetZoom que causaba errores -->
+          </div>
+        </div>
+      </div>
+      <div class="h-64">
+        <canvas #miembrosSeccionChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Próximos eventos y Notificaciones -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Próximos eventos -->
+    <div class="bg-white rounded-lg shadow lg:col-span-2">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h2 class="ml-2 text-lg font-semibold text-gray-800">Próximos Eventos</h2>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">{{ mesActual }}</p>
+      </div>
+      <div class="p-6">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let evento of eventosProximos">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ evento.titulo }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.fecha }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.hora }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.lugar }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <h2 class="ml-2 text-lg font-semibold text-gray-800">Notificaciones</h2>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div *ngFor="let notificacion of notificaciones"
+               [ngClass]="getNotificationStyle(notificacion.tipo)"
+               class="p-4 rounded">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg *ngIf="notificacion.tipo === 'warning'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <svg *ngIf="notificacion.tipo === 'info'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <svg *ngIf="notificacion.tipo === 'alert'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm">{{ notificacion.mensaje }}</p>
+                <p class="mt-1 text-xs text-gray-500">{{ notificacion.tiempo }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

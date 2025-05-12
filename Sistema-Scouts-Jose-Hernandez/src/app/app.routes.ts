@@ -5,6 +5,7 @@ import {RegistryManagementComponent} from './shared/registry-management/registry
 import {RegistryComponent} from './shared/registry/registry.component';
 import {PaymentsComponent} from './shared/payments/payments.component';
 import {EducatorDashboardComponent} from './shared/educator-dashboard/educator-dashboard.component';
+import {AdminDashboardComponent} from './shared/admin-dashboard/admin-dashboard.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -14,4 +15,5 @@ export const routes: Routes = [
   {path: 'registro', component:RegistryComponent},
   {path: 'payments', component:PaymentsComponent},
   {path: 'educators', component:EducatorDashboardComponent},
+  {path: 'dashboard', component:AdminDashboardComponent},
 ];

@@ -46,11 +46,6 @@ export interface SectionMember{
   address:string;
 }
 
-export interface EducatorExtended extends SectionMember {
-  email: string;
-  contactPhone: string;
-}
-
 export interface MiembroConDetalles extends SectionMember {
   tutoresInfo?: (Tutor & { relationship: string })[];
 }
