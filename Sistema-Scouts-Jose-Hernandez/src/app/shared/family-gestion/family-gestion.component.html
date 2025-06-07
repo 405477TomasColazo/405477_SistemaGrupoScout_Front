@@ -49,13 +49,13 @@
     <ng-container *ngIf="seccionActiva === 'beneficiarios' || seccionActiva === 'tutores'">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <!-- Tutor principal (solo se muestra en la sección de tutores) -->
-        <div *ngIf="seccionActiva === 'tutores'" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-600">
+        <div *ngIf="seccionActiva === 'tutores'" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-600 hover:shadow-lg transition-shadow duration-200">
           <div class="p-6">
             <div class="flex items-center mb-4">
               <img src="/media/lis.jpg" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-blue-400">
               <div>
                 <h3 class="text-xl font-semibold text-gray-800">{{familyGroup.mainContact.name}} {{familyGroup.mainContact.lastName}}</h3>
-                <p class="text-blue-600">Tutor Principal</p>
+                <p class="text-blue-600 font-medium">Tutor Principal</p>
               </div>
               <div class="ml-auto flex space-x-2">
                 <button (click)="showInfoTutor(familyGroup.mainContact)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
@@ -102,13 +102,14 @@
         </div>
 
         <!-- Tutores adicionales (solo se muestran en la sección de tutores) -->
-        <div *ngIf="seccionActiva === 'tutores' && familyGroup.tutors.length!=0" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-green-600" >
-          <div *ngFor="let tutor of familyGroup.tutors" class="p-6" >
-            <div class="flex items-center mb-4">
+        <ng-container *ngIf="seccionActiva === 'tutores'">
+          <div *ngFor="let tutor of familyGroup.tutors" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-green-600 hover:shadow-lg transition-shadow duration-200">
+            <div class="p-6">
+              <div class="flex items-center mb-4">
               <img src="/media/lis.jpg" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-green-400">
               <div>
                 <h3 class="text-xl font-semibold text-gray-800">{{ tutor.name }} {{ tutor.lastName }}</h3>
-                <p class="text-green-600">Tutor Adicional</p>
+                <p class="text-green-600 font-medium">Tutor Adicional</p>
               </div>
               <div class="ml-auto flex space-x-2">
                 <button (click)="showInfoTutor(tutor)" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
@@ -156,17 +157,21 @@
                 <span>DNI: {{ tutor.dni }}</span>
               </div>
             </div>
+            </div>
           </div>
-        </div>
+        </ng-container>
 
         <!-- Miembros beneficiarios (solo se muestran en la sección de beneficiarios) -->
-        <div *ngIf="seccionActiva === 'beneficiarios' && familyGroup.members.length!=0" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-purple-600" >
-          <div *ngFor="let beneficiario of familyGroup.members" class="p-6">
-            <div class="flex items-center mb-4">
-              <img src="/api/placeholder/64/64" alt="Perfil" class="h-16 w-16 rounded-full object-cover mr-4 border-2 border-purple-400">
+        <ng-container *ngIf="seccionActiva === 'beneficiarios'">
+          <div *ngFor="let beneficiario of familyGroup.members" class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-purple-600 hover:shadow-lg transition-shadow duration-200">
+            <div class="p-6">
+              <div class="flex items-center mb-4">
+              <div class="h-16 w-16 rounded-full mr-4 border-2 border-purple-400 bg-purple-100 flex items-center justify-center">
+                <span class="text-purple-600 font-bold text-xl">{{ beneficiario.name.charAt(0) }}{{ beneficiario.lastName.charAt(0) }}</span>
+              </div>
               <div>
                 <h3 class="text-xl font-semibold text-gray-800">{{ beneficiario.name }} {{ beneficiario.lastName }}</h3>
-                <p class="text-purple-600">{{ beneficiario.memberType }} - {{ beneficiario.section }}</p>
+                <p class="text-purple-600 font-medium">{{ beneficiario.memberType }} - {{ beneficiario.section }}</p>
               </div>
               <div class="ml-auto flex space-x-2">
                 <button (click)="showInfoProtagonist(beneficiario)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition">
@@ -220,11 +225,12 @@
                 <span>{{ beneficiario.notes }}</span>
               </div>
             </div>
+            </div>
           </div>
-        </div>
+        </ng-container>
 
         <!-- Tarjeta para agregar nuevo miembro -->
-        <div (click)="abrirModalNuevoMiembro(seccionActiva === 'tutores' ? 'tutor' : 'beneficiario')" class="bg-white rounded-lg shadow-md overflow-hidden border-dashed border-2 border-blue-300 flex items-center justify-center p-6 cursor-pointer hover:bg-blue-50 transition">
+        <div (click)="abrirModalNuevoMiembro(seccionActiva === 'tutores' ? 'tutor' : 'beneficiario')" class="bg-white rounded-lg shadow-md overflow-hidden border-dashed border-2 border-blue-300 flex items-center justify-center p-6 cursor-pointer hover:bg-blue-50 hover:shadow-lg transition-all duration-200 min-h-[200px]">
           <div class="text-center">
             <div class="bg-gray-100 p-4 rounded-full inline-block mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -264,7 +270,9 @@
 
               <div *ngFor="let relacion of selectedProtagonist.relationships" class="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
                 <div class="flex items-center">
-                  <img src="/api/placeholder/48/48" alt="Tutor" class="h-12 w-12 rounded-full object-cover mr-4 border-2 border-green-400">
+                  <div class="h-12 w-12 rounded-full mr-4 border-2 border-green-400 bg-green-100 flex items-center justify-center">
+                    <span class="text-green-600 font-medium text-sm">{{ getTutorNombre(relacion.tutorId).charAt(0) }}</span>
+                  </div>
                   <div>
                     <h4 class="font-medium text-gray-800">{{ getTutorNombre(relacion.tutorId) }}</h4>
                     <p class="text-gray-600 text-sm">{{ relacion.relationship }}</p>
