@@ -1,0 +1,676 @@
+<!-- family-events.component.html -->
+<div class="container mx-auto p-4">
+  <!-- Alertas -->
+  <div *ngIf="showAlert" class="mb-4 p-4 rounded-md alert-animation"
+       [ngClass]="{
+         'bg-green-100 text-green-700': alertType === 'success',
+         'bg-red-100 text-red-700': alertType === 'error',
+         'bg-blue-100 text-blue-700': alertType === 'info'
+       }">
+    <div class="flex items-center">
+      <svg *ngIf="alertType === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <svg *ngIf="alertType === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <svg *ngIf="alertType === 'info'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      {{ alertText }}
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Eventos del Grupo Scout</h1>
+
+    <!-- Controles superiores -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <!-- Selector de miembro -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-gray-700">Filtrar por:</span>
+        <button (click)="selectMember(null)"
+                [class.bg-blue-600]="!selectedMemberId"
+                [class.text-white]="!selectedMemberId"
+                [class.bg-gray-200]="selectedMemberId"
+                class="px-3 py-1 rounded-full text-sm font-medium transition-colors">
+          Todos
+        </button>
+        <button *ngFor="let member of familyGroup?.members"
+                (click)="selectMember(member.id!)"
+                [class.bg-blue-600]="selectedMemberId === member.id"
+                [class.text-white]="selectedMemberId === member.id"
+                [class.bg-gray-200]="selectedMemberId !== member.id"
+                class="px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center gap-1">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+               [ngClass]="selectedMemberId === member.id ? 'bg-blue-500' : 'bg-gray-300'">
+            {{ getMemberInitials(member) }}
+          </div>
+          {{ member.name }}
+        </button>
+      </div>
+
+      <!-- Selector de vista -->
+      <div class="flex items-center bg-gray-200 rounded-lg p-1">
+        <button (click)="changeView('calendar')"
+                [class.bg-white]="viewMode === 'calendar'"
+                [class.text-blue-600]="viewMode === 'calendar'"
+                class="px-3 py-1 rounded-md text-sm font-medium transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Calendario
+        </button>
+        <button (click)="changeView('list')"
+                [class.bg-white]="viewMode === 'list'"
+                [class.text-blue-600]="viewMode === 'list'"
+                class="px-3 py-1 rounded-md text-sm font-medium transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          Lista
+        </button>
+        <button (click)="changeView('agenda')"
+                [class.bg-white]="viewMode === 'agenda'"
+                [class.text-blue-600]="viewMode === 'agenda'"
+                class="px-3 py-1 rounded-md text-sm font-medium transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Agenda
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+  </div>
+
+  <!-- Vista Calendario -->
+  <div *ngIf="!loading && viewMode === 'calendar'" class="bg-white rounded-lg shadow-lg p-4">
+    <!-- Controles del calendario -->
+    <div class="flex items-center justify-between mb-4">
+      <button (click)="previousMonth()"
+              class="p-2 hover:bg-gray-100 rounded-lg transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <div class="flex items-center gap-4">
+        <h2 class="text-xl font-semibold text-gray-800">
+          {{ months[currentDate.getMonth()] }} {{ currentDate.getFullYear() }}
+        </h2>
+        <button (click)="goToToday()"
+                class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+          Hoy
+        </button>
+      </div>
+
+      <button (click)="nextMonth()"
+              class="p-2 hover:bg-gray-100 rounded-lg transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Días de la semana -->
+    <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-t-lg overflow-hidden">
+      <div *ngFor="let day of weekDays"
+           class="bg-gray-50 py-2 text-center text-sm font-medium text-gray-700">
+        {{ day }}
+      </div>
+    </div>
+
+    <!-- Días del calendario -->
+    <div class="grid grid-cols-7 gap-px bg-gray-200 rounded-b-lg overflow-hidden">
+      <div *ngFor="let day of calendarDays"
+           class="bg-white min-h-[100px] p-2 relative"
+           [class.bg-gray-50]="!day.isCurrentMonth"
+           [class.ring-2]="day.isToday"
+           [class.ring-blue-500]="day.isToday">
+
+        <!-- Número del día -->
+        <div class="text-sm font-medium mb-1"
+             [class.text-gray-400]="!day.isCurrentMonth"
+             [class.text-blue-600]="day.isToday">
+          {{ day.dayNumber }}
+        </div>
+
+        <!-- Eventos del día -->
+        <div class="space-y-1">
+          <div *ngFor="let calEvent of day.events"
+               (click)="openEventDetails(calEvent.event)"
+               class="text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+               [ngClass]="[
+                 getEventColorClass(calEvent.event.eventType),
+                 calEvent.event.sections.length === 1 ? getSectionBorderClass(calEvent.event.sections[0]) : '',
+                 'text-white'
+               ]"
+               [class.border-l-4]="calEvent.event.sections.length === 1"
+               [class.rounded-l-none]="calEvent.continuesFromPrevious"
+               [class.rounded-r-none]="calEvent.continuesToNext">
+
+            <!-- Mostrar título solo si empieza en este día o es el primer día del mes -->
+            <div class="flex items-center justify-between">
+              <span *ngIf="calEvent.startOnDay || day.dayNumber === 1"
+                    class="truncate font-medium">
+                {{ calEvent.event.title }}
+              </span>
+
+              <!-- Indicador de miembros registrados -->
+              <div *ngIf="calEvent.memberIds.length > 0"
+                   class="flex -space-x-1 ml-1">
+                <div *ngFor="let memberId of calEvent.memberIds.slice(0, 3)"
+                     class="w-4 h-4 bg-white bg-opacity-30 rounded-full flex items-center justify-center text-[10px] font-bold"
+                     [title]="getMemberName(memberId)">
+                  {{ getMemberName(memberId).charAt(0) }}
+                </div>
+                <div *ngIf="calEvent.memberIds.length > 3"
+                     class="w-4 h-4 bg-white bg-opacity-30 rounded-full flex items-center justify-center text-[10px]">
+                  +{{ calEvent.memberIds.length - 3 }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="mt-4 flex flex-wrap gap-4 text-sm">
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-gray-700">Tipos:</span>
+        <div *ngFor="let type of ['campamento', 'salida', 'reunion', 'actividad']"
+             class="flex items-center gap-1">
+          <div class="w-3 h-3 rounded" [ngClass]="getEventColorClass(type)"></div>
+          <span class="text-gray-600">{{ getEventTypeLabel(type) }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-gray-700">Secciones:</span>
+        <div *ngFor="let section of ['manada', 'unidad', 'caminantes', 'rovers']"
+             class="flex items-center gap-1">
+          <div class="w-3 h-3 border-l-4" [ngClass]="getSectionBorderClass(section)"></div>
+          <span class="text-gray-600">{{ getSectionLabel(section) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Lista -->
+  <div *ngIf="!loading && viewMode === 'list'" class="space-y-4">
+    <div *ngIf="filteredEvents.length === 0"
+         class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-yellow-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <p class="text-yellow-700 text-lg font-medium">No hay eventos disponibles</p>
+      <p class="text-yellow-600 mt-2">
+        {{ selectedMemberId ? 'No hay eventos para el miembro seleccionado' : 'No hay eventos próximos para tu familia' }}
+      </p>
+    </div>
+
+    <div *ngFor="let event of filteredEvents"
+         class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+      <div class="p-6">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ event.title }}</h3>
+            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ formatDate(event.startDate) }}
+                <span *ngIf="!isSameDayDates(event.startDate, event.endDate)">
+                  - {{ formatDate(event.endDate) }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {{ event.location }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 lg:mt-0 flex items-center gap-2">
+            <span class="px-3 py-1 text-xs font-medium rounded-full text-white"
+                  [ngClass]="getEventColorClass(event.eventType)">
+              {{ getEventTypeLabel(event.eventType) }}
+            </span>
+            <div *ngIf="getDaysUntilEvent(event) >= 0 && getDaysUntilEvent(event) <= 7"
+                 class="px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+              En {{ getDaysUntilEvent(event) }} días
+            </div>
+          </div>
+        </div>
+
+        <p class="text-gray-600 mb-4">{{ event.description }}</p>
+
+        <div class="flex flex-wrap gap-4 text-sm">
+          <div class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            {{ getEventSections(event) }}
+          </div>
+
+          <div *ngIf="event.maxCapacity" class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            {{ event.currentCapacity || 0 }}/{{ event.maxCapacity }} participantes
+          </div>
+
+          <div *ngIf="event.requiresPayment" class="flex items-center font-medium text-blue-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ${{ event.cost }}
+          </div>
+        </div>
+
+        <!-- Miembros registrados -->
+        <div *ngIf="familyGroup" class="mt-4 pt-4 border-t border-gray-200">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="text-sm font-medium text-gray-700">Inscriptos:</span>
+            <div *ngFor="let member of familyGroup.members" class="flex items-center gap-2">
+              <ng-container *ngIf="getMemberRegistrationStatus(event.id!, member.id!) as registration">
+                <div class="flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                     [ngClass]="{
+                       'bg-green-100 text-green-700': registration.status === 'confirmed',
+                       'bg-yellow-100 text-yellow-700': registration.status === 'pending',
+                       'bg-gray-100 text-gray-500': registration.status === 'cancelled'
+                     }">
+                  <div class="w-5 h-5 rounded-full flex items-center justify-center font-medium"
+                       [ngClass]="{
+                         'bg-green-200': registration.status === 'confirmed',
+                         'bg-yellow-200': registration.status === 'pending',
+                         'bg-gray-200': registration.status === 'cancelled'
+                       }">
+                    {{ getMemberInitials(member) }}
+                  </div>
+                  {{ member.name }}
+                </div>
+              </ng-container>
+
+              <div *ngIf="!getMemberRegistrationStatus(event.id!, member.id!) && canRegisterForEvent(event, member.id!)"
+                   class="flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center font-medium">
+                  {{ getMemberInitials(member) }}
+                </div>
+                {{ member.name }}
+                <span class="text-gray-400">(no inscripto)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button (click)="openEventDetails(event)"
+                  class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition text-sm font-medium">
+            Ver detalles
+          </button>
+
+          <button *ngIf="canFamilyRegisterForEvent(event)"
+                  (click)="openConfirmAttendanceModal(event)"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium">
+            Confirmar asistencia
+          </button>
+
+          <button (click)="exportToCalendar(event)"
+                  class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Agregar al calendario
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Agenda -->
+  <div *ngIf="!loading && viewMode === 'agenda'" class="bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">Próximos eventos</h2>
+
+    <div *ngIf="getUpcomingEvents().length === 0"
+         class="text-center py-12 text-gray-500">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <p>No hay eventos próximos</p>
+    </div>
+
+    <div class="space-y-6">
+      <div *ngFor="let event of getUpcomingEvents()"
+           class="flex gap-4 pb-6 border-b border-gray-200 last:border-0">
+        <!-- Fecha -->
+        <div class="flex-shrink-0 text-center">
+          <div class="text-sm text-gray-500">{{ formatDateShort(event.startDate) }}</div>
+          <div class="text-2xl font-bold text-gray-800">{{ getEventDayNumber(event) }}</div>
+          <div class="text-sm font-medium text-gray-600">{{ getEventMonth(event) }}</div>
+        </div>
+
+        <!-- Contenido -->
+        <div class="flex-1">
+          <div class="flex items-start justify-between mb-2">
+            <h3 class="text-lg font-semibold text-gray-800">{{ event.title }}</h3>
+            <span class="ml-2 px-2 py-1 text-xs font-medium rounded-full text-white"
+                  [ngClass]="getEventColorClass(event.eventType)">
+              {{ getEventTypeLabel(event.eventType) }}
+            </span>
+          </div>
+
+          <p class="text-gray-600 text-sm mb-3">{{ event.description }}</p>
+
+          <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ formatDate(event.startDate) }}
+            </div>
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {{ event.location }}
+            </div>
+            <div *ngIf="event.requiresPayment" class="flex items-center font-medium text-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              ${{ event.cost }}
+            </div>
+          </div>
+
+          <!-- Estados de inscripción rápida -->
+          <div class="mt-3 flex flex-wrap gap-2">
+            <div *ngFor="let member of familyGroup?.members">
+              <ng-container *ngIf="getMemberRegistrationStatus(event.id!, member.id!) as registration">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-700': registration.status === 'confirmed',
+                        'bg-yellow-100 text-yellow-700': registration.status === 'pending'
+                      }">
+                  {{ member.name }} - Inscripto
+                </span>
+              </ng-container>
+            </div>
+
+            <button *ngIf="canFamilyRegisterForEvent(event)"
+                    (click)="openConfirmAttendanceModal(event)"
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+              + Inscribir miembros
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del evento -->
+  <div *ngIf="showEventDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+        <h3 class="text-lg font-semibold text-gray-800">Detalles del Evento</h3>
+        <button (click)="closeEventDetailsModal()" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div *ngIf="selectedEvent" class="p-6">
+        <!-- Header -->
+        <div class="mb-6">
+          <div class="flex items-start justify-between mb-2">
+            <h2 class="text-2xl font-bold text-gray-800">{{ selectedEvent.title }}</h2>
+            <span class="ml-2 px-3 py-1 text-sm font-medium rounded-full text-white"
+                  [ngClass]="getEventColorClass(selectedEvent.eventType)">
+              {{ getEventTypeLabel(selectedEvent.eventType) }}
+            </span>
+          </div>
+          <p class="text-gray-600">{{ selectedEvent.description }}</p>
+        </div>
+
+        <!-- Información del evento -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center text-gray-700 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="font-medium">Fecha y hora</span>
+            </div>
+            <p class="text-sm">Inicio: {{ formatDate(selectedEvent.startDate) }}</p>
+            <p class="text-sm">Fin: {{ formatDate(selectedEvent.endDate) }}</p>
+          </div>
+
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center text-gray-700 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="font-medium">Ubicación</span>
+            </div>
+            <p class="text-sm">{{ selectedEvent.location }}</p>
+          </div>
+
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center text-gray-700 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span class="font-medium">Secciones</span>
+            </div>
+            <p class="text-sm">{{ getEventSections(selectedEvent) }}</p>
+          </div>
+
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center text-gray-700 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="font-medium">Capacidad</span>
+            </div>
+            <p class="text-sm">
+              {{ selectedEvent.currentCapacity || 0 }} inscriptos
+              <span *ngIf="selectedEvent.maxCapacity"> de {{ selectedEvent.maxCapacity }}</span>
+            </p>
+            <div *ngIf="selectedEvent.maxCapacity" class="mt-1">
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full"
+                     [style.width.%]="(selectedEvent.currentCapacity || 0) / selectedEvent.maxCapacity * 100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Costo y fechas límite -->
+        <div *ngIf="selectedEvent.requiresPayment || selectedEvent.registrationDeadline"
+             class="bg-blue-50 rounded-lg p-4 mb-6">
+          <div *ngIf="selectedEvent.requiresPayment" class="flex items-center justify-between mb-2">
+            <span class="font-medium text-blue-900">Costo por participante:</span>
+            <span class="text-xl font-bold text-blue-600">${{ selectedEvent.cost }}</span>
+          </div>
+          <div *ngIf="selectedEvent.registrationDeadline" class="text-sm text-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Fecha límite de inscripción: {{ formatDate(selectedEvent.registrationDeadline) }}
+          </div>
+          <div *ngIf="selectedEvent.paymentDeadline" class="text-sm text-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Fecha límite de pago: {{ formatDate(selectedEvent.paymentDeadline) }}
+          </div>
+        </div>
+
+        <!-- Notas adicionales -->
+        <div *ngIf="selectedEvent.notes" class="bg-yellow-50 rounded-lg p-4 mb-6">
+          <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="font-medium text-yellow-900 mb-1">Información importante:</p>
+              <p class="text-sm text-yellow-700">{{ selectedEvent.notes }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado de inscripción de los miembros -->
+        <div class="mb-6">
+          <h3 class="font-semibold text-gray-800 mb-3">Estado de inscripción de tu familia</h3>
+          <div class="space-y-2">
+            <div *ngFor="let member of familyGroup?.members"
+                 class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-medium mr-3"
+                     [ngClass]="{
+                       'bg-green-200 text-green-700': getMemberRegistrationStatus(selectedEvent.id!, member.id!)?.status === 'confirmed',
+                       'bg-yellow-200 text-yellow-700': getMemberRegistrationStatus(selectedEvent.id!, member.id!)?.status === 'pending',
+                       'bg-gray-200 text-gray-600': !getMemberRegistrationStatus(selectedEvent.id!, member.id!)
+                     }">
+                  {{ getMemberInitials(member) }}
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">{{ member.name }} {{ member.lastName }}</p>
+                  <p class="text-sm text-gray-600">{{ getSectionLabel(member.section) }}</p>
+                </div>
+              </div>
+
+              <div>
+                <ng-container *ngIf="getMemberRegistrationStatus(selectedEvent.id!, member.id!) as registration">
+                  <span class="px-3 py-1 text-sm font-medium rounded-full"
+                        [ngClass]="{
+                          'bg-green-100 text-green-700': registration.status === 'confirmed',
+                          'bg-yellow-100 text-yellow-700': registration.status === 'pending',
+                          'bg-red-100 text-red-700': registration.status === 'cancelled'
+                        }">
+                    {{ registration.status === 'confirmed' ? 'Confirmado' :
+                    registration.status === 'pending' ? 'Pendiente' : 'Cancelado' }}
+                  </span>
+                  <button *ngIf="registration.status !== 'cancelled'"
+                          (click)="cancelRegistration(selectedEvent.id!, member.id!)"
+                          class="ml-2 text-red-600 hover:text-red-800 text-sm">
+                    Cancelar
+                  </button>
+                </ng-container>
+
+                <span *ngIf="!getMemberRegistrationStatus(selectedEvent.id!, member.id!)"
+                      class="text-sm text-gray-500">
+                  {{ canRegisterForEvent(selectedEvent, member.id!) ? 'No inscripto' : 'No disponible' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-wrap gap-3">
+          <button *ngIf="selectedEvent && canFamilyRegisterForEvent(selectedEvent)"
+                  (click)="closeEventDetailsModal(); openConfirmAttendanceModal(selectedEvent)"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium">
+            Inscribir miembros
+          </button>
+
+          <button (click)="exportToCalendar(selectedEvent)"
+                  class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Agregar al calendario
+          </button>
+
+          <button (click)="closeEventDetailsModal()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de asistencia -->
+  <div *ngIf="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">Confirmar Asistencia</h3>
+      </div>
+
+      <div class="p-6">
+        <p class="text-gray-600 mb-4">
+          Selecciona los miembros de tu familia que asistirán al evento
+          <strong>{{ selectedEvent?.title }}</strong>
+        </p>
+
+        <div class="space-y-2 mb-6">
+          <div *ngFor="let member of familyGroup?.members">
+            <label *ngIf="canRegisterForEvent(selectedEvent!, member.id!)"
+                   class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                   [class.bg-blue-50]="membersToRegister.includes(member.id!)"
+                   [class.border-blue-300]="membersToRegister.includes(member.id!)">
+              <input type="checkbox"
+                     [checked]="membersToRegister.includes(member.id!)"
+                     (change)="toggleMemberForRegistration(member.id!)"
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <div class="ml-3 flex-1">
+                <p class="text-sm font-medium text-gray-900">
+                  {{ member.name }} {{ member.lastName }}
+                </p>
+                <p class="text-xs text-gray-500">
+                  {{ getSectionLabel(member.section) }}
+                </p>
+              </div>
+              <div *ngIf="selectedEvent?.requiresPayment" class="text-sm font-medium text-blue-600">
+                ${{ selectedEvent?.cost }}
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="selectedEvent?.requiresPayment && membersToRegister.length > 0"
+             class="bg-blue-50 rounded-lg p-4 mb-6">
+          <div class="flex justify-between items-center">
+            <span class="font-medium text-blue-900">Total a pagar:</span>
+            <span class="text-xl font-bold text-blue-600">
+              ${{ (selectedEvent?.cost || 0) * membersToRegister.length }}
+            </span>
+          </div>
+          <p class="text-xs text-blue-700 mt-2">
+            El pago se realizará después de confirmar la asistencia
+          </p>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+          <button (click)="closeConfirmModal()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition">
+            Cancelar
+          </button>
+          <button (click)="confirmAttendance()"
+                  [disabled]="membersToRegister.length === 0 || loading"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+            <span *ngIf="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+            Confirmar asistencia
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

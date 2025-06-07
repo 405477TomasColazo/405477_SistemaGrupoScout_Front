@@ -1,0 +1,658 @@
+<!-- event-management.component.html -->
+<div class="container mx-auto p-4">
+  <!-- Alertas -->
+  <div *ngIf="showAlert" class="mb-4 p-4 rounded-md"
+       [ngClass]="{'bg-green-100 text-green-700': alertType === 'success', 'bg-red-100 text-red-700': alertType === 'error'}">
+    <div class="flex items-center">
+      <svg *ngIf="alertType === 'success'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <svg *ngIf="alertType === 'error'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      {{ alertText }}
+    </div>
+  </div>
+
+  <!-- Título y botón de crear -->
+  <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <h1 class="text-2xl font-bold text-blue-800">Gestión de Eventos</h1>
+    <p class="text-lg text-gray-600">Administra los eventos y actividades del grupo scout</p>
+    <button (click)="openEventModal()"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Crear Evento
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="mb-6 bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Filtros de búsqueda</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Búsqueda por texto -->
+      <div class="lg:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+        <input type="text"
+               [(ngModel)]="searchTerm"
+               (ngModelChange)="applyLocalFilters()"
+               placeholder="Buscar por título, descripción o ubicación..."
+               class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <!-- Tipo de evento -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de evento</label>
+        <select [(ngModel)]="filters.eventType"
+                class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+          <option [value]="null">Todos</option>
+          <option *ngFor="let type of eventTypes" [value]="type.value">{{ type.label }}</option>
+        </select>
+      </div>
+
+      <!-- Estado -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+        <select [(ngModel)]="filters.status"
+                class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+          <option [value]="null">Todos</option>
+          <option value="published">Publicado</option>
+          <option value="draft">Borrador</option>
+          <option value="cancelled">Cancelado</option>
+          <option value="completed">Finalizado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botones de filtro -->
+    <div class="mt-4 flex justify-end space-x-3">
+      <button (click)="clearFilters()"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-400">
+        Limpiar
+      </button>
+      <button (click)="applyFilters()"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Aplicar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de eventos -->
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+  </div>
+
+  <div *ngIf="!loading && filteredEvents.length === 0" class="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    </svg>
+    <p class="text-blue-700 text-lg font-medium">No se encontraron eventos</p>
+    <p class="text-blue-600 mt-2">Intenta ajustar los filtros o crear un nuevo evento</p>
+  </div>
+
+  <div *ngIf="!loading && filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let event of filteredEvents"
+         class="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+      <!-- Header del card -->
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-lg font-semibold text-gray-800">{{ event.title }}</h3>
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                [ngClass]="getStatusBadgeClasses(event.status)">
+            {{ getStatusLabel(event.status) }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 line-clamp-2">{{ event.description }}</p>
+      </div>
+
+      <!-- Contenido del card -->
+      <div class="p-4">
+        <div class="space-y-2 text-sm">
+          <!-- Tipo de evento -->
+          <div class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            {{ getEventTypeLabel(event.eventType) }}
+          </div>
+
+          <!-- Fechas -->
+          <div class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            {{ formatDate(event.startDate) }}
+          </div>
+
+          <!-- Ubicación -->
+          <div class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ event.location }}
+          </div>
+
+          <!-- Secciones -->
+          <div class="flex items-center text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="truncate">
+              {{ getSectionLabelsJoined(event.sections) }}
+            </span>
+          </div>
+
+          <!-- Capacidad -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              {{ getRegistrationStats(event) }}
+            </div>
+            <div *ngIf="event.requiresPayment" class="text-blue-600 font-medium">
+              ${{ event.cost }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer del card -->
+      <div class="px-4 py-3 bg-gray-50 flex justify-between items-center">
+        <button (click)="openDetailsModal(event)"
+                class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+          Ver detalles
+        </button>
+        <div *ngIf="canEditEvent(event)" class="flex space-x-2">
+          <button (click)="openEventModal(event)"
+                  class="text-gray-600 hover:text-gray-900 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          <button (click)="confirmDelete(event)"
+                  class="text-red-600 hover:text-red-900 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de crear/editar evento -->
+  <div *ngIf="showEventModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+        <h3 class="text-lg font-semibold text-gray-800">
+          {{ selectedEvent ? 'Editar Evento' : 'Crear Nuevo Evento' }}
+        </h3>
+        <button (click)="closeEventModal()" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="eventForm" (ngSubmit)="saveEvent()" class="px-6 py-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Título -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Título del evento *</label>
+            <input type="text"
+                   formControlName="title"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('title')?.invalid && eventForm.get('title')?.touched">
+            <p *ngIf="eventForm.get('title')?.invalid && eventForm.get('title')?.touched"
+               class="text-red-500 text-xs mt-1">
+              El título es requerido (mínimo 3 caracteres)
+            </p>
+          </div>
+
+          <!-- Descripción -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+            <textarea formControlName="description"
+                      rows="3"
+                      class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      [class.border-red-500]="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"></textarea>
+            <p *ngIf="eventForm.get('description')?.invalid && eventForm.get('description')?.touched"
+               class="text-red-500 text-xs mt-1">
+              La descripción es requerida (mínimo 10 caracteres)
+            </p>
+          </div>
+
+          <!-- Tipo de evento -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de evento *</label>
+            <select formControlName="eventType"
+                    class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+              <option *ngFor="let type of eventTypes" [value]="type.value">{{ type.label }}</option>
+            </select>
+          </div>
+
+          <!-- Ubicación -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación *</label>
+            <input type="text"
+                   formControlName="location"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('location')?.invalid && eventForm.get('location')?.touched">
+          </div>
+
+          <!-- Fecha inicio -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio *</label>
+            <input type="datetime-local"
+                   formControlName="startDate"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.touched">
+          </div>
+
+          <!-- Fecha fin -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de fin *</label>
+            <input type="datetime-local"
+                   formControlName="endDate"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.touched">
+          </div>
+
+          <!-- Secciones -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Secciones *</label>
+            <div class="space-y-2">
+              <div *ngFor="let section of sections" class="flex items-center">
+                <input type="checkbox"
+                       [id]="'section-' + section.value"
+                       [value]="section.value"
+                       [checked]="isSectionSelected(section.value)"
+                       (change)="toggleSection(section.value)"
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                       [disabled]="!canCreateForAllSections && section.value !== userSection">
+                <label [for]="'section-' + section.value"
+                       class="ml-2 text-sm text-gray-700"
+                       [class.text-gray-400]="!canCreateForAllSections && section.value !== userSection">
+                  {{ section.label }}
+                </label>
+              </div>
+              <div *ngIf="canCreateForAllSections" class="flex items-center">
+                <input type="checkbox"
+                       id="section-all"
+                       [checked]="areAllSectionsSelected()"
+                       (change)="toggleAllSections()"
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="section-all" class="ml-2 text-sm text-gray-700 font-medium">
+                  Todas las secciones
+                </label>
+              </div>
+            </div>
+            <p *ngIf="eventForm.get('sections')?.invalid && eventForm.get('sections')?.touched"
+               class="text-red-500 text-xs mt-1">
+              Debes seleccionar al menos una sección
+            </p>
+          </div>
+
+          <!-- Tipo de invitación -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de invitación *</label>
+            <div class="flex space-x-4">
+              <label class="flex items-center">
+                <input type="radio"
+                       formControlName="invitationType"
+                       value="all"
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                <span class="ml-2 text-sm text-gray-700">Todos los miembros de las secciones</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio"
+                       formControlName="invitationType"
+                       value="selected"
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                <span class="ml-2 text-sm text-gray-700">Miembros específicos</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Capacidad máxima -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidad máxima</label>
+            <input type="number"
+                   formControlName="maxCapacity"
+                   min="1"
+                   placeholder="Sin límite"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Fecha límite de inscripción -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha límite de inscripción</label>
+            <input type="datetime-local"
+                   formControlName="registrationDeadline"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Requiere pago -->
+          <div class="md:col-span-2">
+            <label class="flex items-center">
+              <input type="checkbox"
+                     formControlName="requiresPayment"
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <span class="ml-2 text-sm font-medium text-gray-700">Este evento requiere pago</span>
+            </label>
+          </div>
+
+          <!-- Costo (condicional) -->
+          <div *ngIf="eventForm.get('requiresPayment')?.value">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Costo por participante *</label>
+            <input type="number"
+                   formControlName="cost"
+                   min="1"
+                   step="0.01"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('cost')?.invalid && eventForm.get('cost')?.touched">
+            <p *ngIf="eventForm.get('cost')?.invalid && eventForm.get('cost')?.touched"
+               class="text-red-500 text-xs mt-1">
+              El costo debe ser mayor a 0
+            </p>
+          </div>
+
+          <!-- Fecha límite de pago (condicional) -->
+          <div *ngIf="eventForm.get('requiresPayment')?.value">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha límite de pago *</label>
+            <input type="datetime-local"
+                   formControlName="paymentDeadline"
+                   class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                   [class.border-red-500]="eventForm.get('paymentDeadline')?.invalid && eventForm.get('paymentDeadline')?.touched">
+          </div>
+
+          <!-- Notas adicionales -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
+            <textarea formControlName="notes"
+                      rows="2"
+                      placeholder="Información adicional para los participantes..."
+                      class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"></textarea>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-6 flex justify-end space-x-3">
+          <button type="button"
+                  (click)="closeEventModal()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-400">
+            Cancelar
+          </button>
+          <button type="submit"
+                  [disabled]="eventForm.invalid"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ selectedEvent ? 'Actualizar' : 'Crear' }} Evento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del evento -->
+  <div *ngIf="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+        <h3 class="text-lg font-semibold text-gray-800">Detalles del Evento</h3>
+        <button (click)="closeDetailsModal()" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div *ngIf="selectedEvent" class="p-6">
+        <!-- Información general -->
+        <div class="mb-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800">{{ selectedEvent.title }}</h2>
+              <p class="text-gray-600 mt-1">{{ selectedEvent.description }}</p>
+            </div>
+            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full"
+                  [ngClass]="getStatusBadgeClasses(selectedEvent.status)">
+              {{ getStatusLabel(selectedEvent.status) }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-lg p-4">
+            <div>
+              <p class="text-sm text-gray-500">Tipo de evento</p>
+              <p class="font-medium">{{ getEventTypeLabel(selectedEvent.eventType) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Ubicación</p>
+              <p class="font-medium">{{ selectedEvent.location }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Fecha de inicio</p>
+              <p class="font-medium">{{ formatDate(selectedEvent.startDate) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Fecha de fin</p>
+              <p class="font-medium">{{ formatDate(selectedEvent.endDate) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Secciones</p>
+              <p class="font-medium">{{ getSectionLabelsJoined(selectedEvent.sections) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Capacidad</p>
+              <p class="font-medium">
+                {{ selectedEvent.currentCapacity || 0 }} inscriptos
+                <span *ngIf="selectedEvent.maxCapacity"> / {{ selectedEvent.maxCapacity }}</span>
+              </p>
+            </div>
+            <div *ngIf="selectedEvent.requiresPayment">
+              <p class="text-sm text-gray-500">Costo</p>
+              <p class="font-medium text-blue-600">${{ selectedEvent.cost }}</p>
+            </div>
+            <div *ngIf="selectedEvent.registrationDeadline">
+              <p class="text-sm text-gray-500">Fecha límite de inscripción</p>
+              <p class="font-medium">{{ formatDate(selectedEvent.registrationDeadline) }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="selectedEvent.notes" class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <p class="text-sm font-medium text-blue-900">Notas adicionales:</p>
+            <p class="text-sm text-blue-700 mt-1">{{ selectedEvent.notes }}</p>
+          </div>
+        </div>
+
+        <!-- Lista de inscriptos -->
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Participantes inscriptos</h3>
+            <div class="flex space-x-2">
+              <button *ngIf="selectedEvent.invitationType === 'selected' && canEditEvent(selectedEvent)"
+                      (click)="openInviteMembersModal(selectedEvent)"
+                      class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition">
+                Gestionar invitados
+              </button>
+              <button class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Exportar lista
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Participante
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Fecha de inscripción
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Pago
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let registration of eventRegistrations" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ registration.memberName }} {{ registration.memberLastName }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-500">
+                    {{ formatDate(registration.registrationDate) }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                          [ngClass]="{
+                            'bg-green-100 text-green-800': registration.status === 'confirmed',
+                            'bg-yellow-100 text-yellow-800': registration.status === 'pending',
+                            'bg-red-100 text-red-800': registration.status === 'cancelled',
+                            'bg-gray-100 text-gray-800': registration.status === 'waitlist'
+                          }">
+                      {{ getRegistrationStatusLabel(registration.status) }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span *ngIf="selectedEvent.requiresPayment"
+                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                          [ngClass]="{
+                            'bg-green-100 text-green-800': registration.paymentStatus === 'paid',
+                            'bg-yellow-100 text-yellow-800': registration.paymentStatus === 'pending',
+                            'bg-gray-100 text-gray-800': registration.paymentStatus === 'exempt'
+                          }">
+                      {{ getPaymentStatusLabel(registration.paymentStatus!) }}
+                    </span>
+                  <span *ngIf="!selectedEvent.requiresPayment" class="text-sm text-gray-500">
+                      N/A
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button class="text-blue-600 hover:text-blue-900">
+                    Ver detalles
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <div *ngIf="eventRegistrations.length === 0" class="text-center py-8 text-gray-500">
+              No hay participantes inscriptos aún
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de gestión de invitados -->
+  <div *ngIf="showInviteMembersModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+        <h3 class="text-lg font-semibold text-gray-800">Gestionar Invitados</h3>
+        <button (click)="closeInviteMembersModal()" class="text-gray-400 hover:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6">
+        <p class="text-sm text-gray-600 mb-4">
+          Selecciona los miembros que deseas invitar a este evento.
+          Solo se muestran los miembros de las secciones asociadas al evento.
+        </p>
+
+        <div class="mb-4">
+          <button (click)="toggleAllMembers()"
+                  class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            {{ selectedMembers.length === availableMembers.length ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+          </button>
+        </div>
+
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <div *ngFor="let member of availableMembers"
+               class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+               [class.bg-blue-50]="selectedMembers.includes(member.id)"
+               [class.border-blue-300]="selectedMembers.includes(member.id)"
+               (click)="toggleMemberSelection(member.id)">
+            <input type="checkbox"
+                   [checked]="selectedMembers.includes(member.id)"
+                   (click)="$event.stopPropagation()"
+                   (change)="toggleMemberSelection(member.id)"
+                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <div class="ml-3 flex-1">
+              <p class="text-sm font-medium text-gray-900">
+                {{ member.name }} {{ member.lastName }}
+              </p>
+              <p class="text-xs text-gray-500">
+                {{ getSectionLabel(member.section) }} - DNI: {{ member.dni }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+          <p class="text-sm text-gray-600">
+            {{ selectedMembers.length }} miembros seleccionados
+          </p>
+          <div class="flex space-x-3">
+            <button (click)="closeInviteMembersModal()"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-400">
+              Cancelar
+            </button>
+            <button (click)="saveInvitations()"
+                    [disabled]="selectedMembers.length === 0"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              Guardar invitaciones
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div *ngIf="showDeleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-6">
+        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800 text-center mt-4">Confirmar eliminación</h3>
+        <p class="text-gray-600 text-center mt-2">
+          ¿Estás seguro que deseas eliminar el evento "{{ eventToDelete?.title }}"?
+          Esta acción no se puede deshacer.
+        </p>
+        <div class="mt-6 flex justify-center space-x-3">
+          <button (click)="closeDeleteModal()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-gray-400">
+            Cancelar
+          </button>
+          <button (click)="deleteEvent()"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-red-500">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

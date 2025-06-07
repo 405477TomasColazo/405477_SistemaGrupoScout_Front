@@ -14,15 +14,16 @@
   </div>
 
   <!-- Header del Dashboard -->
-  <div class="bg-white shadow rounded-lg mb-6">
-    <div class="px-6 py-4">
-      <h1 class="text-2xl font-bold text-gray-800">Dashboard Administrativo</h1>
+  <div class="bg-white shadow-md rounded-lg mb-6">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold text-blue-800">Dashboard Administrativo</h1>
+      <p class="text-gray-600 mt-1">Panel de control y estadísticas del grupo scout</p>
     </div>
   </div>
 
   <!-- Tarjetas de resumen -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-    <div *ngFor="let stat of resumenEstadisticas" class="bg-white rounded-lg shadow p-6">
+    <div *ngFor="let stat of resumenEstadisticas" class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div [ngClass]="stat.bgColor" class="p-3 rounded-full">
           <svg *ngIf="stat.icon === 'users'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [ngClass]="stat.textColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,7 +50,7 @@
   </div>
 
   <!-- Sección de filtros para los gráficos -->
-  <div class="bg-white rounded-lg shadow p-6 mb-6">
+  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <h2 class="text-lg font-semibold text-gray-800">Filtros de Dashboard</h2>
 
@@ -106,7 +107,7 @@
   <!-- Gráficos con menús de opciones -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     <!-- Gráfico de pagos de cuotas -->
-    <div class="bg-white rounded-lg shadow p-6 lg:col-span-1">
+    <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Pago de Cuotas Mensuales</h2>
 
@@ -142,7 +143,7 @@
     </div>
 
     <!-- Gráfico de miembros por sección -->
-    <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+    <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Miembros Activos por Sección</h2>
 
@@ -181,7 +182,7 @@
   <!-- Próximos eventos y Notificaciones -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Próximos eventos -->
-    <div class="bg-white rounded-lg shadow lg:col-span-2">
+    <div class="bg-white rounded-lg shadow-md lg:col-span-2">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,7 +217,7 @@
     </div>
 
     <!-- Notificaciones -->
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-white rounded-lg shadow-md">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
