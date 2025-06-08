@@ -1,0 +1,49 @@
+/* Estilos personalizados para el dashboard de progresión */
+
+.container {
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Animaciones para las barras de progreso */
+.progress-bar {
+  transition: width 0.6s ease-in-out;
+}
+
+/* Hover effects para las tarjetas */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para los iconos de etapa */
+.etapa-icon {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner personalizado */
+.loading-spinner {
+  border-top-color: #3b82f6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .grid {
+    gap: 1rem;
+  }
+}

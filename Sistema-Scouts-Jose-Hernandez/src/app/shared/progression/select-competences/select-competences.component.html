@@ -1,0 +1,146 @@
+<div class="container mx-auto p-6 max-w-6xl">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center space-x-4">
+      <button (click)="onCancel()" 
+              class="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Seleccionar Competencias</h1>
+        <p class="text-gray-600" *ngIf="currentMember">{{ currentMember.name }} {{ currentMember.lastName }}</p>
+        <p class="text-sm text-gray-500" *ngIf="currentMember">{{ currentMember.section }}</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <span class="text-sm text-gray-600">{{ getSelectedCount() }} seleccionadas</span>
+      <button (click)="onSaveSelection()" 
+              [disabled]="saving || getSelectedCount() === 0"
+              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2">
+        <span *ngIf="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+        <span>{{ saving ? 'Agregando...' : 'Agregar Competencias' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <span class="ml-3 text-lg text-gray-600">Cargando competencias...</span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error">
+    <!-- Area Tabs -->
+    <div class="bg-white rounded-lg shadow-md mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="flex space-x-8 px-6">
+          <button *ngFor="let area of areas"
+                  (click)="onSelectArea(area)"
+                  [class]="'py-4 px-1 border-b-2 font-medium text-sm transition-colors ' + 
+                          (selectedArea === area ? 
+                           'border-blue-500 text-blue-600' : 
+                           'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')">
+            <div class="flex items-center space-x-2">
+              <span>{{ areaLabels[area] }}</span>
+              <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                {{ getCompetencesForArea(area).length }}
+              </span>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Competences List -->
+      <div class="p-6">
+        <div *ngIf="getCompetencesForArea(selectedArea).length === 0" 
+             class="text-center py-12">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No hay competencias disponibles</h3>
+          <p class="text-gray-600">Todas las competencias de {{ areaLabels[selectedArea] }} ya están agregadas a la hoja de marcha.</p>
+        </div>
+
+        <!-- Available Competences -->
+        <div *ngIf="getCompetencesForArea(selectedArea).length > 0" class="space-y-4">
+          <div *ngFor="let competence of getCompetencesForArea(selectedArea)"
+               [class]="'border rounded-lg p-4 transition-all cursor-pointer ' + 
+                        (isCompetenceSelected(competence.id) ? 
+                         'border-blue-500 bg-blue-50' : 
+                         'border-gray-200 hover:border-gray-300 hover:bg-gray-50')"
+               (click)="onToggleCompetence(competence.id)">
+            
+            <div class="flex items-start space-x-3">
+              <!-- Checkbox -->
+              <div class="flex-shrink-0 mt-1">
+                <div [class]="'w-5 h-5 rounded border-2 transition-colors flex items-center justify-center ' +
+                            (isCompetenceSelected(competence.id) ? 
+                             'border-blue-500 bg-blue-500' : 
+                             'border-gray-300')">
+                  <svg *ngIf="isCompetenceSelected(competence.id)" 
+                       class="w-3 h-3 text-white" 
+                       fill="none" 
+                       stroke="currentColor" 
+                       viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Competence Content -->
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 mb-2">{{ competence.title }}</h3>
+                <p class="text-gray-600 text-sm mb-3">{{ competence.description }}</p>
+
+                <!-- Suggested Actions -->
+                <div *ngIf="competence.suggestedActions && competence.suggestedActions.length > 0" class="mb-3">
+                  <h4 class="text-xs font-medium text-gray-700 mb-1">Acciones Sugeridas:</h4>
+                  <ul class="space-y-1">
+                    <li *ngFor="let action of competence.suggestedActions" 
+                        class="text-xs text-gray-600 flex items-start">
+                      <span class="w-1 h-1 bg-blue-400 rounded-full mt-1.5 mr-2 flex-shrink-0"></span>
+                      {{ action.description }}
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Guiding Questions -->
+                <div *ngIf="competence.guidingQuestions && competence.guidingQuestions.length > 0">
+                  <h4 class="text-xs font-medium text-gray-700 mb-1">Preguntas Orientadoras:</h4>
+                  <ul class="space-y-1">
+                    <li *ngFor="let question of competence.guidingQuestions" 
+                        class="text-xs text-gray-600 italic">
+                      "{{ question }}"
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div *ngIf="getSelectedCount() > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-blue-800 text-sm font-medium">
+          Has seleccionado {{ getSelectedCount() }} competencia{{ getSelectedCount() !== 1 ? 's' : '' }} para agregar a la hoja de marcha.
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

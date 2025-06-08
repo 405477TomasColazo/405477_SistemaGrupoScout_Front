@@ -58,6 +58,7 @@ export class AuthService {
           user.roles = roles;
           // Después de recibir el usuario, actualizas el currentUserSubject
           this.currentUserSubject.next(user);
+          console.log(this.currentUserSubject.value);
         },
         error: () => {
           // Si ocurre un error, puedes manejarlo (por ejemplo, eliminar el token y limpiar el usuario)
