@@ -1,0 +1,476 @@
+<div class="min-h-screen bg-gray-50 pt-16 pb-12">
+    <div class="container mx-auto px-4">
+        <!-- Cabecera -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold text-blue-800 mb-2">Nómina de la Sección</h1>
+            <p class="text-lg text-gray-600">Gestiona la información de educadores y beneficiarios</p>
+        </div>
+
+        <!-- Filtros -->
+        <div class="mb-6 bg-white shadow-md rounded-lg p-6">
+            <form [formGroup]="filtrosForm" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+                <div class="flex-1">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                    <div class="relative">
+                        <input type="text" id="search" formControlName="searchText"
+                               class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Buscar por nombre, apellido, sección o DNI...">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-64">
+                    <label for="tipo" class="block text-sm font-medium text-gray-700 mb-1">Mostrar</label>
+                    <select id="tipo" formControlName="tipo"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="todos">Todos</option>
+                        <option value="educadores">Solo educadores</option>
+                        <option value="beneficiarios">Solo beneficiarios</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de miembros -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Miembro
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            DNI
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Edad
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Rol
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Cuenta personal
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let miembro of miembrosFiltrados" class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded-full mr-3 flex items-center justify-center"
+                                     [ngClass]="miembro.isEducator ? 'border-2 border-blue-400 bg-blue-100' : 'border-2 border-purple-400 bg-purple-100'">
+                                    <span class="font-medium text-sm"
+                                          [ngClass]="miembro.isEducator ? 'text-blue-600' : 'text-purple-600'">
+                                        {{getInitials(miembro.name, miembro.lastName)}}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{miembro.name}} {{miembro.lastName}}
+                                    </div>
+                                    <div class="text-sm" [ngClass]="getSectionClass(miembro)">
+                                        {{miembro.section}}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{miembro.dni}}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{getAge(miembro.birthdate)}}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      [ngClass]="getStatusClass(miembro)">
+                  {{getRolLabel(miembro)}}
+                </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div  class="text-sm font-medium"
+                                 [ngClass]="miembro.accountBalance >= 0 ? 'text-green-600' : 'text-red-600'">
+                                {{miembro.accountBalance | currency}}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button (click)="verDetallesMiembro(miembro)"
+                                        class="text-blue-600 hover:text-blue-900 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Ver detalles
+                                </button>
+                                <button *ngIf="!miembro.isEducator" 
+                                        (click)="verProgresionMiembro(miembro)"
+                                        class="text-green-600 hover:text-green-900 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Ver progresión
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Mensaje si no hay resultados -->
+                    <tr *ngIf="miembrosFiltrados.length === 0">
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            No se encontraron miembros que coincidan con los criterios de búsqueda.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loading spinner -->
+        <div *ngIf="loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-4 rounded-lg">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        </div>
+
+        <!-- Error message -->
+        <div *ngIf="error" class="mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+            <p class="font-medium">{{error}}</p>
+        </div>
+
+      <!-- Modal de detalles -->
+      <div *ngIf="showModal && miembroSeleccionado" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <!-- Encabezado del modal -->
+          <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-800">
+                Información detallada - {{miembroSeleccionado.isEducator ? 'Educador' : 'Beneficiario'}}
+              </h3>
+              <button (click)="cerrarModal()" class="text-gray-400 hover:text-gray-500">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <!-- Información personal -->
+            <div class="mb-8">
+              <h4 class="text-xl font-semibold text-gray-800 mb-4">Datos personales</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Nombre completo</p>
+                    <p class="text-base text-gray-900">{{miembroSeleccionado.name}} {{miembroSeleccionado.lastName}}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">DNI</p>
+                    <p class="text-base text-gray-900">{{miembroSeleccionado.dni}}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Fecha de nacimiento</p>
+                    <p class="text-base text-gray-900">{{miembroSeleccionado.birthdate | date:"dd/MM/yyyy"}}</p>
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Dirección</p>
+                    <p class="text-base text-gray-900">{{miembroSeleccionado.address || 'No especificada'}}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Sección</p>
+                    <p class="text-base text-gray-900">{{miembroSeleccionado.section}}</p>
+                  </div>
+                  <div *ngIf="!miembroSeleccionado.isEducator">
+                    <p class="text-sm font-medium text-gray-500">Saldo de cuenta</p>
+                    <p class="text-base" [ngClass]="miembroSeleccionado.accountBalance >= 0 ? 'text-green-600' : 'text-red-600'">
+                      ${{miembroSeleccionado.accountBalance || 0}}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4" *ngIf="miembroSeleccionado.notes">
+                <p class="text-sm font-medium text-gray-500">Notas</p>
+                <p class="text-base text-gray-900 mt-1">{{miembroSeleccionado.notes}}</p>
+              </div>
+            </div>
+
+            <!-- Información de tutores para beneficiarios -->
+            <div *ngIf="!miembroSeleccionado.isEducator">
+              <h4 class="text-xl font-semibold text-gray-800 mb-4">Tutores asignados</h4>
+
+              <!-- Loading state -->
+              <div *ngIf="loadingDetails" class="bg-gray-50 rounded-lg p-6 flex justify-center items-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3 text-gray-600">Cargando información de tutores...</span>
+              </div>
+
+              <!-- Error state -->
+              <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-red-700">{{error}}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tutors list -->
+              <div *ngIf="!loadingDetails && !error && miembroSeleccionado.tutoresInfo" class="space-y-4">
+                <div *ngFor="let tutor of miembroSeleccionado.tutoresInfo"
+                     class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div class="flex items-center mb-4">
+                    <div class="h-12 w-12 rounded-full mr-4 border-2 border-blue-400 bg-blue-100 flex items-center justify-center">
+                      <span class="text-blue-600 font-medium text-sm">
+                        {{getInitials(tutor.name, tutor.lastName)}}
+                      </span>
+                    </div>
+                    <div>
+                      <h5 class="text-lg font-medium text-gray-900">{{tutor.name}} {{tutor.lastName}}</h5>
+                      <p class="text-sm text-blue-600">{{tutor.relationship}}</p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Correo electrónico</p>
+                      <p class="text-base text-gray-900">{{tutor.email}}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Teléfono</p>
+                      <p class="text-base text-gray-900">{{tutor.contactPhone}}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">DNI</p>
+                      <p class="text-base text-gray-900">{{tutor.dni}}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Dirección</p>
+                      <p class="text-base text-gray-900">{{tutor.address}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del modal -->
+          <div class="px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+            <button (click)="cerrarModal()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de progresión -->
+      <div *ngIf="showProgressionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto">
+          <!-- Encabezado del modal -->
+          <div class="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-800">
+                Progresión Personal - {{marchSheetSeleccionada?.memberName || 'Cargando...'}}
+              </h3>
+              <button (click)="cerrarModalProgresion()" class="text-gray-400 hover:text-gray-500">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <!-- Loading state -->
+            <div *ngIf="loadingProgression" class="bg-gray-50 rounded-lg p-8 flex justify-center items-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <span class="ml-3 text-gray-600">Cargando progresión...</span>
+            </div>
+
+            <!-- Error state -->
+            <div *ngIf="error && !loadingProgression" class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm text-red-700">{{error}}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progression content -->
+            <div *ngIf="marchSheetSeleccionada && !loadingProgression && !error">
+              <!-- Información de la hoja de marcha -->
+              <div class="mb-6 bg-blue-50 rounded-lg p-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Scout</p>
+                    <p class="text-base font-semibold text-gray-900">{{marchSheetSeleccionada.memberName}}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Totem</p>
+                    <p class="text-base text-gray-900">{{marchSheetSeleccionada.totem || 'Sin asignar'}}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">Etapa actual</p>
+                    <div class="flex items-center space-x-2">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{marchSheetSeleccionada.progressionStage}}
+                      </span>
+                      <button (click)="showChangeStageModal = true" 
+                              class="text-blue-600 hover:text-blue-800 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Competencias -->
+              <div class="space-y-4">
+                <h4 class="text-xl font-semibold text-gray-800 mb-4">
+                  Competencias ({{marchSheetSeleccionada.competenceProgress.length || 0}}/14)
+                </h4>
+                
+                <div *ngIf="marchSheetSeleccionada.competenceProgress.length === 0" 
+                     class="text-center py-8 text-gray-500">
+                  No hay competencias seleccionadas aún.
+                </div>
+
+                <div *ngFor="let progress of marchSheetSeleccionada.competenceProgress" 
+                     class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                      <h5 class="text-lg font-medium text-gray-900 mb-1">
+                        {{progress.competence?.title}}
+                      </h5>
+                      <p class="text-sm text-gray-600 mb-2">{{progress.competence?.description}}</p>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            [ngClass]="{
+                              'bg-yellow-100 text-yellow-800': progress.status === 'PENDING',
+                              'bg-blue-100 text-blue-800': progress.status === 'IN_PROGRESS',
+                              'bg-purple-100 text-purple-800': progress.status === 'COMPLETED',
+                              'bg-green-100 text-green-800': progress.status === 'APPROVED'
+                            }">
+                        {{getStatusLabel(progress.status)}}
+                      </span>
+                    </div>
+                    <span class="text-xs text-gray-500 ml-4">
+                      {{getAreaLabel(progress.competence?.growthArea)}}
+                    </span>
+                  </div>
+
+                  <div *ngIf="progress.ownAction" class="mb-2">
+                    <p class="text-sm font-medium text-gray-700">Acción propia:</p>
+                    <p class="text-sm text-gray-600">{{progress.ownAction}}</p>
+                  </div>
+
+                  <div *ngIf="progress.achievement" class="mb-2">
+                    <p class="text-sm font-medium text-gray-700">Logro:</p>
+                    <p class="text-sm text-gray-600">{{progress.achievement}}</p>
+                  </div>
+
+                  <div *ngIf="progress.status === 'COMPLETED'" class="mt-3 flex justify-end">
+                    <button (click)="aprobarCompetencia(progress)" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm">
+                      Aprobar competencia
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del modal -->
+          <div class="px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+            <button (click)="cerrarModalProgresion()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para cambiar etapa -->
+      <div *ngIf="showChangeStageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">
+              Cambiar Etapa de Progresión
+            </h3>
+          </div>
+
+          <div class="p-6">
+            <form [formGroup]="changeStageForm" (ngSubmit)="cambiarEtapa()">
+              <div class="mb-4">
+                <label for="currentStage" class="block text-sm font-medium text-gray-700 mb-1">
+                  Etapa actual
+                </label>
+                <input type="text" id="currentStage" 
+                       [value]="marchSheetSeleccionada?.progressionStage" 
+                       disabled
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
+              </div>
+
+              <div class="mb-4">
+                <label for="newStage" class="block text-sm font-medium text-gray-700 mb-1">
+                  Nueva etapa
+                </label>
+                <select id="newStage" formControlName="newStage" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Seleccionar etapa</option>
+                  <option value="AMBIENTACION">Ambientación</option>
+                  <option value="TIERRA">Tierra</option>
+                  <option value="AIRE">Aire</option>
+                  <option value="FUEGO">Fuego</option>
+                  <option value="AGUA">Agua</option>
+                </select>
+              </div>
+
+              <div class="mb-6">
+                <label for="comments" class="block text-sm font-medium text-gray-700 mb-1">
+                  Comentarios (opcional)
+                </label>
+                <textarea id="comments" formControlName="comments" rows="3"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Motivo del cambio de etapa..."></textarea>
+              </div>
+
+              <div class="flex justify-end space-x-3">
+                <button type="button" (click)="cancelarCambioEtapa()"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                  Cancelar
+                </button>
+                <button type="submit" [disabled]="!changeStageForm.valid || changingStage"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span *ngIf="changingStage" class="flex items-center">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Cambiando...
+                  </span>
+                  <span *ngIf="!changingStage">Cambiar etapa</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

@@ -1,0 +1,110 @@
+/* Estilos personalizados para la hoja de marcha */
+
+.container {
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Tabs styling */
+.tab-active {
+  border-bottom-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.tab-inactive {
+  border-bottom-color: transparent;
+  color: #6b7280;
+}
+
+.tab-inactive:hover {
+  color: #374151;
+  border-bottom-color: #d1d5db;
+}
+
+/* Progress bar animations */
+.progress-bar {
+  transition: width 0.6s ease-in-out;
+}
+
+/* Competencia cards */
+.competencia-card {
+  transition: all 0.3s ease;
+}
+
+.competencia-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* Form styling */
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Estado badges */
+.estado-pendiente {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.estado-progreso {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.estado-completada {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.estado-aprobada {
+  background-color: #e0e7ff;
+  color: #5b21b6;
+}
+
+/* Loading states */
+.loading-spinner {
+  border-top-color: #3b82f6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .competencia-card {
+    margin-bottom: 1rem;
+  }
+  
+  .modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .competencia-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #d1d5db;
+  }
+}
