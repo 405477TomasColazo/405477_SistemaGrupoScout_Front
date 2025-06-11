@@ -169,13 +169,13 @@
             <!-- Indicador de miembros registrados (siempre visible) -->
             <div *ngIf="calEvent.memberIds.length > 0" class="flex -space-x-0.5 mt-1">
               <div *ngFor="let memberId of calEvent.memberIds.slice(0, 3)"
-                   class="w-3 h-3 bg-white bg-opacity-40 rounded-full flex items-center justify-center text-[8px] font-bold border border-white border-opacity-30"
+                   class="w-4 h-4 bg-white bg-opacity-90 rounded-full flex items-center justify-center text-[7px] font-bold border border-white shadow-sm"
                    [title]="getMemberName(memberId)">
-                {{ getMemberName(memberId).charAt(0) }}
+                <span class="text-gray-700">{{ getMemberInitialsById(memberId) }}</span>
               </div>
               <div *ngIf="calEvent.memberIds.length > 3"
-                   class="w-3 h-3 bg-white bg-opacity-40 rounded-full flex items-center justify-center text-[8px] font-bold border border-white border-opacity-30">
-                +{{ calEvent.memberIds.length - 3 }}
+                   class="w-4 h-4 bg-white bg-opacity-90 rounded-full flex items-center justify-center text-[7px] font-bold border border-white shadow-sm">
+                <span class="text-gray-700">+{{ calEvent.memberIds.length - 3 }}</span>
               </div>
             </div>
 

@@ -477,6 +477,12 @@ END:VCALENDAR`;
     return `${member.name.charAt(0)}${member.lastName.charAt(0)}`.toUpperCase();
   }
 
+  getMemberInitialsById(memberId: number): string {
+    const member = this.familyGroup?.members.find(m => m.id === memberId);
+    if (!member) return '?';
+    return `${member.name.charAt(0)}${member.lastName.charAt(0)}`.toUpperCase();
+  }
+
   getEventTypeLabel(type: string): string {
     const labels = {
       'campamento': 'Campamento',

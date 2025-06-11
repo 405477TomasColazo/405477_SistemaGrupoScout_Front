@@ -1,10 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CurrencyPipe, DatePipe, NgClass, NgForOf, NgIf} from "@angular/common";
 import {EducatorsService} from "../../core/services/educators.service";
 import {MiembroConDetalles, SectionMember} from "../../core/models/user.model";
 import {FamilyGroupService} from '../../core/services/family-group.service';
 import {Tutor} from '../../core/models/family-group.model';
+import {ProgressionService} from '../../core/services/progression.service';
+import {MarchSheet, ProgressionStage, GrowthArea, AREA_LABELS} from '../../core/models/progression.model';
 
 @Component({
   selector: 'app-educator-dashboard',
@@ -24,8 +26,13 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
   miembrosFiltrados: SectionMember[] = [];
   miembroSeleccionado: MiembroConDetalles | null = null;
   showModal: boolean = false;
+  showProgressionModal: boolean = false;
+  showChangeStageModal: boolean = false;
+  marchSheetSeleccionada: MarchSheet | null = null;
   loading: boolean = false;
   loadingDetails: boolean = false;
+  loadingProgression: boolean = false;
+  changingStage: boolean = false;
   error: string | null = null;
 
   filtrosForm = new FormGroup({
@@ -33,7 +40,16 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
     tipo: new FormControl('todos') // 'todos', 'beneficiarios', 'educadores'
   });
 
-  constructor(private educatorService: EducatorsService, private familyGroupService: FamilyGroupService) {}
+  changeStageForm = new FormGroup({
+    newStage: new FormControl('', [Validators.required]),
+    comments: new FormControl('')
+  });
+
+  constructor(
+    private educatorService: EducatorsService, 
+    private familyGroupService: FamilyGroupService,
+    private progressionService: ProgressionService
+  ) {}
 
   ngOnInit() {
     this.cargarMiembrosSeccion();
@@ -116,9 +132,33 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  verProgresionMiembro(miembro: SectionMember) {
+    this.loadingProgression = true;
+    this.showProgressionModal = true;
+    this.error = null;
+
+    this.progressionService.getMarchSheet(miembro.id).subscribe({
+      next: (marchSheet) => {
+        this.marchSheetSeleccionada = marchSheet;
+        this.loadingProgression = false;
+      },
+      error: (err) => {
+        console.error('Error cargando hoja de marcha:', err);
+        this.error = 'Error cargando la progresión del scout. Es posible que no tenga una hoja de marcha creada.';
+        this.loadingProgression = false;
+      }
+    });
+  }
+
   cerrarModal() {
     this.showModal = false;
     this.miembroSeleccionado = null;
+    this.error = null;
+  }
+
+  cerrarModalProgresion() {
+    this.showProgressionModal = false;
+    this.marchSheetSeleccionada = null;
     this.error = null;
   }
 
@@ -165,5 +205,80 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
     }
 
     return age;
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'Pendiente';
+      case 'IN_PROGRESS': return 'En progreso';
+      case 'COMPLETED': return 'Completada';
+      case 'APPROVED': return 'Aprobada';
+      default: return status;
+    }
+  }
+
+  aprobarCompetencia(progress: any) {
+    this.progressionService.approveCompetence(progress.id, 'Aprobada por educador').subscribe({
+      next: (updatedProgress) => {
+        // Actualizar el status en la hoja de marcha actual
+        if (this.marchSheetSeleccionada && this.marchSheetSeleccionada.competenceProgress) {
+          const index = this.marchSheetSeleccionada.competenceProgress.findIndex(cp => cp.id === progress.id);
+          if (index !== -1) {
+            this.marchSheetSeleccionada.competenceProgress[index] = updatedProgress;
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Error aprobando competencia:', err);
+        this.error = 'Error al aprobar la competencia. Intente nuevamente.';
+      }
+    });
+  }
+
+  cambiarEtapa() {
+    if (!this.changeStageForm.valid || !this.marchSheetSeleccionada) {
+      return;
+    }
+
+    this.changingStage = true;
+    this.error = null;
+
+    const newStage = this.changeStageForm.get('newStage')?.value as ProgressionStage;
+    const comments = this.changeStageForm.get('comments')?.value || '';
+
+    this.progressionService.updateProgressionStage(
+      this.marchSheetSeleccionada.memberId,
+      newStage,
+      comments
+    ).subscribe({
+      next: (updatedMarchSheet) => {
+        this.marchSheetSeleccionada = updatedMarchSheet;
+        this.changingStage = false;
+        this.showChangeStageModal = false;
+        this.changeStageForm.reset();
+      },
+      error: (err) => {
+        console.error('Error cambiando etapa:', err);
+        this.error = 'Error al cambiar la etapa. Intente nuevamente.';
+        this.changingStage = false;
+      }
+    });
+  }
+
+  cancelarCambioEtapa() {
+    this.showChangeStageModal = false;
+    this.changeStageForm.reset();
+    this.error = null;
+  }
+
+  getAreaLabel(area: GrowthArea | undefined): string {
+    if (!area) return '';
+    return AREA_LABELS[area] || area;
+  }
+
+  getInitials(name: string, lastName: string): string {
+    const firstInitial = name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
+    const lastInitial = lastName && lastName.length > 0 ? lastName.charAt(0).toUpperCase() : '';
+    return firstInitial + lastInitial;
   }
 }

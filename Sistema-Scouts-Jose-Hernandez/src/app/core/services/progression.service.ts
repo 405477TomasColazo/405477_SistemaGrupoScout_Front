@@ -89,6 +89,14 @@ export class ProgressionService {
     return this.http.delete<void>(`${this.apiUrl}/progression/competence-progress/${progressId}`);
   }
 
+  updateProgressionStage(memberId: number, newStage: ProgressionStage, comments?: string): Observable<MarchSheet> {
+    return this.http.put<MarchSheet>(`${this.apiUrl}/progression/progression-stage`, {
+      memberId: memberId,
+      newStage: newStage,
+      comments: comments
+    }).pipe(tap(updatedMarchSheet => this.currentProgressionSubject.next(updatedMarchSheet)));
+  }
+
   // Métodos auxiliares para cálculos locales
   calculateProgressionStats(competenceProgress: CompetenceProgress[]): ProgressionStats {
     const totalCompetences = competenceProgress.length;

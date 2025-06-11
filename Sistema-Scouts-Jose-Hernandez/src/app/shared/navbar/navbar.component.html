@@ -28,7 +28,11 @@
           <div class="relative group">
             <button class="flex items-center space-x-2 focus:outline-none">
               <span>{{ user?.lastName }}</span>
-              <img src='/media/lis.jpg' alt="Perfil" class="h-10 w-10 rounded-full border-2 border-green-400">
+              <div class="h-10 w-10 rounded-full border-2 border-green-400 bg-green-100 flex items-center justify-center">
+                <span class="text-green-600 font-medium text-sm">
+                  {{getInitials(user?.lastName || '')}}
+                </span>
+              </div>
             </button>
 
             <!-- Dropdown menú -->
