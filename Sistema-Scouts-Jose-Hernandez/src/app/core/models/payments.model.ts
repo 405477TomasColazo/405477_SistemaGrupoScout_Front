@@ -19,9 +19,12 @@ export interface Payment {
 }
 
 export interface PaymentItem {
-  feeId: number;
+  feeId?: number;  // Para cuotas mensuales
+  eventId?: number;  // Para eventos - NUEVO
+  eventRegistrationId?: number;  // Para registros de eventos - NUEVO
   description: string;
-  period: string;
+  period?: string;  // Para cuotas mensuales
+  eventDate?: string;  // Para eventos - NUEVO
   amount: number;
 }
 
@@ -34,11 +37,14 @@ export interface PaymentFilters {
 
 export interface PaymentPreferenceRequest {
   memberId: number;
-  paymentType: string;
+  paymentType: 'fee' | 'event';  // ACTUALIZADO para distinguir tipos
   items: {
-    feeId: number;
+    feeId?: number;  // Para cuotas mensuales
+    eventId?: number;  // Para eventos - NUEVO
+    eventRegistrationId?: number;  // Para registros de eventos - NUEVO
     description: string;
-    period: string;
+    period?: string;  // Para cuotas mensuales
+    eventDate?: string;  // Para eventos - NUEVO
     amount: number;
   }[];
   totalAmount: number;
@@ -65,4 +71,16 @@ export interface ProcessPaymentResponse {
 export interface PaymentsHistoryResponse {
   payments: Payment[];
   total: number;
+}
+
+// Nuevas interfaces para eventos
+export interface EventPaymentItem {
+  eventId: number;
+  eventTitle: string;
+  eventDate: string;
+  memberId: number;
+  memberName: string;
+  amount: number;
+  paymentStatus: 'pending' | 'paid' | 'exempt';
+  registrationId: number;
 }

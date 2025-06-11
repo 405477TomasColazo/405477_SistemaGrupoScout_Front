@@ -250,7 +250,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
   retryPayment(payment: Payment): void {
     // Se pueden recuperar los conceptos del pago fallido
-    this.selectedFees = payment.items.map(item => item.feeId);
+    this.selectedFees = payment.items.map(item => item.feeId).filter((id): id is number => id !== undefined);
     this.closeDetailsModal();
     this.openPaymentModal();
   }
@@ -331,7 +331,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         amount: fee.amount
       })),
       totalAmount: totalAmount,
-      paymentType: '',
+      paymentType: 'fee' as const,
       externalReferenceId: ''
     }).subscribe({
       next: (preferenceResponse) => {

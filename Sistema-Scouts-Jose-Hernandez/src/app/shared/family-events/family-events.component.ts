@@ -5,6 +5,7 @@ import {CalendarDay, EventRegistration, Event, CalendarEvent} from '../../core/m
 import {AuthService} from '../../core/auth/auth.service';
 import {EventService} from '../../core/services/event.service';
 import {FamilyGroupService} from '../../core/services/family-group.service';
+import {PaymentService} from '../../core/services/payment.service';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 
 @Component({
@@ -37,6 +38,11 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
   showAlert = false;
   alertType: 'success' | 'error' | 'info' = 'success';
   alertText = '';
+  
+  // Estados para pagos
+  showPaymentModal = false;
+  paymentLoading = false;
+  pendingEventPayments: Map<number, any[]> = new Map(); // eventId -> registrations que requieren pago
 
   // Calendario
   currentDate = new Date();
@@ -47,27 +53,29 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // Colores por tipo de evento
-  eventColors = {
-    campamento: 'bg-green-500',
-    salida: 'bg-blue-500',
-    reunion: 'bg-yellow-500',
-    actividad: 'bg-purple-500',
-    otro: 'bg-gray-500'
+  // Colores por sección (aplicado como fondo del evento)
+  sectionColors = {
+    manada: 'bg-orange-500',
+    unidad: 'bg-green-500', 
+    caminantes: 'bg-blue-500',
+    rovers: 'bg-red-500',
+    all: 'bg-gray-500'
   };
 
-  // Leyenda de secciones
-  sectionColors = {
-    manada: 'border-orange-500',
-    unidad: 'border-green-500',
-    caminantes: 'border-blue-500',
-    rovers: 'border-red-500'
+  // Iconos por tipo de evento
+  eventIcons = {
+    campamento: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    salida: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8',
+    reunion: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+    actividad: 'M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    otro: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
   };
 
   constructor(
     private authService: AuthService,
     private eventService: EventService,
-    private familyService: FamilyGroupService
+    private familyService: FamilyGroupService,
+    private paymentService: PaymentService
   ) {}
 
   ngOnInit(): void {
@@ -356,6 +364,11 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
           );
           this.closeConfirmModal();
           this.loadRegistrations();
+          
+          // Si el evento requiere pago, mostrar modal de pago
+          if (this.selectedEvent?.requiresPayment && this.selectedEvent?.cost && this.selectedEvent.cost > 0) {
+            this.checkForEventPayments();
+          }
         },
         error: (error) => {
           this.showAlertMessage('Error al confirmar asistencia', 'error');
@@ -383,6 +396,44 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
           this.loading = false;
         }
       });
+  }
+
+  confirmPendingRegistrations(event: Event): void {
+    if (!this.familyGroup) return;
+
+    const registrations = this.familyRegistrations.get(event.id!) || [];
+    const familyMemberIds = this.familyGroup.members.map(m => m.id!);
+    
+    const pendingRegistrations = registrations.filter(r => 
+      familyMemberIds.includes(r.memberId) && r.status === 'pending'
+    );
+
+    if (pendingRegistrations.length === 0) return;
+
+    this.loading = true;
+
+    // Confirmar cada registración pendiente
+    const confirmPromises = pendingRegistrations.map(reg =>
+      this.eventService.updateRegistration(event.id!, reg.id!, 'confirmed').toPromise()
+    );
+
+    Promise.all(confirmPromises).then(() => {
+      this.showAlertMessage(
+        `Se confirmó la asistencia de ${pendingRegistrations.length} miembro(s)`,
+        'success'
+      );
+      this.loadRegistrations();
+      
+      // Si el evento requiere pago, mostrar modal de pago
+      if (event.requiresPayment && event.cost && event.cost > 0) {
+        this.selectedEvent = event;
+        this.checkForEventPayments();
+      }
+      this.loading = false;
+    }).catch(error => {
+      this.showAlertMessage('Error al confirmar asistencia', 'error');
+      this.loading = false;
+    });
   }
 
   exportToCalendar(event: Event): void {
@@ -447,12 +498,22 @@ END:VCALENDAR`;
     return labels[section as keyof typeof labels] || section;
   }
 
-  getEventColorClass(eventType: string): string {
-    return this.eventColors[eventType as keyof typeof this.eventColors] || 'bg-gray-500';
+  getEventColorClass(event: Event): string {
+    // Si el evento es para múltiples secciones, usar color neutro
+    if (event.sections.length > 1 || event.sections.includes('all')) {
+      return this.sectionColors['all'];
+    }
+    // Si es para una sección específica, usar el color de esa sección
+    const section = event.sections[0]?.toLowerCase();
+    return this.sectionColors[section as keyof typeof this.sectionColors] || this.sectionColors['all'];
   }
 
-  getSectionBorderClass(section: string): string {
-    return this.sectionColors[section as keyof typeof this.sectionColors] || 'border-gray-500';
+  getEventIconPath(eventType: string): string {
+    return this.eventIcons[eventType as keyof typeof this.eventIcons] || this.eventIcons['otro'];
+  }
+
+  getSectionColorClass(section: string): string {
+    return this.sectionColors[section as keyof typeof this.sectionColors] || 'bg-gray-500';
   }
 
   formatDate(date: Date | string): string {
@@ -560,5 +621,134 @@ END:VCALENDAR`;
 
   canFamilyRegisterForEvent(event: Event): boolean {
     return this.familyGroup ? this.familyGroup.members.some(m => this.canRegisterForEvent(event, m.id!)) : false;
+  }
+
+  hasFamilyPendingRegistrations(event: Event): boolean {
+    if (!this.familyGroup) return false;
+    
+    const registrations = this.familyRegistrations.get(event.id!) || [];
+    const familyMemberIds = this.familyGroup.members.map(m => m.id!);
+    
+    return registrations.some(r => 
+      familyMemberIds.includes(r.memberId) && r.status === 'pending'
+    );
+  }
+
+  hasFamilyConfirmedRegistrations(event: Event): boolean {
+    if (!this.familyGroup) return false;
+    
+    const registrations = this.familyRegistrations.get(event.id!) || [];
+    const familyMemberIds = this.familyGroup.members.map(m => m.id!);
+    
+    return registrations.some(r => 
+      familyMemberIds.includes(r.memberId) && r.status === 'confirmed'
+    );
+  }
+
+  checkForEventPayments(): void {
+    // Verificar si hay registraciones que requieren pago después de un breve delay
+    // para que el backend haya procesado las cuotas
+    setTimeout(() => {
+      this.loadPendingEventPayments();
+    }, 1000);
+  }
+
+  loadPendingEventPayments(): void {
+    if (!this.familyGroup || !this.selectedEvent) return;
+
+    // Buscar cuotas pendientes de eventos para cada miembro de la familia
+    const memberPromises = this.familyGroup.members.map(member =>
+      this.paymentService.getPendingFeed(member.id!).toPromise()
+        .then(fees => {
+          const eventFees = fees?.filter(fee => 
+            fee.description.startsWith('Evento:') && 
+            fee.description.includes(this.selectedEvent!.title)
+          ) || [];
+          return { member, eventFees };
+        })
+    );
+
+    Promise.all(memberPromises).then(results => {
+      const hasPendingPayments = results.some(result => result.eventFees.length > 0);
+      
+      if (hasPendingPayments) {
+        // Mostrar modal de pago
+        this.showPaymentModal = true;
+        // Guardar información de pagos pendientes
+        this.pendingEventPayments.set(this.selectedEvent!.id!, results.filter(r => r.eventFees.length > 0));
+      }
+    });
+  }
+
+  openEventPaymentModal(event: Event): void {
+    this.selectedEvent = event;
+    this.showPaymentModal = true;
+    this.loadPendingEventPayments();
+  }
+
+  closePaymentModal(): void {
+    this.showPaymentModal = false;
+    this.selectedEvent = null;
+    this.pendingEventPayments.clear();
+  }
+
+  processEventPayment(): void {
+    if (!this.selectedEvent || !this.familyGroup) return;
+
+    const eventPayments = this.pendingEventPayments.get(this.selectedEvent.id!) || [];
+    const allFees = eventPayments.flatMap(ep => ep.eventFees);
+    
+    if (allFees.length === 0) return;
+
+    this.paymentLoading = true;
+
+    // Crear preferencia de pago para las cuotas del evento
+    const paymentRequest = {
+      memberId: allFees[0].memberId, // Usar el primer miembro como referencia
+      paymentType: 'event' as const,
+      items: allFees.map(fee => ({
+        feeId: fee.id,
+        description: fee.description,
+        period: fee.period,
+        amount: fee.amount
+      })),
+      totalAmount: allFees.reduce((sum, fee) => sum + fee.amount, 0),
+      externalReferenceId: `event-${this.selectedEvent.id}-${Date.now()}`
+    };
+
+    this.paymentService.createPaymentPreference(paymentRequest)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          // Redirigir a MercadoPago
+          if (response.initPoint) {
+            window.open(response.initPoint, '_blank');
+          }
+          this.paymentLoading = false;
+          this.closePaymentModal();
+          this.showAlertMessage('Redirigiendo a la plataforma de pago...', 'info');
+        },
+        error: (error) => {
+          this.showAlertMessage('Error al procesar el pago', 'error');
+          this.paymentLoading = false;
+        }
+      });
+  }
+
+  hasEventPendingPayments(event: Event): boolean {
+    if (!this.familyGroup || !event.requiresPayment) return false;
+    
+    // Esta es una verificación simple - en producción podrías cachear esta información
+    return this.pendingEventPayments.has(event.id!) && 
+           this.pendingEventPayments.get(event.id!)!.length > 0;
+  }
+
+  getEventPaymentTotal(event: Event): number {
+    if (!event.requiresPayment || !event.cost) return 0;
+    
+    const eventPayments = this.pendingEventPayments.get(event.id!) || [];
+    return eventPayments.reduce((total, ep) => 
+      total + ep.eventFees.reduce((sum: number, fee: any) => sum + fee.amount, 0), 0
+    );
   }
 }
