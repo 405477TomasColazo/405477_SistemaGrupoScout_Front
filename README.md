@@ -455,23 +455,11 @@ if (typeof MercadoPago === 'undefined') {
 }
 ```
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 👥 Equipo de Desarrollo
-
-- **Frontend Developer**: [Tu Nombre]
-- **UI/UX Designer**: [Nombre del Diseñador]
-- **Project Lead**: [Nombre del Líder]
-
 ## 📞 Contacto
 
 Para consultas sobre el proyecto:
-- Email: [email-contacto@ejemplo.com]
-- Slack: [canal-del-proyecto]
-- Documentación: [enlace-a-docs-internas]
+- Email: tomas.colazo.federico@gmail.com
 
 ---
 
-**Nota**: Este README está actualizado a enero 2025. Para la versión más reciente de la documentación, consultar el repositorio oficial.
+**Nota**: Este README está actualizado a junio 2025. Para la versión más reciente de la documentación, consultar el repositorio oficial.
