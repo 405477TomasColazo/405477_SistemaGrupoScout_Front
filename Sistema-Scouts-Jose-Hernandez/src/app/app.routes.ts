@@ -11,6 +11,10 @@ import {FamilyEventsComponent} from './shared/family-events/family-events.compon
 import {ProgressionDashboardComponent} from './shared/progression/progression-dashboard/progression-dashboard.component';
 import {MarchSheetComponent} from './shared/progression/march-sheet/march-sheet.component';
 import {SelectCompetencesComponent} from './shared/progression/select-competences/select-competences.component';
+import {NewsListComponent} from './shared/news/news-list/news-list.component';
+import {NewsDetailComponent} from './shared/news/news-detail/news-detail.component';
+import {NewsAdminListComponent} from './shared/news/news-admin/news-admin-list.component';
+import {NewsFormComponent} from './shared/news/news-admin/news-form.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -26,5 +30,10 @@ export const routes: Routes = [
   {path: 'progression', component:ProgressionDashboardComponent},
   {path: 'progression/dashboard', component:ProgressionDashboardComponent},
   {path: 'progression/march-sheet', component:MarchSheetComponent},
-  {path: 'progression/select-competences', component:SelectCompetencesComponent}
+  {path: 'progression/select-competences', component:SelectCompetencesComponent},
+  {path: 'noticias', component:NewsListComponent},
+  {path: 'noticias/:slug', component:NewsDetailComponent},
+  {path: 'admin/noticias', component:NewsAdminListComponent},
+  {path: 'admin/noticias/crear', component:NewsFormComponent},
+  {path: 'admin/noticias/:id/editar', component:NewsFormComponent}
 ];

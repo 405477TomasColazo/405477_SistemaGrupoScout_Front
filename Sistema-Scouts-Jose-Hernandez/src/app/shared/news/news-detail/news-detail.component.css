@@ -1,0 +1,156 @@
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse animation for skeleton loader */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Content styling */
+.prose {
+  max-width: none;
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+  line-height: 1.75;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #1f2937;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #2563eb;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #6b7280;
+  margin: 1.5rem 0;
+}
+
+.prose ul, .prose ol {
+  margin: 1.25rem 0;
+  padding-left: 1.625rem;
+}
+
+.prose li {
+  margin: 0.5rem 0;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin: 1.5rem 0;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+/* Share buttons hover effects */
+button {
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Category badges */
+.category-badge {
+  transition: all 0.3s ease;
+}
+
+/* Back button hover effect */
+nav button:hover svg {
+  transform: translateX(-2px);
+}
+
+nav button svg {
+  transition: transform 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .prose {
+    font-size: 1rem;
+    line-height: 1.625;
+  }
+  
+  .prose h1 {
+    font-size: 2rem;
+    line-height: 2.25rem;
+  }
+  
+  .prose h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  footer .flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  footer .flex > div {
+    margin-top: 1rem;
+    justify-content: center;
+  }
+  
+  footer button {
+    flex: 1;
+    margin: 0.25rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  nav, footer {
+    display: none !important;
+  }
+  
+  .prose {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}

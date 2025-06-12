@@ -12,7 +12,7 @@
         <a href="#" class="hover:text-green-300 transition">Inicio</a>
         <a href="#quienes-somos" class="hover:text-green-300 transition">Quiénes Somos</a>
         <a href="#secciones" class="hover:text-green-300 transition">Secciones</a>
-        <a href="#noticias" class="hover:text-green-300 transition">Noticias</a>
+        <a href="/noticias" class="hover:text-green-300 transition">Noticias</a>
         <a href="#contacto" class="hover:text-green-300 transition">Contacto</a>
 
         <!-- No logueado: Botón de login -->
@@ -43,6 +43,7 @@
               <a href="/payments" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pagos</a>
               <ng-container *ngIf="isAdmin">
                 <a href="/invitations" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Administración</a>
+                <a href="/admin/noticias" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Gestión de Noticias</a>
               </ng-container>
               <hr class="my-1">
               <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar Sesión</button>

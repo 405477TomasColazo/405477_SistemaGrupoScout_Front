@@ -1,0 +1,187 @@
+/* Table styling improvements */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Action buttons hover effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Table row hover effects */
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+/* Image hover effects */
+img {
+  transition: all 0.3s ease;
+}
+
+tr:hover img {
+  transform: scale(1.05);
+}
+
+/* Status badge styling */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  table {
+    min-width: 800px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/* Search input styling */
+input[type="text"] {
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Select dropdown styling */
+select {
+  transition: all 0.3s ease;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Category badges */
+.category-badge {
+  transition: all 0.3s ease;
+}
+
+.category-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Empty state styling */
+.empty-state {
+  opacity: 0.8;
+}
+
+/* Header section styling */
+.header-section {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* Pagination styling */
+nav button {
+  transition: all 0.2s ease;
+}
+
+nav button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table header styling */
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f9fafb;
+  z-index: 10;
+}
+
+/* Card-like table styling */
+.table-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Action button specific colors */
+.action-view {
+  color: #2563eb;
+}
+
+.action-view:hover {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+.action-edit {
+  color: #7c3aed;
+}
+
+.action-edit:hover {
+  color: #6d28d9;
+  background-color: #f3e8ff;
+}
+
+.action-publish {
+  color: #059669;
+}
+
+.action-publish:hover {
+  color: #047857;
+  background-color: #ecfdf5;
+}
+
+.action-unpublish {
+  color: #d97706;
+}
+
+.action-unpublish:hover {
+  color: #b45309;
+  background-color: #fffbeb;
+}
+
+.action-delete {
+  color: #dc2626;
+}
+
+.action-delete:hover {
+  color: #b91c1c;
+  background-color: #fef2f2;
+}
