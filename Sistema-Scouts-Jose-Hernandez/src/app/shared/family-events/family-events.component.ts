@@ -7,6 +7,7 @@ import {EventService} from '../../core/services/event.service';
 import {FamilyGroupService} from '../../core/services/family-group.service';
 import {PaymentService} from '../../core/services/payment.service';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-family-events',
@@ -75,7 +76,8 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
     private authService: AuthService,
     private eventService: EventService,
     private familyService: FamilyGroupService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -708,37 +710,17 @@ END:VCALENDAR`;
 
     this.paymentLoading = true;
 
-    // Crear preferencia de pago para las cuotas del evento
-    const paymentRequest = {
-      memberId: allFees[0].memberId, // Usar el primer miembro como referencia
-      paymentType: 'event' as const,
-      items: allFees.map(fee => ({
-        feeId: fee.id,
-        description: fee.description,
-        period: fee.period,
-        amount: fee.amount
-      })),
-      totalAmount: allFees.reduce((sum, fee) => sum + fee.amount, 0),
-      externalReferenceId: `event-${this.selectedEvent.id}-${Date.now()}`
-    };
-
-    this.paymentService.createPaymentPreference(paymentRequest)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          // Redirigir a MercadoPago
-          if (response.initPoint) {
-            window.open(response.initPoint, '_blank');
-          }
-          this.paymentLoading = false;
-          this.closePaymentModal();
-          this.showAlertMessage('Redirigiendo a la plataforma de pago...', 'info');
-        },
-        error: (error) => {
-          this.showAlertMessage('Error al procesar el pago', 'error');
-          this.paymentLoading = false;
-        }
-      });
+    // Close the modal and navigate to payments component
+    this.closePaymentModal();
+    
+    // Navigate to payments component where event fees can be paid using Checkout Bricks
+    this.router.navigate(['/payments']).then(() => {
+      this.paymentLoading = false;
+      this.showAlertMessage('Dirigiendo a la sección de pagos para completar el pago del evento...', 'info');
+    }).catch(() => {
+      this.paymentLoading = false;
+      this.showAlertMessage('Error al navegar a la sección de pagos', 'error');
+    });
   }
 
   hasEventPendingPayments(event: Event): boolean {

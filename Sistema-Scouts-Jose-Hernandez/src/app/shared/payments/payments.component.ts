@@ -27,10 +27,14 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   seccionActiva: 'cuotas' | 'historial' = 'cuotas';
   selectedMember: MemberProtagonist | undefined;
   pendingFees: Fee[] = [];
+  filteredFees: Fee[] = [];
   selectedFees: number[] = [];
   paymentsHistory: Payment[] = [];
   familyGroup: FamilyGroup | undefined;
   subscriptions: Subscription[] = [];
+
+  // Filtro de tipo de cuota
+  feeTypeFilter: 'all' | 'monthly' | 'event' = 'all';
 
   filters: PaymentFilters = {
     memberId: null,
@@ -101,6 +105,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       const sub = this.paymentService.getPendingFeed(memberId).subscribe({
         next: data => {
           this.pendingFees = data;
+          this.applyFeeTypeFilter();
         },
         error: err => {
           console.error('Error al cargar datos de familia:', err);
@@ -108,6 +113,46 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         }
       })
     }
+  }
+
+  private applyFeeTypeFilter() {
+    if (this.feeTypeFilter === 'all') {
+      this.filteredFees = [...this.pendingFees];
+    } else {
+      this.filteredFees = this.pendingFees.filter(fee => {
+        const feeType = this.determineFeeType(fee);
+        return feeType === this.feeTypeFilter;
+      });
+    }
+  }
+
+  determineFeeType(fee: Fee): 'monthly' | 'event' {
+    // Estrategia para identificar fees de eventos:
+    // 1. Si la descripción contiene palabras relacionadas con eventos
+    // 2. Si el formato del período no es mensual típico
+    // 3. Otros patrones que puedas identificar
+    
+    const description = fee.description.toLowerCase();
+    const eventKeywords = ['evento', 'campamento', 'salida', 'actividad', 'excursión', 'fogón', 'raid'];
+    
+    // Verificar si contiene palabras clave de eventos
+    if (eventKeywords.some(keyword => description.includes(keyword))) {
+      return 'event';
+    }
+    
+    // Si la descripción no parece una cuota mensual estándar
+    if (!description.includes('cuota') && !description.includes('mensual') && !description.includes('mes')) {
+      return 'event';
+    }
+    
+    // Por defecto, asumir que es mensual
+    return 'monthly';
+  }
+
+  changeFeeTypeFilter(type: 'all' | 'monthly' | 'event') {
+    this.feeTypeFilter = type;
+    this.selectedFees = []; // Limpiar selección al cambiar filtro
+    this.applyFeeTypeFilter();
   }
 
   loadPaymentsHistory(page = 1): void {
@@ -127,12 +172,12 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   toggleAllFees(): void {
-    if (this.pendingFees.length === this.selectedFees.length) {
+    if (this.filteredFees.length === this.selectedFees.length) {
       // Si ya están todos seleccionados, los deselecciona
       this.selectedFees = [];
     } else {
-      // Selecciona todos
-      this.selectedFees = this.pendingFees.map(fee => fee.id);
+      // Selecciona todos los filtrados
+      this.selectedFees = this.filteredFees.map(fee => fee.id);
     }
   }
 
