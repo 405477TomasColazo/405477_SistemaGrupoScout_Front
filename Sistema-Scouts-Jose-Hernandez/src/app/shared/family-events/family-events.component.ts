@@ -142,9 +142,43 @@ export class FamilyEventsComponent implements OnInit,OnDestroy {
     );
 
     Promise.all(registrationPromises).then(() => {
+      this.loadEventPaymentStatus();
       this.filterEvents();
       this.generateCalendar();
       this.loading = false;
+    });
+  }
+
+  loadEventPaymentStatus(): void {
+    if (!this.familyGroup) return;
+
+    // Cargar estado de pagos para todos los eventos que requieren pago
+    const paymentPromises = this.allEvents
+      .filter(event => event.requiresPayment)
+      .map(event => this.loadEventPaymentStatusForEvent(event));
+
+    Promise.all(paymentPromises);
+  }
+
+  private loadEventPaymentStatusForEvent(event: Event): Promise<void> {
+    if (!this.familyGroup) return Promise.resolve();
+
+    const memberPromises = this.familyGroup.members.map(member =>
+      this.paymentService.getPendingFeed(member.id!).toPromise()
+        .then(fees => {
+          const eventFees = fees?.filter(fee => 
+            fee.description.startsWith('Evento:') && 
+            fee.description.includes(event.title)
+          ) || [];
+          return { member, eventFees };
+        })
+    );
+
+    return Promise.all(memberPromises).then(results => {
+      const pendingPayments = results.filter(r => r.eventFees.length > 0);
+      if (pendingPayments.length > 0) {
+        this.pendingEventPayments.set(event.id!, pendingPayments);
+      }
     });
   }
 

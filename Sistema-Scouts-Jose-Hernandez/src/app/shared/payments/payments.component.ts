@@ -131,20 +131,20 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     // 1. Si la descripción contiene palabras relacionadas con eventos
     // 2. Si el formato del período no es mensual típico
     // 3. Otros patrones que puedas identificar
-    
+
     const description = fee.description.toLowerCase();
     const eventKeywords = ['evento', 'campamento', 'salida', 'actividad', 'excursión', 'fogón', 'raid'];
-    
+
     // Verificar si contiene palabras clave de eventos
     if (eventKeywords.some(keyword => description.includes(keyword))) {
       return 'event';
     }
-    
+
     // Si la descripción no parece una cuota mensual estándar
     if (!description.includes('cuota') && !description.includes('mensual') && !description.includes('mes')) {
       return 'event';
     }
-    
+
     // Por defecto, asumir que es mensual
     return 'monthly';
   }
@@ -381,20 +381,29 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (preferenceResponse) => {
 
-        // Inicializa el Brick de Card Payment
-        const cardPaymentBrickSettings = {
+        // Inicializa el Payment Brick completo (incluye todos los métodos de pago)
+        const paymentBrickSettings = {
           initialization: {
-            amount:totalAmount,
+            amount: totalAmount,
             preferenceId: preferenceResponse.preferenceId
           },
           customization: {
             paymentMethods: {
-              ticket: "all",
-              creditCard: "all",
-              prepaidCard: "all",
-              debitCard: "all",
-              mercadoPago: "all",
+              ticket: "all",           // Rapipago, PagoFácil, etc.
+              creditCard: "all",       // Tarjetas de crédito
+              prepaidCard: "all",      // Tarjetas prepagas
+              debitCard: "all",        // Tarjetas de débito
+              mercadoPago: "all",      // Cuenta de MercadoPago
+              bankTransfer: "all",     // Transferencias bancarias
+              atm: "all"              // Cajeros automáticos
             },
+            visual: {
+              hidePaymentButton: false,
+              hideFormTitle: false,
+              style: {
+                theme: 'default'
+              }
+            }
           },
           callbacks: {
             onReady: () => {
@@ -405,8 +414,8 @@ export class PaymentsComponent implements OnInit, OnDestroy {
               this.loadingPaymentBrick = false;
               this.showAlertMessage('error', 'Hubo un problema con el servicio de pago');
             },
-            onSubmit: (cardFormData: any) => {
-              this.processCardPayment(cardFormData, preferenceResponse.preferenceId);
+            onSubmit: (paymentFormData: any) => {
+              this.processPayment(paymentFormData, preferenceResponse.preferenceId);
             }
           }
         };
@@ -415,8 +424,8 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         const brickContainerId = 'mercadopago-bricks-container';
 
         if (brickContainer) {
-          // Renderiza el Brick
-          this.mpCardPaymentBrickController = this.mpInstance.bricks().create('cardPayment', brickContainerId, cardPaymentBrickSettings );
+          // Renderiza el Payment Brick completo
+          this.mpCardPaymentBrickController = this.mpInstance.bricks().create('payment', brickContainerId, paymentBrickSettings );
           this.loadingPaymentBrick = false;
         } else {
           console.error('No se encontró el contenedor para el Brick de MercadoPago');
@@ -431,11 +440,11 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     });
   }
 
-  processCardPayment(cardFormData: any, preferenceId: string): void {
+  processPayment(paymentFormData: any, preferenceId: string): void {
     this.processingPayment = true;
 
     this.paymentService.processPayment({
-      cardFormData: cardFormData,
+      paymentFormData: paymentFormData,
       preferenceId: preferenceId,
       feeIds: this.selectedFees
     }).subscribe({
@@ -506,16 +515,16 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }, 300); // Un retraso un poco mayor para asegurar que la UI esté lista
   }
 
-  processPayment(): void {
-    // Este método se llama desde el botón "Confirmar pago"
-    // El procesamiento real lo gestiona MercadoPago al hacer submit del formulario
-    // Por lo que este método queda para compatibilidad con la plantilla
-    if (this.mpCardPaymentBrickController) {
-      this.processingPayment = true;
-    } else {
-      this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
-    }
-  }
+  // processPayment(): void {
+  //   // Este método se llama desde el botón "Confirmar pago"
+  //   // El procesamiento real lo gestiona MercadoPago al hacer submit del formulario
+  //   // Por lo que este método queda para compatibilidad con la plantilla
+  //   if (this.mpCardPaymentBrickController) {
+  //     this.processingPayment = true;
+  //   } else {
+  //     this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
+  //   }
+  // }
 
   // Métodos para cambio de secciones
   changeTab(tab: 'cuotas' | 'historial'): void {

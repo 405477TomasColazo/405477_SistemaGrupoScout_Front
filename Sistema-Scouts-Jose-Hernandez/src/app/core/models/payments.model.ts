@@ -57,9 +57,10 @@ export interface PaymentPreferenceResponse {
 }
 
 export interface ProcessPaymentRequest {
-  cardFormData: any;
+  paymentFormData: any; // Generic payment data for any method
   preferenceId: string;
   feeIds: number[];
+  paymentMethod?: string; // Optional payment method type
 }
 
 export interface ProcessPaymentResponse {
