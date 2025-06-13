@@ -10,7 +10,7 @@ import { NewsArticleSummary, NewsCategory, PaginatedNewsResponse } from '../../.
 @Component({
   selector: 'app-news-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './news-list.component.html',
   styleUrl: './news-list.component.css'
 })
@@ -21,7 +21,7 @@ export class NewsListComponent implements OnInit {
   error = '';
   searchTerm = '';
   selectedCategoryId: string = '';
-  
+
   // Pagination
   currentPage = 0;
   totalPages = 0;
@@ -51,7 +51,7 @@ export class NewsListComponent implements OnInit {
     this.error = '';
 
     let request: Observable<PaginatedNewsResponse>;
-    
+
     if (this.searchTerm.trim()) {
       request = this.newsService.searchArticles(this.searchTerm, this.currentPage, this.pageSize);
     } else if (this.selectedCategoryId && this.selectedCategoryId !== '') {
@@ -104,7 +104,7 @@ export class NewsListComponent implements OnInit {
     const pages = [];
     const start = Math.max(0, this.currentPage - 2);
     const end = Math.min(this.totalPages - 1, this.currentPage + 2);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }

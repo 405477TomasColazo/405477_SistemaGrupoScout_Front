@@ -1,0 +1,25 @@
+/* Main Layout Styles */
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Content area with proper spacing */
+main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Ensure footer stays at bottom */
+.flex-1 {
+  flex: 1;
+}

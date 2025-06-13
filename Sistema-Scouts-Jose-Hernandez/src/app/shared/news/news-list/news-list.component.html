@@ -1,4 +1,4 @@
-<app-navbar></app-navbar>
+
 
 <div class="min-h-screen bg-gray-50">
   <!-- Header -->
@@ -15,7 +15,7 @@
   <section class="bg-white shadow-sm border-b">
     <div class="container mx-auto px-4 py-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        
+
         <!-- Search -->
         <div class="flex-1 md:max-w-md">
           <div class="relative">
@@ -64,7 +64,7 @@
 
   <!-- Content -->
   <main class="container mx-auto px-4 py-8">
-    
+
     <!-- Loading State -->
     <div *ngIf="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -76,8 +76,8 @@
       <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg max-w-md mx-auto">
         <h3 class="font-semibold mb-2">Error al cargar las noticias</h3>
         <p class="mb-4">{{ error }}</p>
-        <button 
-          (click)="loadArticles()" 
+        <button
+          (click)="loadArticles()"
           class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors">
           Intentar nuevamente
         </button>
@@ -86,22 +86,22 @@
 
     <!-- Articles Grid -->
     <div *ngIf="!loading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <article 
-        *ngFor="let article of articles" 
+      <article
+        *ngFor="let article of articles"
         class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1">
-        
+
         <!-- Image -->
         <div class="relative h-48 bg-gray-200">
-          <img 
-            [src]="getImageUrl(article.featuredImage)" 
+          <img
+            [src]="getImageUrl(article.featuredImage)"
             [alt]="article.title"
             class="w-full h-full object-cover"
             loading="lazy">
-          
+
           <!-- Category badges -->
           <div class="absolute top-3 left-3 flex flex-wrap gap-1">
-            <span 
-              *ngFor="let category of article.categories" 
+            <span
+              *ngFor="let category of article.categories"
               class="px-2 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full"
               [style.background-color]="category.color || '#2563eb'">
               {{ category.name }}
@@ -112,17 +112,17 @@
         <!-- Content -->
         <div class="p-6">
           <h2 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-            <a 
+            <a
               [routerLink]="['/noticias', article.slug]"
               class="hover:text-blue-600 transition-colors">
               {{ article.title }}
             </a>
           </h2>
-          
+
           <p class="text-gray-600 mb-4 line-clamp-3">
             {{ article.summary }}
           </p>
-          
+
           <!-- Meta information -->
           <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
             <div class="flex items-center space-x-4">
@@ -139,7 +139,7 @@
           </div>
 
           <!-- Read more button -->
-          <a 
+          <a
             [routerLink]="['/noticias', article.slug]"
             class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors">
             Leer más
@@ -165,7 +165,7 @@
           Pronto publicaremos las últimas novedades del grupo scout.
         </span>
       </p>
-      <button 
+      <button
         *ngIf="hasActiveFilters"
         (click)="clearFilters()"
         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">

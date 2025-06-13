@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            ¡Bienvenido, {{ user?.lastName }}!
+          </h1>
+          <p class="text-gray-600 mt-2">
+            Panel de control para familias scout
+          </p>
+        </div>
+        <div class="hidden md:block">
+          <img src="/media/lis.jpg" alt="Logo Scout" class="h-16 w-16 rounded-full">
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div 
+        *ngFor="let action of quickActions"
+        (click)="navigateTo(action.route)"
+        class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500': action.color === 'blue',
+          'border-green-500': action.color === 'green',
+          'border-purple-500': action.color === 'purple',
+          'border-yellow-500': action.color === 'yellow'
+        }"
+      >
+        <div class="flex items-center">
+          <div 
+            class="flex-shrink-0 p-3 rounded-md"
+            [ngClass]="{
+              'bg-blue-100': action.color === 'blue',
+              'bg-green-100': action.color === 'green',
+              'bg-purple-100': action.color === 'purple',
+              'bg-yellow-100': action.color === 'yellow'
+            }"
+          >
+            <svg 
+              class="h-6 w-6"
+              [ngClass]="{
+                'text-blue-600': action.color === 'blue',
+                'text-green-600': action.color === 'green',
+                'text-purple-600': action.color === 'purple',
+                'text-yellow-600': action.color === 'yellow'
+              }"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+              [innerHTML]="getIconSvg(action.icon)"
+            >
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900">{{ action.title }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ action.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Upcoming Events -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Próximos Eventos</h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <div>
+              <h4 class="font-medium text-gray-900">Campamento de Invierno</h4>
+              <p class="text-sm text-gray-500">15-17 Julio 2024</p>
+            </div>
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Disponible</span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <div>
+              <h4 class="font-medium text-gray-900">Reunión de Padres</h4>
+              <p class="text-sm text-gray-500">22 Julio 2024</p>
+            </div>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Inscripto</span>
+          </div>
+        </div>
+        <button 
+          (click)="navigateTo('/events')"
+          class="mt-4 w-full text-center text-blue-600 hover:text-blue-500 font-medium"
+        >
+          Ver todos los eventos →
+        </button>
+      </div>
+
+      <!-- Scout Progress -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Progreso de Scouts</h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900">Scout María</h4>
+              <p class="text-sm text-gray-500">Sección Unidad</p>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-medium text-gray-900">Etapa Aire</div>
+              <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                <div class="bg-green-500 h-2 rounded-full w-12"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900">Scout Juan</h4>
+              <p class="text-sm text-gray-500">Sección Caminantes</p>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-medium text-gray-900">Etapa Tierra</div>
+              <div class="w-16 bg-gray-200 rounded-full h-2 mt-1">
+                <div class="bg-blue-500 h-2 rounded-full w-8"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button 
+          (click)="navigateTo('/progression')"
+          class="mt-4 w-full text-center text-blue-600 hover:text-blue-500 font-medium"
+        >
+          Ver progresión completa →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

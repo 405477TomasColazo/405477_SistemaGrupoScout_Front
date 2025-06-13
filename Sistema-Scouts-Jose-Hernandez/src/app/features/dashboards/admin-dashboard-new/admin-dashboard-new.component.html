@@ -1,0 +1,184 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            Panel de Administración
+          </h1>
+          <p class="text-gray-600 mt-2">
+            Bienvenido, Administrador {{ user?.lastName }}
+          </p>
+        </div>
+        <div class="hidden md:block">
+          <img src="/media/lis.jpg" alt="Logo Scout" class="h-16 w-16 rounded-full">
+        </div>
+      </div>
+    </div>
+
+    <!-- System Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        *ngFor="let stat of systemStats"
+        class="bg-white rounded-lg shadow-sm p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500': stat.color === 'blue',
+          'border-green-500': stat.color === 'green',
+          'border-purple-500': stat.color === 'purple',
+          'border-yellow-500': stat.color === 'yellow'
+        }"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">{{ stat.label }}</p>
+            <p class="text-3xl font-bold"
+               [ngClass]="{
+                 'text-blue-600': stat.color === 'blue',
+                 'text-green-600': stat.color === 'green',
+                 'text-purple-600': stat.color === 'purple',
+                 'text-yellow-600': stat.color === 'yellow'
+               }"
+            >
+              {{ stat.value }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div
+        *ngFor="let action of quickActions"
+        (click)="navigateTo(action.route)"
+        class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500': action.color === 'blue',
+          'border-green-500': action.color === 'green',
+          'border-purple-500': action.color === 'purple',
+          'border-yellow-500': action.color === 'yellow',
+          'border-indigo-500': action.color === 'indigo',
+          'border-red-500': action.color === 'red'
+        }"
+      >
+        <div class="flex items-center">
+          <div
+            class="flex-shrink-0 p-3 rounded-md"
+            [ngClass]="{
+              'bg-blue-100': action.color === 'blue',
+              'bg-green-100': action.color === 'green',
+              'bg-purple-100': action.color === 'purple',
+              'bg-yellow-100': action.color === 'yellow',
+              'bg-indigo-100': action.color === 'indigo',
+              'bg-red-100': action.color === 'red'
+            }"
+          >
+            <svg
+              class="h-6 w-6"
+              [ngClass]="{
+                'text-blue-600': action.color === 'blue',
+                'text-green-600': action.color === 'green',
+                'text-purple-600': action.color === 'purple',
+                'text-yellow-600': action.color === 'yellow',
+                'text-indigo-600': action.color === 'indigo',
+                'text-red-600': action.color === 'red'
+              }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              [innerHTML]="getIconSvg(action.icon)"
+            >
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900">{{ action.title }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ action.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Recent User Activity -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Actividad Reciente</h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <div>
+              <h4 class="font-medium text-gray-900">Nuevo usuario registrado</h4>
+              <p class="text-sm text-gray-500">familia.gonzalez&#64;email.com - Hace 2 horas</p>
+            </div>
+            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Nuevo</span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <div>
+              <h4 class="font-medium text-gray-900">Evento creado</h4>
+              <p class="text-sm text-gray-500">Campamento de Verano - Hace 4 horas</p>
+            </div>
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Evento</span>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <h4 class="font-medium text-gray-900">Pago procesado</h4>
+              <p class="text-sm text-gray-500">Cuota mensual - $15.000 - Ayer</p>
+            </div>
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pago</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Alerts -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Alertas del Sistema</h2>
+        <div class="space-y-3">
+          <div class="p-3 bg-yellow-50 border-l-4 border-yellow-400">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                  5 invitaciones pendientes de revisión
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-blue-50 border-l-4 border-blue-400">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                  Backup del sistema completado exitosamente
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-green-50 border-l-4 border-green-400">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-green-700">
+                  Sistema funcionando normalmente
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

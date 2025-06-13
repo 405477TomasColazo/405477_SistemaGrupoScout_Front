@@ -1,4 +1,4 @@
-<app-navbar></app-navbar>
+
 
 <div class="min-h-screen bg-gray-50">
   <!-- Loading State -->
@@ -19,8 +19,8 @@
     <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg max-w-md mx-auto">
       <h3 class="font-semibold mb-2">Error al cargar el artículo</h3>
       <p class="mb-4">{{ error }}</p>
-      <button 
-        (click)="goBack()" 
+      <button
+        (click)="goBack()"
         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors">
         Volver a noticias
       </button>
@@ -32,8 +32,8 @@
     <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-6 py-4 rounded-lg max-w-md mx-auto">
       <h3 class="font-semibold mb-2">Artículo no encontrado</h3>
       <p class="mb-4">El artículo que buscas no existe o ha sido eliminado.</p>
-      <button 
-        (click)="goBack()" 
+      <button
+        (click)="goBack()"
         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
         Ver todas las noticias
       </button>
@@ -42,10 +42,10 @@
 
   <!-- Article Content -->
   <article *ngIf="article && !loading" class="max-w-4xl mx-auto px-4 py-8">
-    
+
     <!-- Back Navigation -->
     <nav class="mb-6">
-      <button 
+      <button
         (click)="goBack()"
         class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
       <div class="mb-4">
         <!-- Categories -->
         <div class="flex flex-wrap gap-2 mb-4" *ngIf="article.categories.length > 0">
-          <span 
+          <span
             *ngFor="let category of article.categories"
             class="px-3 py-1 text-sm font-semibold text-white bg-blue-600 rounded-full"
             [style.background-color]="category.color || '#2563eb'">
@@ -104,7 +104,7 @@
 
           <!-- Status Badge (if not published) -->
           <div *ngIf="article.status !== 'PUBLISHED'">
-            <span 
+            <span
               class="px-2 py-1 text-xs font-semibold rounded-full"
               [class]="getStatusColor(article.status)">
               {{ getStatusText(article.status) }}
@@ -115,8 +115,8 @@
 
       <!-- Featured Image -->
       <div *ngIf="article.featuredImage" class="mb-8">
-        <img 
-          [src]="getImageUrl(article.featuredImage)" 
+        <img
+          [src]="getImageUrl(article.featuredImage)"
           [alt]="article.title"
           class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg">
       </div>
@@ -131,9 +131,9 @@
     <footer class="border-t pt-6">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Compartir artículo</h3>
-        
+
         <div class="flex items-center space-x-3">
-          <button 
+          <button
             (click)="shareOnWhatsApp()"
             class="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -142,7 +142,7 @@
             WhatsApp
           </button>
 
-          <button 
+          <button
             (click)="shareOnFacebook()"
             class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@
             Facebook
           </button>
 
-          <button 
+          <button
             (click)="copyLink()"
             class="flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

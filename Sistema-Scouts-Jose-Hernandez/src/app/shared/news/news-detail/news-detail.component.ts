@@ -9,7 +9,7 @@ import { NewsArticle } from '../../../core/models/news.model';
 @Component({
   selector: 'app-news-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './news-detail.component.html',
   styleUrl: './news-detail.component.css'
 })

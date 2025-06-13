@@ -3,55 +3,162 @@
     <div class="flex justify-between items-center py-4">
       <div class="flex items-center space-x-2">
         <!-- Logo -->
-        <img src='media/lis.jpg' alt="Logo Scout" class="h-12 w-12 rounded-full">
-        <span class="font-bold text-xl">Grupo Scout Jose Hernandez</span>
+        <img src='media/lis.jpg' alt="Logo Scout" class="h-12 w-12 rounded-full cursor-pointer" (click)="navigateTo('/home')">
+        <span class="font-bold text-xl cursor-pointer" (click)="navigateTo('/home')">Grupo Scout José Hernández</span>
       </div>
 
       <div class="flex items-center space-x-6">
-        <!-- Enlaces de navegación -->
-        <a href="#" class="hover:text-green-300 transition">Inicio</a>
-        <a href="#quienes-somos" class="hover:text-green-300 transition">Quiénes Somos</a>
-        <a href="#secciones" class="hover:text-green-300 transition">Secciones</a>
-        <a href="/noticias" class="hover:text-green-300 transition">Noticias</a>
-        <a href="#contacto" class="hover:text-green-300 transition">Contacto</a>
+        <!-- Dynamic Navigation Menu -->
+        <div class="hidden md:flex items-center space-x-6">
+          <ng-container *ngFor="let item of navigationItems">
+            <ng-container *ngIf="shouldShowItem(item)">
+              <!-- Item without children -->
+              <ng-container *ngIf="!item.children">
+                <button
+                  (click)="navigateTo(item.route)"
+                  class="hover:text-green-300 transition cursor-pointer"
+                >
+                  {{ item.label }}
+                </button>
+              </ng-container>
 
-        <!-- No logueado: Botón de login -->
+              <!-- Item with children (dropdown) -->
+              <ng-container *ngIf="item.children">
+                <div class="relative group">
+                  <button class="hover:text-green-300 transition cursor-pointer flex items-center">
+                    {{ item.label }}
+                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+
+                  <!-- Dropdown menu -->
+                  <div class="absolute left-0 top-full w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                    <ng-container *ngFor="let child of item.children">
+                      <ng-container *ngIf="shouldShowItem(child)">
+                        <button
+                          (click)="navigateTo(child.route)"
+                          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {{ child.label }}
+                        </button>
+                      </ng-container>
+                    </ng-container>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </div>
+
+        <!-- Authentication Section -->
         <ng-container *ngIf="!isLoggedIn">
-          <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
-          (click)="openLoginModal()">
+          <!-- Not logged in: Login button -->
+          <button
+            (click)="goToLogin()"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+          >
             Iniciar Sesión
           </button>
         </ng-container>
 
-        <!-- Logueado: Menú del usuario -->
+
         <ng-container *ngIf="isLoggedIn">
-          <div class="relative group">
-            <button class="flex items-center space-x-2 focus:outline-none">
-              <span>{{ user?.lastName }}</span>
-              <div class="h-10 w-10 rounded-full border-2 border-green-400 bg-green-100 flex items-center justify-center">
-                <span class="text-green-600 font-medium text-sm">
-                  {{getInitials(user?.lastName || '')}}
-                </span>
-              </div>
+          <!-- Logged in: User menu -->
+          <div class="flex items-center space-x-4">
+            <!-- Quick Dashboard Link -->
+            <button
+              (click)="navigateTo(getDashboardRoute())"
+              class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition"
+            >
+              Mi Panel
             </button>
 
-            <!-- Dropdown menú -->
-            <div class="absolute right-0 top-full w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
-              <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Perfil</a>
-              <a href="/family-gestion" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Grupo Familiar</a>
-              <a href="/progression" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Progresión</a>
-              <a href="/payments" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pagos</a>
-              <ng-container *ngIf="isAdmin">
-                <a href="/invitations" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Administración</a>
-                <a href="/admin/noticias" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Gestión de Noticias</a>
-              </ng-container>
-              <hr class="my-1">
-              <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar Sesión</button>
+            <!-- User dropdown -->
+            <div class="relative group">
+              <button class="flex items-center space-x-2 focus:outline-none">
+                <span class="hidden sm:inline">{{ user?.lastName }}</span>
+                <div class="h-10 w-10 rounded-full border-2 border-green-400 bg-green-100 flex items-center justify-center">
+                  <span class="text-green-600 font-medium text-sm">
+                    {{ getInitials(user?.lastName || '') }}
+                  </span>
+                </div>
+              </button>
+
+              <!-- User dropdown menu -->
+              <div class="absolute right-0 top-full w-48 bg-white rounded-md shadow-lg py-1 z-20 hidden group-hover:block">
+                <div class="px-4 py-2 text-sm text-gray-900 border-b border-gray-200">
+                  <div class="font-medium">{{ user?.lastName }}</div>
+                  <div class="text-gray-500">{{ user?.email }}</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <button
+                  (click)="navigateTo(getDashboardRoute())"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <span class="flex items-center">
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    </svg>
+                    Mi Dashboard
+                  </span>
+                </button>
+
+                <!-- Role-specific quick links -->
+                <ng-container *ngIf="userHasFamilyRole()">
+                  <button
+                    (click)="navigateTo('/family/gestion')"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Grupo Familiar
+                  </button>
+                </ng-container>
+
+                <ng-container *ngIf="userHasEducatorRole()">
+                  <button
+                    (click)="navigateTo('/educator/scouts')"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Mis Scouts
+                  </button>
+                </ng-container>
+
+                <ng-container *ngIf="userHasAdminRole()">
+                  <button
+                    (click)="navigateTo('/admin/stats')"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Estadísticas
+                  </button>
+                </ng-container>
+
+                <hr class="my-1">
+
+                <!-- Logout -->
+                <button
+                  (click)="logout()"
+                  class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  <span class="flex items-center">
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Cerrar Sesión
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </ng-container>
+
+        <!-- Mobile menu button (for future mobile implementation) -->
+        <button class="md:hidden p-2">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 </nav>
-<app-login-modal *ngIf="showLoginModal" (closeModal)="closeLoginModal()"></app-login-modal>

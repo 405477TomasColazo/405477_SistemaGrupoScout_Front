@@ -9,7 +9,7 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isLoggedIn()) {
+    if (this.authService.isAuthenticated()) {
       // Verificar roles requeridos
       const requiredRoles = route.data['roles'] as Array<string>;
       if (requiredRoles) {
@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    this.router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }
 }

@@ -7,7 +7,7 @@ export interface User {
   createdAt?: string;
   lastLogin?: string;
   profilePicture?: string;
-  roles: string[];
+  roles: string[]; // This should always be defined, even if empty
 }
 
 export interface Invitation {

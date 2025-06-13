@@ -1,0 +1,99 @@
+/* Admin Dashboard Styles */
+.dashboard-card {
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.quick-action-card {
+  transition: all 0.2s ease;
+}
+
+.quick-action-card:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Section indicator colors */
+.section-manada {
+  background-color: #ef4444;
+}
+
+.section-unidad {
+  background-color: #10b981;
+}
+
+.section-caminantes {
+  background-color: #3b82f6;
+}
+
+.section-rovers {
+  background-color: #8b5cf6;
+}
+
+/* Stats visualization */
+.stat-item {
+  transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Activity feed styles */
+.activity-item {
+  transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Animation for stats */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom admin gradient */
+.bg-admin-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid {
+    gap: 1rem;
+  }
+  
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

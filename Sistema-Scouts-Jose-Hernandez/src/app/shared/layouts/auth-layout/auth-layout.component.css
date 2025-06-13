@@ -1,0 +1,40 @@
+/* Auth Layout Styles */
+.auth-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Animation for the auth card */
+.auth-card {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .auth-card {
+    max-width: 500px;
+  }
+}
+
+/* Backdrop blur support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Custom gradient backgrounds */
+.bg-scout-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+}

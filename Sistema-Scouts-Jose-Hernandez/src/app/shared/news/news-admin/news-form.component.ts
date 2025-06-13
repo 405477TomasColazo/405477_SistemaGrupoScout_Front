@@ -10,7 +10,7 @@ import { NewsArticle, NewsCategory, CreateNewsArticle, UpdateNewsArticle } from 
 @Component({
   selector: 'app-news-form',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './news-form.component.html',
   styleUrl: './news-form.component.css'
 })
@@ -37,7 +37,7 @@ export class NewsFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadCategories();
     this.setupFormSubscriptions();
-    
+
     // Check if we're in edit mode
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['id']) {
@@ -123,7 +123,7 @@ export class NewsFormComponent implements OnInit, OnDestroy {
       this.error = '';
 
       const formData = this.newsForm.value;
-      
+
       if (this.isEditMode && this.articleId) {
         const updateData: UpdateNewsArticle = {
           title: formData.title,
@@ -210,7 +210,7 @@ export class NewsFormComponent implements OnInit, OnDestroy {
 
   onCategoryChange(categoryId: number, event: any): void {
     const currentCategories = this.newsForm.get('categoryIds')?.value || [];
-    
+
     if (event.target.checked) {
       if (!currentCategories.includes(categoryId)) {
         this.newsForm.patchValue({
@@ -236,7 +236,7 @@ export class NewsFormComponent implements OnInit, OnDestroy {
       summary: formValue.summary || 'Resumen del artículo...',
       content: formValue.content || 'Contenido del artículo...',
       featuredImage: formValue.featuredImage,
-      categories: this.categories.filter(c => 
+      categories: this.categories.filter(c =>
         (formValue.categoryIds || []).includes(c.id)
       )
     };

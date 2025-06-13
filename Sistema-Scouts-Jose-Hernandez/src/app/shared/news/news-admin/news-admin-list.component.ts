@@ -10,7 +10,7 @@ import { NewsArticleSummary, PaginatedNewsResponse, NewsStatus } from '../../../
 @Component({
   selector: 'app-news-admin-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './news-admin-list.component.html',
   styleUrl: './news-admin-list.component.css'
 })
@@ -20,7 +20,7 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
   error = '';
   searchTerm = '';
   selectedStatus = '';
-  
+
   // Pagination
   currentPage = 0;
   totalPages = 0;
@@ -108,7 +108,7 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
 
   togglePublishStatus(article: NewsArticleSummary): void {
     const action = article.status === NewsStatus.PUBLISHED ? 'unpublish' : 'publish';
-    const method = action === 'publish' 
+    const method = action === 'publish'
       ? this.newsService.publishArticle(article.id)
       : this.newsService.unpublishArticle(article.id);
 
@@ -144,7 +144,7 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
     const pages = [];
     const start = Math.max(0, this.currentPage - 2);
     const end = Math.min(this.totalPages - 1, this.currentPage + 2);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }

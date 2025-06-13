@@ -1,0 +1,42 @@
+/* Footer Styles */
+footer {
+  margin-top: auto;
+}
+
+/* Smooth transitions for hover effects */
+a {
+  transition: color 0.3s ease;
+}
+
+/* Social media hover effects */
+.social-link {
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  h3, h4 {
+    font-size: 1rem;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+}
+
+/* Custom scout colors */
+.bg-scout-primary {
+  background-color: #10b981;
+}
+
+.text-scout-primary {
+  color: #10b981;
+}
+
+.hover\:bg-scout-primary:hover {
+  background-color: #10b981;
+}
