@@ -3,20 +3,20 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
+/* Responsive adjustments removed - no container padding */
 
 /* Content area with proper spacing */
 main {
   flex: 1;
   overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Ensure footer stays at bottom */
