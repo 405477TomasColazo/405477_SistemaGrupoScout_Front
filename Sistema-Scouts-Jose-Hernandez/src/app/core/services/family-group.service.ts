@@ -33,11 +33,11 @@ export class FamilyGroupService {
   }
 
   updateTutor(tutor: Tutor): Observable<Tutor> {
-    return this.http.put<Tutor>(`${this.apiUrl}/tutors/${tutor.id}`, tutor);
+    return this.http.put<Tutor>(`${this.apiUrl}/tutor/${tutor.id}`, tutor);
   }
 
   deleteTutor(tutorId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/tutors/${tutorId}`);
+    return this.http.delete<void>(`${this.apiUrl}/tutor/${tutorId}`);
   }
 
   // Gestión de beneficiarios
@@ -46,11 +46,12 @@ export class FamilyGroupService {
   }
 
   updateMember(member: MemberProtagonist): Observable<MemberProtagonist> {
-    return this.http.put<MemberProtagonist>(`${this.apiUrl}/members/${member.id}`, member);
+    return this.http.put<MemberProtagonist>(`${this.apiUrl}/member/${member.id}`, member);
   }
 
   deleteMember(memberId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/members/${memberId}`);
+    console.log(this.authService.getCurrentUser())
+    return this.http.delete<void>(`${this.apiUrl}/member/${memberId}`);
   }
 
   // Gestión de relaciones
@@ -58,10 +59,8 @@ export class FamilyGroupService {
     return this.http.post<Relationship>(`${this.apiUrl}/relationship`, relationship);
   }
 
-  deleteRelationship(relationship: Relationship): Observable<void> {
-    return this.http.delete<void>(
-      `${this.apiUrl}/relationships/${relationship.memberId}/${relationship.tutorId}`
-    );
+  deleteRelationship(relationshipId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/relationShip/${relationshipId}`);
   }
 
   getFamilyGroupById(userId: number):Observable<FamilyGroup> {

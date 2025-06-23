@@ -99,7 +99,7 @@ export class FamilyGestionComponent implements OnInit {
       notes: ['']
     });
 
-    // Formulario para beneficiarios
+    // Formulario para beneficiarios (protagonistas)
     this.protagonistForm = this.fb.group({
       id: [null],
       userId: [null],
@@ -108,8 +108,8 @@ export class FamilyGestionComponent implements OnInit {
       birthdate: ['', Validators.required],
       address: ['', [Validators.required]],
       dni: ['', Validators.required],
-      memberType: ['', Validators.required],
-      section: ['', Validators.required],
+      email: [''], // Optional
+      contactPhone: [''], // Optional
       notes: ['']
     });
 
@@ -402,7 +402,7 @@ export class FamilyGestionComponent implements OnInit {
   confirmarEliminacionRelacion(): void {
     if (!this.relationshipToDelete || !this.selectedProtagonist) return;
 
-    this.familyGroupService.deleteRelationship(this.relationshipToDelete).subscribe({
+    this.familyGroupService.deleteRelationship(this.relationshipToDelete.id!).subscribe({
       next: () => {
         // Eliminar la relación del array local
         this.selectedProtagonist!.relationships = this.selectedProtagonist!.relationships!.filter(
