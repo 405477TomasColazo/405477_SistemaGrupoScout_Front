@@ -52,9 +52,9 @@ export class AdminDashboardNewComponent implements OnInit {
     },
     {
       title: 'Gestión de Pagos',
-      description: 'Monitorear pagos y finanzas',
+      description: 'Administrar todos los pagos del sistema',
       icon: 'credit-card',
-      route: '/payments',
+      route: '/admin/payments',
       color: 'red'
     }
   ];

@@ -81,6 +81,11 @@ export class NavbarComponent implements OnInit {
           label: 'Noticias',
           route: '/admin/noticias',
           roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Administrar Pagos',
+          route: '/admin/payments',
+          roles: ['ROLE_ADMIN']
         }
       ]
     },

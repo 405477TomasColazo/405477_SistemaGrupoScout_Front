@@ -1,0 +1,64 @@
+/* Custom styles for admin payments management component */
+
+.container {
+  max-width: 1400px;
+}
+
+/* Responsive table improvements */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #f7fafc;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 2px;
+  }
+}
+
+/* Status badges with consistent sizing */
+.status-badge {
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Filter section transition */
+.filter-transition {
+  transition: all 0.3s ease;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(2px);
+}
+
+/* Custom button hover effects */
+.btn-hover-scale:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Statistics cards hover effect */
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}

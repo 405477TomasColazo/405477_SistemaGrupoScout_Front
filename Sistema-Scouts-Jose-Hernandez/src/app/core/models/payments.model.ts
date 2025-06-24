@@ -10,6 +10,8 @@ export interface Fee {
 export interface Payment {
   id: number;
   memberId: number;
+  memberName?: string;
+  memberLastName?: string;
   amount: number;
   paymentDate: string;
   status: 'completed' | 'processing' | 'failed' | 'pending';
@@ -30,9 +32,15 @@ export interface PaymentItem {
 
 export interface PaymentFilters {
   memberId: number | null;
+  familyGroupId: number | null;
+  sectionId: number | null;
   dateFrom: string | null;
   dateTo: string | null;
   minAmount: number | null;
+  maxAmount: number | null;
+  status: string | null;
+  paymentMethod: string | null;
+  memberName: string | null;
 }
 
 export interface PaymentPreferenceRequest {
@@ -84,4 +92,29 @@ export interface EventPaymentItem {
   amount: number;
   paymentStatus: 'pending' | 'paid' | 'exempt';
   registrationId: number;
+}
+
+// Interfaces for admin functionality
+export interface PaymentStatistics {
+  totalPayments: number;
+  completedPayments: number;
+  pendingPayments: number;
+  failedPayments: number;
+  totalAmount: number;
+  completedAmount: number;
+  pendingAmount: number;
+  averagePaymentAmount: number;
+}
+
+export interface PendingPaymentsBySection {
+  sectionId: number;
+  sectionName: string;
+  totalPendingFees: number;
+  totalPendingAmount: number;
+  membersWithPendingPayments: number;
+}
+
+export interface UpdatePaymentStatusRequest {
+  status: string;
+  reason?: string;
 }

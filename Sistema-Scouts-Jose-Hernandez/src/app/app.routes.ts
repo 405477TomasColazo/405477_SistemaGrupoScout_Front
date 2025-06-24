@@ -30,6 +30,7 @@ import { NewsListComponent } from './shared/news/news-list/news-list.component';
 import { NewsDetailComponent } from './shared/news/news-detail/news-detail.component';
 import { NewsAdminListComponent } from './shared/news/news-admin/news-admin-list.component';
 import { NewsFormComponent } from './shared/news/news-admin/news-form.component';
+import { AdminPaymentsManagementComponent } from './shared/admin-payments-management/admin-payments-management.component';
 
 // Guards
 import { AuthGuard } from './core/auth/auth.guard';
@@ -69,6 +70,7 @@ export const routes: Routes = [
           { path: 'dashboard', component: AdminDashboardNewComponent },
           { path: 'stats', component: AdminDashboardComponent }, // Original dashboard with charts
           { path: 'users', component: RegistryManagementComponent },
+          { path: 'payments', component: AdminPaymentsManagementComponent },
           { path: 'noticias', component: NewsAdminListComponent },
           { path: 'noticias/crear', component: NewsFormComponent },
           { path: 'noticias/:id/editar', component: NewsFormComponent },

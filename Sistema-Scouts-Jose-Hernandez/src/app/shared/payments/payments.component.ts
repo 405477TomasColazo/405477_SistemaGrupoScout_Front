@@ -37,6 +37,12 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   feeTypeFilter: 'all' | 'monthly' | 'event' = 'all';
 
   filters: PaymentFilters = {
+    familyGroupId: null,
+    maxAmount: null,
+    memberName: null,
+    paymentMethod: null,
+    sectionId: null,
+    status: null,
     memberId: null,
     dateFrom: null,
     dateTo: null,
@@ -197,6 +203,12 @@ export class PaymentsComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.filters = {
+      familyGroupId: null,
+      maxAmount: null,
+      memberName: null,
+      paymentMethod: null,
+      sectionId: null,
+      status: null,
       memberId: null,
       dateFrom: null,
       dateTo: null,
@@ -277,21 +289,22 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   downloadRecipe(payment: Payment): void {
-    // this.paymentService.downloadPaymentReceipt(payment.id).subscribe({
-    //   next: (blob) => {
-    //     const url = window.URL.createObjectURL(blob);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = `comprobante-pago-${payment.referenceId}.pdf`;
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     document.body.removeChild(a);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error al descargar comprobante:', error);
-    //     this.showAlertMessage('error', 'No se pudo descargar el comprobante');
-    //   }
-    // });
+    this.paymentService.downloadPaymentReceipt(payment.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `comprobante-pago-${payment.referenceId || payment.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al descargar comprobante:', error);
+        this.showAlertMessage('error', 'No se pudo descargar el comprobante');
+      }
+    });
   }
   retryPayment(payment: Payment): void {
     // Se pueden recuperar los conceptos del pago fallido
