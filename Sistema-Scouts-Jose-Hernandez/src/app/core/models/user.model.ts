@@ -14,9 +14,18 @@ export interface Invitation {
   id?: number;
   lastName: string;
   email: string;
+  userType?: string; // "FAMILY" or "EDUCATOR"
   status: string;
   sentDate?: string;
+  sectionName?: string; // Only for educators
   tutor?: Tutor;
+}
+
+export interface Section {
+  id: number;
+  description: string;
+  minAge?: number;
+  maxAge?: number;
 }
 
 export interface RegisterRequest {
@@ -29,6 +38,8 @@ export interface RegisterRequest {
 export interface InvitationRequest{
   email: string;
   lastName: string;
+  userType: string; // "FAMILY" or "EDUCATOR"
+  sectionId?: number; // Only for educators
 }
 
 export interface SectionMember{
