@@ -188,8 +188,8 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Miembro</label>
           <select [(ngModel)]="filters.memberId" class="w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
-            <option [value]="null">Todos</option>
-            <option *ngFor="let member of familyGroup?.members" [value]="member.id">
+            <option [ngValue]="null">Todos</option>
+            <option *ngFor="let member of familyGroup?.members" [ngValue]="member.id">
               {{ member.name }} {{ member.lastName }}
             </option>
           </select>

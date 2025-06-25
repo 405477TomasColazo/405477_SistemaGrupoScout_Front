@@ -42,7 +42,6 @@ export class MonthlyFeeManagementComponent implements OnInit {
   logsPage = 0;
   logsLimit = 10;
   logsFilters = {
-    section: '',
     generationType: ''
   };
   logsLoading = false;
@@ -150,15 +149,16 @@ export class MonthlyFeeManagementComponent implements OnInit {
   // Logs methods
   loadGenerationLogs(): void {
     this.logsLoading = true;
-    const { section, generationType } = this.logsFilters;
+    const { generationType } = this.logsFilters;
 
     this.monthlyFeeService.getGenerationLogs(
       this.logsPage,
       this.logsLimit,
-      section || undefined,
+      undefined, // section no se usa
       generationType || undefined
     ).subscribe({
       next: (response) => {
+        console.log('Generation logs response:', response); // Debug logging
         this.generationLogs = response.logs;
         this.logsTotal = response.total;
         this.logsLoading = false;

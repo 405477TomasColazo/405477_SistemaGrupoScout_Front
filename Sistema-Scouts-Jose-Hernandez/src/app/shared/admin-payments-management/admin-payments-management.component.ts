@@ -16,6 +16,8 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
 
   // Data properties
   payments: Payment[] = [];
+  pendingFees: any[] = [];
+  availableSections: any[] = [];
   statistics: PaymentStatistics | null = null;
   pendingBySection: PendingPaymentsBySection[] = [];
 
@@ -28,15 +30,27 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
     dateTo: null,
     minAmount: null,
     maxAmount: null,
-    status: null,
+    status: '',
     paymentMethod: null,
     memberName: null
   };
 
+  // Pending fees filter properties
+  pendingFeesFilters: any = {
+    memberName: null,
+    sectionId: '',
+    familyGroupId: null,
+    minAmount: null,
+    maxAmount: null,
+    period: null
+  };
+
   // UI state properties
-  currentTab: 'payments' | 'statistics' = 'payments';
+  currentTab: 'payments' | 'pending-fees' | 'statistics' = 'payments';
   showFilters = true;
+  showPendingFeesFilters = true;
   loadingPayments = false;
+  loadingPendingFees = false;
   loadingStatistics = false;
   selectedPayment: Payment | null = null;
   showPaymentModal = false;
@@ -52,6 +66,12 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
   itemsPerPage = 20;
   totalItems = 0;
   totalPages = 1;
+
+  // Pending fees pagination properties
+  currentPendingFeesPage = 1;
+  pendingFeesItemsPerPage = 20;
+  totalPendingFeesItems = 0;
+  totalPendingFeesPages = 1;
 
   // Status options for dropdown
   statusOptions = [
@@ -74,6 +94,7 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
     this.loadPayments();
     this.loadStatistics();
     this.loadPendingBySection();
+    this.loadSections();
   }
 
   ngOnDestroy(): void {
@@ -153,7 +174,7 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
       dateTo: null,
       minAmount: null,
       maxAmount: null,
-      status: null,
+      status: '',
       paymentMethod: null,
       memberName: null
     };
@@ -166,10 +187,12 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  changeTab(tab: 'payments' | 'statistics'): void {
+  changeTab(tab: 'payments' | 'pending-fees' | 'statistics'): void {
     this.currentTab = tab;
     if (tab === 'statistics' && !this.statistics) {
       this.loadStatistics();
+    } else if (tab === 'pending-fees' && this.pendingFees.length === 0) {
+      this.loadPendingFees();
     }
   }
 
@@ -287,6 +310,69 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
 
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
+  }
+
+  togglePendingFeesFilters(): void {
+    this.showPendingFeesFilters = !this.showPendingFeesFilters;
+  }
+
+  loadPendingFees(page: number = 1): void {
+    this.loadingPendingFees = true;
+    this.currentPendingFeesPage = page;
+
+    const sub = this.paymentService.getPendingFeesForAdmin(this.pendingFeesFilters, page - 1, this.pendingFeesItemsPerPage)
+      .subscribe({
+        next: (response) => {
+          this.pendingFees = response.fees;
+          this.totalPendingFeesItems = response.total;
+          this.totalPendingFeesPages = Math.ceil(this.totalPendingFeesItems / this.pendingFeesItemsPerPage);
+          this.loadingPendingFees = false;
+        },
+        error: (error) => {
+          console.error('Error loading pending fees:', error);
+          this.showAlertMessage('error', 'Error al cargar las cuotas pendientes');
+          this.loadingPendingFees = false;
+        }
+      });
+
+    this.subscriptions.push(sub);
+  }
+
+  applyPendingFeesFilters(): void {
+    this.loadPendingFees(1);
+  }
+
+  clearPendingFeesFilters(): void {
+    this.pendingFeesFilters = {
+      memberName: null,
+      sectionId: '',
+      familyGroupId: null,
+      minAmount: null,
+      maxAmount: null,
+      period: null
+    };
+    this.loadPendingFees(1);
+  }
+
+  changePendingFeesPage(page: number): void {
+    if (page >= 1 && page <= this.totalPendingFeesPages) {
+      this.loadPendingFees(page);
+    }
+  }
+
+  loadSections(): void {
+    const sub = this.paymentService.getAllSections()
+      .subscribe({
+        next: (sections) => {
+          this.availableSections = sections;
+        },
+        error: (error) => {
+          console.error('Error loading sections:', error);
+          this.showAlertMessage('error', 'Error al cargar las secciones');
+        }
+      });
+
+    this.subscriptions.push(sub);
   }
 
   private showAlertMessage(type: 'success' | 'error', message: string): void {

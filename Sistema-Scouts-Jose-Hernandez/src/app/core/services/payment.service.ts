@@ -33,7 +33,7 @@ export class PaymentService {
       .set('limit', itemsPerPage.toString());
 
     if (filters.memberId) {
-      params = params.set('memberId', filters.memberId);
+      params = params.set('memberId', filters.memberId.toString());
     }
     if (filters.dateFrom) {
       params = params.set('dateFrom', filters.dateFrom);
@@ -75,7 +75,7 @@ export class PaymentService {
     if (filters.maxAmount) {
       params = params.set('maxAmount', filters.maxAmount.toString());
     }
-    if (filters.status) {
+    if (filters.status && filters.status !== '') {
       params = params.set('status', filters.status);
     }
     if (filters.paymentMethod) {
@@ -125,5 +125,24 @@ export class PaymentService {
 
   processPayment(request: ProcessPaymentRequest): Observable<ProcessPaymentResponse> {
     return this.client.post<ProcessPaymentResponse>(`${this.url}/process`, request);
+  }
+
+  getPendingFeesForAdmin(filters: any, page: number, limit: number): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (filters.memberName) params = params.set('memberName', filters.memberName);
+    if (filters.sectionId && filters.sectionId !== '') params = params.set('sectionId', filters.sectionId.toString());
+    if (filters.familyGroupId) params = params.set('familyGroupId', filters.familyGroupId.toString());
+    if (filters.minAmount) params = params.set('minAmount', filters.minAmount.toString());
+    if (filters.maxAmount) params = params.set('maxAmount', filters.maxAmount.toString());
+    if (filters.period) params = params.set('period', filters.period);
+
+    return this.client.get<any>(`${this.adminUrl}/pending-fees`, { params });
+  }
+
+  getAllSections(): Observable<any[]> {
+    return this.client.get<any[]>(`${this.adminUrl}/sections`);
   }
 }
