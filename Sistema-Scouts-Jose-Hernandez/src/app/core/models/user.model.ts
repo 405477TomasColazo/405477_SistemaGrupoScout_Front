@@ -7,6 +7,7 @@ export interface User {
   createdAt?: string;
   lastLogin?: string;
   profilePicture?: string;
+  avatar?: string;
   roles: string[]; // This should always be defined, even if empty
 }
 
@@ -59,4 +60,41 @@ export interface SectionMember{
 
 export interface MiembroConDetalles extends SectionMember {
   tutoresInfo?: (Tutor & { relationship: string })[];
+}
+
+// User Management Interfaces (simplified)
+export interface UpdateUserRequest {
+  email: string;
+  lastName: string;
+  avatar?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface AvatarOption {
+  id: string;
+  name: string;
+  url: string;
+}
+
+// API Response interfaces
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
 }

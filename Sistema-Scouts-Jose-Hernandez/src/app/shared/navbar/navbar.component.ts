@@ -201,4 +201,11 @@ export class NavbarComponent implements OnInit {
   userHasAdminRole(): boolean {
     return this.userHasRole('ROLE_ADMIN');
   }
+
+  getAvatarUrl(avatar: string | undefined): string {
+    if (avatar && avatar !== 'default') {
+      return `https://api.dicebear.com/9.x/lorelei-neutral/svg?seed=${avatar}`;
+    }
+    return '';
+  }
 }

@@ -92,6 +92,32 @@ export class AuthService {
            user.roles.includes(roleWithoutPrefix);
   }
 
+  // Method to update current user data (for profile updates)
+  updateCurrentUser(updatedUser: Partial<User>): void {
+    const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      const newUser = { ...currentUser, ...updatedUser };
+      this.currentUserSubject.next(newUser);
+    }
+  }
+
+  // Method to refresh user data from backend
+  refreshCurrentUser(): void {
+    const currentUser = this.getCurrentUser();
+    if (currentUser && currentUser.email) {
+      this.getUserByEmail(currentUser.email).subscribe({
+        next: (user) => {
+          user.roles = currentUser.roles; // Keep the roles from token
+          this.currentUserSubject.next(user);
+        },
+        error: () => {
+          // Handle error if needed
+          console.error('Error refreshing user data');
+        }
+      });
+    }
+  }
+
   isAuthenticated(): boolean {
     return this.isLoggedIn();
   }

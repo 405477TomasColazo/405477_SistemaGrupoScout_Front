@@ -7,6 +7,9 @@ import { AuthLayoutComponent } from './shared/layouts/auth-layout/auth-layout.co
 // Auth Components
 import { LoginComponent } from './features/auth/login/login.component';
 import { LogoutComponent } from './features/auth/logout/logout.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { ProfileComponent } from './shared/profile/profile.component';
 
 // Dashboard Components
 import { FamilyDashboardComponent } from './features/dashboards/family-dashboard/family-dashboard.component';
@@ -47,6 +50,8 @@ export const routes: Routes = [
     children: [
       { path: 'login', component: LoginComponent },
       { path: 'logout', component: LogoutComponent },
+      { path: 'forgot-password', component: ForgotPasswordComponent },
+      { path: 'reset-password', component: ResetPasswordComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
@@ -126,6 +131,12 @@ export const routes: Routes = [
       {
         path: 'payments',
         component: PaymentsComponent,
+        canActivate: [AuthGuard]
+      },
+
+      {
+        path: 'profile',
+        component: ProfileComponent,
         canActivate: [AuthGuard]
       },
 

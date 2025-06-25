@@ -78,10 +78,19 @@
             <div class="relative group">
               <button class="flex items-center space-x-2 focus:outline-none">
                 <span class="hidden sm:inline">{{ user?.lastName }}</span>
-                <div class="h-10 w-10 rounded-full border-2 border-green-400 bg-green-100 flex items-center justify-center">
-                  <span class="text-green-600 font-medium text-sm">
-                    {{ getInitials(user?.lastName || '') }}
-                  </span>
+                <div class="h-10 w-10 rounded-full border-2 border-green-400 overflow-hidden">
+                  <img 
+                    *ngIf="user?.avatar && user?.avatar !== 'default'" 
+                    [src]="getAvatarUrl(user?.avatar)" 
+                    [alt]="user?.lastName || 'Avatar'"
+                    class="w-full h-full object-cover">
+                  <div 
+                    *ngIf="!user?.avatar || user?.avatar === 'default'" 
+                    class="w-full h-full bg-green-100 flex items-center justify-center">
+                    <span class="text-green-600 font-medium text-sm">
+                      {{ getInitials(user?.lastName || '') }}
+                    </span>
+                  </div>
                 </div>
               </button>
 
@@ -134,6 +143,19 @@
                 </ng-container>
 
                 <hr class="my-1">
+
+                <!-- Profile -->
+                <button
+                  (click)="navigateTo('/profile')"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <span class="flex items-center">
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Mi Perfil
+                  </span>
+                </button>
 
                 <!-- Logout -->
                 <button

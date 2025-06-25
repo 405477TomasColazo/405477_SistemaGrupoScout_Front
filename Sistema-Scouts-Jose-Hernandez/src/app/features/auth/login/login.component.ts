@@ -94,9 +94,13 @@ import { AuthService } from '../../../core/auth/auth.service';
             </label>
           </div>
 
-          <a href="#" class="text-sm text-green-600 hover:text-green-500">
+          <button
+            type="button"
+            (click)="goToForgotPassword()"
+            class="text-sm text-green-600 hover:text-green-500"
+          >
             ¿Olvidaste tu contraseña?
-          </a>
+          </button>
         </div>
 
         <!-- Error Message -->
@@ -244,5 +248,9 @@ export class LoginComponent implements OnInit {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  goToForgotPassword(): void {
+    this.router.navigate(['/auth/forgot-password']);
   }
 }
