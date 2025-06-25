@@ -1,0 +1,292 @@
+<div class="monthly-fee-management">
+  <div class="bg-white rounded-lg shadow-lg">
+    <!-- Header -->
+    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 rounded-t-lg">
+      <h2 class="text-2xl font-bold text-gray-900">Gestión de Cuotas Mensuales</h2>
+      <p class="text-gray-600 mt-1">Administra la generación y configuración de cuotas mensuales</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+      <nav class="flex space-x-8 px-6" aria-label="Tabs">
+        <button
+          (click)="setActiveTab('generation')"
+          [class]="activeTab === 'generation' ? 
+            'border-blue-500 text-blue-600 py-4 px-1 border-b-2 font-medium text-sm' :
+            'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm'"
+        >
+          Generación de Cuotas
+        </button>
+        <button
+          (click)="setActiveTab('configuration')"
+          [class]="activeTab === 'configuration' ? 
+            'border-blue-500 text-blue-600 py-4 px-1 border-b-2 font-medium text-sm' :
+            'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm'"
+        >
+          Configuración de Precios
+        </button>
+        <button
+          (click)="setActiveTab('logs')"
+          [class]="activeTab === 'logs' ? 
+            'border-blue-500 text-blue-600 py-4 px-1 border-b-2 font-medium text-sm' :
+            'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm'"
+        >
+          Historial de Generación
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-6">
+      <!-- Fee Generation Tab -->
+      <div *ngIf="activeTab === 'generation'" class="space-y-6">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-blue-900 mb-2">Generar Cuotas Mensuales</h3>
+          <p class="text-blue-700 text-sm mb-4">
+            Genera cuotas mensuales para todos los miembros activos o para una sección específica.
+          </p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Mes de Destino</label>
+              <input
+                type="month"
+                [(ngModel)]="generationRequest.targetMonth"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Sección (Opcional)</label>
+              <select
+                [(ngModel)]="generationRequest.section"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Todas las secciones</option>
+                <option *ngFor="let section of availableSections" [value]="section.description">{{section.description}}</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            (click)="generateMonthlyFees()"
+            [disabled]="generationInProgress"
+            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md font-medium transition-colors"
+          >
+            <span *ngIf="generationInProgress">Generando...</span>
+            <span *ngIf="!generationInProgress">Generar Cuotas</span>
+          </button>
+        </div>
+
+        <!-- Generation Result -->
+        <div *ngIf="generationResult" class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 class="text-green-900 font-semibold mb-2">Resultado de la Generación</h4>
+          <p class="text-green-700">{{generationResult.message}}</p>
+          <p class="text-green-700 font-medium">Total de cuotas generadas: {{generationResult.totalGenerated}}</p>
+        </div>
+      </div>
+
+      <!-- Price Configuration Tab -->
+      <div *ngIf="activeTab === 'configuration'" class="space-y-6">
+        <!-- Current Global Price Display -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 class="text-2xl font-semibold text-blue-900 mb-3">Precio Mensual Global</h3>
+          <p class="text-blue-700 text-sm mb-4">
+            Precio único para todos los protagonistas, independientemente de su sección.
+          </p>
+          
+          <div *ngIf="globalPriceLoading" class="text-center text-blue-600">
+            Cargando precio actual...
+          </div>
+
+          <div *ngIf="!globalPriceLoading" class="space-y-4">
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-900">Precio Actual</h4>
+                  <p class="text-3xl font-bold text-green-600">${{currentGlobalPrice}}</p>
+                  <p class="text-sm text-gray-500">por mes para todos los protagonistas</p>
+                </div>
+                <div class="text-right">
+                  <svg class="h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Price Form -->
+            <div class="bg-white rounded-lg p-4 border border-gray-200">
+              <h4 class="text-lg font-semibold text-gray-900 mb-3">Actualizar Precio</h4>
+              <div class="flex items-end space-x-4">
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Nuevo Precio Mensual</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="newGlobalPrice"
+                    min="0"
+                    step="0.01"
+                    placeholder="Ingrese el nuevo precio"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+                <div class="space-x-2">
+                  <button
+                    (click)="resetGlobalPriceForm()"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
+                  >
+                    Resetear
+                  </button>
+                  <button
+                    (click)="updateGlobalPrice()"
+                    [disabled]="globalPriceUpdateInProgress || !isValidGlobalPrice()"
+                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-md font-medium transition-colors"
+                  >
+                    <span *ngIf="globalPriceUpdateInProgress">Actualizando...</span>
+                    <span *ngIf="!globalPriceUpdateInProgress">Actualizar Precio Global</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update Result -->
+        <div *ngIf="globalPriceUpdateResult" class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 class="text-green-900 font-semibold mb-2">✅ Actualización Completada</h4>
+          <p class="text-green-700 mb-2">{{globalPriceUpdateResult.message}}</p>
+          <div class="mt-2 text-sm text-green-600 space-y-1">
+            <p><strong>Nuevo precio:</strong> ${{globalPriceUpdateResult.newPrice}}</p>
+            <p><strong>Cuotas pendientes ajustadas:</strong> {{globalPriceUpdateResult.updatedPendingFees}}</p>
+          </div>
+        </div>
+
+        <!-- Information Panel -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h4 class="text-gray-900 font-semibold mb-2">ℹ️ Información Importante</h4>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>• <strong>Precio único:</strong> Todos los protagonistas pagan el mismo monto mensual</li>
+            <li>• <strong>Actualización automática:</strong> Las cuotas pendientes se ajustan al nuevo precio</li>
+            <li>• <strong>Notificaciones:</strong> Las familias son notificadas por email de los cambios</li>
+            <li>• <strong>Solo protagonistas:</strong> Los tutores no pagan cuotas mensuales</li>
+            <li>• <strong>Generación por sección:</strong> La sección solo importa para filtrar qué miembros incluir</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Generation Logs Tab -->
+      <div *ngIf="activeTab === 'logs'" class="space-y-6">
+        <!-- Filters -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Filtros</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Sección</label>
+              <select
+                [(ngModel)]="logsFilters.section"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Todas las secciones</option>
+                <option *ngFor="let section of availableSections" [value]="section.description">{{section.description}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Generación</label>
+              <select
+                [(ngModel)]="logsFilters.generationType"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Todos los tipos</option>
+                <option value="AUTOMATIC">Automática</option>
+                <option value="MANUAL">Manual</option>
+                <option value="NEW_MEMBER">Nuevo Miembro</option>
+              </select>
+            </div>
+          </div>
+          <button
+            (click)="applyLogsFilters()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+          >
+            Aplicar Filtros
+          </button>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="bg-white border border-gray-200 rounded-lg">
+          <div class="px-4 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Historial de Generación</h3>
+          </div>
+          
+          <div *ngIf="logsLoading" class="p-4 text-center text-gray-500">
+            Cargando historial...
+          </div>
+
+          <div *ngIf="!logsLoading && generationLogs.length === 0" class="p-4 text-center text-gray-500">
+            No hay registros disponibles
+          </div>
+
+          <div *ngIf="!logsLoading && generationLogs.length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mes Objetivo</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sección</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuotas Generadas</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detalles</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let log of generationLogs">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{log.executedAt | date:'dd/MM/yyyy HH:mm'}}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span [class]="
+                      log.generationType === 'AUTOMATIC' ? 'bg-blue-100 text-blue-800' :
+                      log.generationType === 'MANUAL' ? 'bg-green-100 text-green-800' :
+                      'bg-purple-100 text-purple-800'
+                    " class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                      {{
+                        log.generationType === 'AUTOMATIC' ? 'Automática' :
+                        log.generationType === 'MANUAL' ? 'Manual' :
+                        'Nuevo Miembro'
+                      }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{log.targetMonth}}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{log.section || 'Todas'}}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{log.totalFeesGenerated}}</td>
+                  <td class="px-6 py-4 text-sm text-gray-900">{{log.details || '-'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div *ngIf="!logsLoading && generationLogs.length > 0" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+              Mostrando {{logsPage * logsLimit + 1}} a {{Math.min((logsPage + 1) * logsLimit, logsTotal)}} de {{logsTotal}} registros
+            </div>
+            <div class="flex space-x-2">
+              <button
+                (click)="previousLogsPage()"
+                [disabled]="!canGoPreviousPage"
+                class="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              <button
+                (click)="nextLogsPage()"
+                [disabled]="!canGoNextPage"
+                class="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -118,3 +118,48 @@ export interface UpdatePaymentStatusRequest {
   status: string;
   reason?: string;
 }
+
+// Monthly Fee Management interfaces
+export interface Section {
+  id: number;
+  description: string;
+  minAge?: number;
+  maxAge?: number;
+}
+
+export interface MemberType {
+  id: number;
+  description: string;
+}
+
+export interface FeeGenerationLog {
+  id: number;
+  generationType: 'AUTOMATIC' | 'MANUAL' | 'NEW_MEMBER' | 'GLOBAL_PRICE_UPDATE';
+  executedAt: string;
+  totalFeesGenerated: number;
+  targetMonth: string;
+  section?: string;
+  memberId?: number;
+  memberName?: string;
+  details?: string;
+}
+
+export interface FeeGenerationRequest {
+  targetMonth: string; // Format: YYYY-MM
+  section?: string;
+}
+
+export interface GlobalPriceUpdateRequest {
+  newAmount: number;
+}
+
+export interface GlobalPriceUpdateResult {
+  message: string;
+  newPrice: number;
+  updatedPendingFees: number;
+}
+
+export interface GlobalFeeConfiguration {
+  monthlyFeeAmount: number;
+  message: string;
+}

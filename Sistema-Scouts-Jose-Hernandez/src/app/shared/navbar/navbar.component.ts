@@ -86,6 +86,11 @@ export class NavbarComponent implements OnInit {
           label: 'Administrar Pagos',
           route: '/admin/payments',
           roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Cuotas Mensuales',
+          route: '/admin/monthly-fees',
+          roles: ['ROLE_ADMIN']
         }
       ]
     },
