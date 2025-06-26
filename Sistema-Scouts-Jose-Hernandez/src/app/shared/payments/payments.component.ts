@@ -80,6 +80,10 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   isExportingPendingFees = false;
   isExportingPaymentHistory = false;
 
+  // Variables para balance de cuenta
+  memberBalance: number = 0;
+  showBalanceSection: boolean = false;
+
   // Referencia para Math en el template
   Math = Math;
 
@@ -207,6 +211,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   selectMember(member: MemberProtagonist): void {
     this.selectedMember = member;
     this.loadPendingFees();
+    this.loadMemberBalance();
   }
 
   clearFilters(): void {
@@ -791,5 +796,81 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   //     this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
   //   }
   // }
+
+  // Métodos para balance de cuenta
+  loadMemberBalance(): void {
+    if (!this.selectedMember?.id) {
+      this.memberBalance = 0;
+      this.showBalanceSection = false;
+      return;
+    }
+
+    this.paymentService.getMemberBalance(this.selectedMember.id).subscribe({
+      next: (response) => {
+        this.memberBalance = response.balance || 0;
+        this.showBalanceSection = true;
+      },
+      error: (error) => {
+        console.error('Error loading member balance:', error);
+        this.memberBalance = 0;
+        this.showBalanceSection = false;
+        this.showAlertMessage('error', 'No se pudo cargar el balance del miembro');
+      }
+    });
+  }
+
+  getMaxBalanceToUse(): number {
+    if (!this.selectedFees.length) return 0;
+    const totalAmount = this.calculateTotalAmount();
+    return Math.min(this.memberBalance, totalAmount);
+  }
+
+  canApplyBalance(): boolean {
+    return this.memberBalance > 0 && this.selectedFees.length > 0;
+  }
+
+  applyBalanceToSelectedFees(): void {
+    if (!this.selectedMember?.id || !this.canApplyBalance()) {
+      this.showAlertMessage('error', 'No se puede aplicar balance en este momento');
+      return;
+    }
+
+    const totalAmount = this.calculateTotalAmount();
+    const balanceToUse = Math.min(this.memberBalance, totalAmount);
+    
+    // Mostrar confirmación
+    const message = `¿Aplicar $${balanceToUse} de tu balance a las cuotas seleccionadas?\n\n` +
+                   `Balance actual: $${this.memberBalance}\n` +
+                   `Total cuotas: $${totalAmount}\n` +
+                   `${balanceToUse < totalAmount ? `Restante a pagar: $${totalAmount - balanceToUse}` : 'Las cuotas quedarán completamente pagadas'}`;
+    
+    if (!confirm(message)) {
+      return;
+    }
+
+    this.paymentService.applyBalanceToFees(this.selectedMember.id, this.selectedFees).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.showAlertMessage('success', response.message);
+          
+          // Actualizar datos
+          this.memberBalance = response.remainingBalance;
+          this.loadPendingFees(); // Recargar cuotas para ver los cambios
+          this.selectedFees = []; // Limpiar selección
+          
+          if (response.feesPaidCompletely > 0) {
+            this.showAlertMessage('success', 
+              `¡${response.feesPaidCompletely} cuota(s) pagada(s) completamente con balance!`);
+          }
+        } else {
+          this.showAlertMessage('error', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error applying balance:', error);
+        this.showAlertMessage('error', 'Error al aplicar balance a las cuotas');
+      }
+    });
+  }
 
 }

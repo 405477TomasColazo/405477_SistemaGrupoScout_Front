@@ -99,6 +99,72 @@
         <p class="text-green-700">¡No hay cuotas {{ feeTypeFilter === 'all' ? 'pendientes' : (feeTypeFilter === 'monthly' ? 'mensuales pendientes' : 'de eventos pendientes') }} para este miembro!</p>
       </div>
 
+      <!-- Sección de Balance de Cuenta -->
+      <div *ngIf="showBalanceSection" class="mb-6 bg-white shadow-md rounded-lg p-6 border-l-4 border-blue-500">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Balance de Cuenta Disponible
+        </h3>
+        
+        <div class="flex items-center justify-between bg-blue-50 rounded-lg p-4 mb-4">
+          <div>
+            <p class="text-sm text-blue-600 font-medium">Balance disponible:</p>
+            <p class="text-2xl font-bold text-blue-800">${{ memberBalance }}</p>
+          </div>
+          <div *ngIf="selectedFees.length > 0" class="text-right">
+            <p class="text-sm text-gray-600">Total seleccionado:</p>
+            <p class="text-lg font-semibold text-gray-800">${{ calculateTotalAmount() }}</p>
+            <p class="text-sm text-green-600" *ngIf="getMaxBalanceToUse() > 0">
+              Aplicable: ${{ getMaxBalanceToUse() }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Información sobre el uso del balance -->
+        <div *ngIf="selectedFees.length > 0" class="mb-4">
+          <div *ngIf="memberBalance >= calculateTotalAmount()" class="flex items-center text-green-600 bg-green-50 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm font-medium">¡Puedes pagar completamente con tu balance!</span>
+          </div>
+          
+          <div *ngIf="memberBalance > 0 && memberBalance < calculateTotalAmount()" class="flex items-center text-yellow-600 bg-yellow-50 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm">
+              Puedes aplicar ${{ memberBalance }} de tu balance. Restante a pagar: ${{ calculateTotalAmount() - memberBalance }}
+            </span>
+          </div>
+          
+          <div *ngIf="memberBalance === 0" class="flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm">No tienes balance disponible en tu cuenta</span>
+          </div>
+        </div>
+
+        <!-- Botón para aplicar balance -->
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-gray-600">
+            Selecciona cuotas para usar tu balance de cuenta
+          </div>
+          <button 
+            *ngIf="canApplyBalance()"
+            (click)="applyBalanceToSelectedFees()"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Aplicar Balance (${{ getMaxBalanceToUse() }})
+          </button>
+        </div>
+      </div>
+
       <!-- Exportar cuotas pendientes -->
       <div *ngIf="filteredFees.length > 0" class="mb-4 flex justify-end">
         <app-export-buttons

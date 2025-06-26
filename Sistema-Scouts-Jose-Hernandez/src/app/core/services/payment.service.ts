@@ -145,4 +145,14 @@ export class PaymentService {
   getAllSections(): Observable<any[]> {
     return this.client.get<any[]>(`${this.adminUrl}/sections`);
   }
+
+  // Balance methods
+  getMemberBalance(memberId: number): Observable<{balance: number}> {
+    return this.client.get<{balance: number}>(`${this.url}/balance/${memberId}`);
+  }
+
+  applyBalanceToFees(memberId: number, feeIds: number[]): Observable<any> {
+    const request = { memberId, feeIds };
+    return this.client.post<any>(`${this.url}/apply-balance`, request);
+  }
 }
