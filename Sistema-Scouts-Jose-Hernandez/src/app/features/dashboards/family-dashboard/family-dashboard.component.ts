@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ExportService } from '../../../core/services/export.service';
+import { ExportButtonsComponent } from '../../../shared/components/export-buttons/export-buttons.component';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 
 @Component({
@@ -11,6 +13,7 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
     NgIf,
     NgClass,
     NgForOf,
+    ExportButtonsComponent
   ],
   templateUrl: './family-dashboard.component.html',
   styleUrl: './family-dashboard.component.css'
@@ -27,6 +30,9 @@ export class FamilyDashboardComponent implements OnInit {
 
   // Variables básicas de la familia
   familyName = '';
+  
+  // Export state
+  isExportingEvents = false;
   
   // Datos para las tarjetas de resumen
   resumenEstadisticas = [
@@ -102,7 +108,8 @@ export class FamilyDashboardComponent implements OnInit {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private exportService: ExportService
   ) { }
 
   ngOnInit(): void {
@@ -161,5 +168,56 @@ export class FamilyDashboardComponent implements OnInit {
     setTimeout(() => {
       this.showAlert = false;
     }, 5000);
+  }
+
+  // Export Methods for Events Table
+  exportEventsToPDF(): void {
+    if (this.eventosProximos.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const exportData = this.eventosProximos.map(evento => ({
+        titulo: evento.titulo,
+        fecha: evento.fecha,
+        estado: evento.estado
+      }));
+      
+      const columns = [
+        { key: 'titulo', header: 'Evento', type: 'text' as const },
+        { key: 'fecha', header: 'Fecha', type: 'text' as const },
+        { key: 'estado', header: 'Estado', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToPDF(exportData, columns, 'proximos-eventos-familia', 'Próximos Eventos - Familia');
+    } catch (error) {
+      console.error('Error al exportar eventos a PDF:', error);
+    }
+    
+    this.isExportingEvents = false;
+  }
+
+  exportEventsToCSV(): void {
+    if (this.eventosProximos.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const exportData = this.eventosProximos.map(evento => ({
+        titulo: evento.titulo,
+        fecha: evento.fecha,
+        estado: evento.estado
+      }));
+      
+      const columns = [
+        { key: 'titulo', header: 'Evento', type: 'text' as const },
+        { key: 'fecha', header: 'Fecha', type: 'text' as const },
+        { key: 'estado', header: 'Estado', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToCSV(exportData, columns, 'proximos-eventos-familia');
+    } catch (error) {
+      console.error('Error al exportar eventos a CSV:', error);
+    }
+    
+    this.isExportingEvents = false;
   }
 }

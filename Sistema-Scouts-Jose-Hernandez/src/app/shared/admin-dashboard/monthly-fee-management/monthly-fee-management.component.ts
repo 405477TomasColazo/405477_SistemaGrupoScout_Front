@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MonthlyFeeService } from '../../../core/services/monthly-fee.service';
+import { ExportService } from '../../../core/services/export.service';
+import { ExportButtonsComponent } from '../../components/export-buttons/export-buttons.component';
 import {
   FeeGenerationLog,
   FeeGenerationRequest,
@@ -14,7 +16,7 @@ import {
 @Component({
   selector: 'app-monthly-fee-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ExportButtonsComponent],
   templateUrl: './monthly-fee-management.component.html',
   styleUrls: ['./monthly-fee-management.component.css']
 })
@@ -49,7 +51,13 @@ export class MonthlyFeeManagementComponent implements OnInit {
   // Utility properties
   availableSections: Section[] = [];
 
-  constructor(private monthlyFeeService: MonthlyFeeService) {}
+  // Export state properties
+  isExportingLogs = false;
+
+  constructor(
+    private monthlyFeeService: MonthlyFeeService,
+    private exportService: ExportService
+  ) {}
 
   ngOnInit(): void {
     this.loadUtilityData();
@@ -195,6 +203,83 @@ export class MonthlyFeeManagementComponent implements OnInit {
 
   get canGoPreviousPage(): boolean {
     return this.logsPage > 0;
+  }
+
+  // Export Methods
+  exportLogsToPDF(): void {
+    if (this.generationLogs.length === 0) {
+      console.error('No hay logs para exportar');
+      return;
+    }
+
+    this.isExportingLogs = true;
+
+    const exportData = this.generationLogs.map(log => ({
+      date: log.executedAt,
+      type: this.getGenerationTypeLabel(log.generationType),
+      targetMonth: log.targetMonth,
+      feesGenerated: log.totalFeesGenerated,
+      details: log.details || 'N/A'
+    }));
+
+    try {
+      const columns = [
+        { key: 'date', header: 'Fecha', type: 'date' as const },
+        { key: 'type', header: 'Tipo', type: 'text' as const },
+        { key: 'targetMonth', header: 'Mes Objetivo', type: 'text' as const },
+        { key: 'feesGenerated', header: 'Cuotas Generadas', type: 'number' as const },
+        { key: 'details', header: 'Detalles', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToPDF(exportData, columns, 'historial-generacion-cuotas', 'Historial de Generación de Cuotas');
+    } catch (error) {
+      console.error('Error al exportar logs a PDF:', error);
+    }
+
+    this.isExportingLogs = false;
+  }
+
+  exportLogsToCSV(): void {
+    if (this.generationLogs.length === 0) {
+      console.error('No hay logs para exportar');
+      return;
+    }
+
+    this.isExportingLogs = true;
+
+    const exportData = this.generationLogs.map(log => ({
+      date: log.executedAt,
+      type: this.getGenerationTypeLabel(log.generationType),
+      targetMonth: log.targetMonth,
+      feesGenerated: log.totalFeesGenerated,
+      details: log.details || 'N/A'
+    }));
+
+    try {
+      const columns = [
+        { key: 'date', header: 'Fecha', type: 'date' as const },
+        { key: 'type', header: 'Tipo', type: 'text' as const },
+        { key: 'targetMonth', header: 'Mes Objetivo', type: 'text' as const },
+        { key: 'feesGenerated', header: 'Cuotas Generadas', type: 'number' as const },
+        { key: 'details', header: 'Detalles', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToCSV(exportData, columns, 'historial-generacion-cuotas');
+    } catch (error) {
+      console.error('Error al exportar logs a CSV:', error);
+    }
+
+    this.isExportingLogs = false;
+  }
+
+  private getGenerationTypeLabel(type: string): string {
+    const typeLabels: { [key: string]: string } = {
+      'AUTOMATIC': 'Automática',
+      'MANUAL': 'Manual',
+      'GLOBAL_PRICE_UPDATE': 'Actualización de Precio',
+      'NEW_MEMBER': 'Nuevo Miembro'
+    };
+    return typeLabels[type] || type;
   }
 
   protected readonly Math = Math;

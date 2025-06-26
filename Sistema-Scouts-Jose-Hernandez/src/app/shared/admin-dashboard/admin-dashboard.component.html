@@ -193,6 +193,16 @@
         <p class="mt-1 text-sm text-gray-500">{{ mesActual }}</p>
       </div>
       <div class="p-6">
+        <!-- Export Buttons for Events -->
+        <div *ngIf="eventosProximos.length > 0" class="mb-4 flex justify-end">
+          <app-export-buttons
+            buttonText="Exportar Eventos"
+            [isExporting]="isExportingEvents"
+            (exportPDF)="exportEventsToPDF()"
+            (exportCSV)="exportEventsToCSV()">
+          </app-export-buttons>
+        </div>
+        
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">

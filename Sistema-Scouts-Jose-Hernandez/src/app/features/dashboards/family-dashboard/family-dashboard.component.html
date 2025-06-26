@@ -81,11 +81,22 @@
     <!-- Próximos eventos y Actividad reciente -->
     <div class="bg-white rounded-lg shadow-md lg:col-span-2">
       <div class="px-6 py-4 border-b border-gray-200">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <h2 class="ml-2 text-lg font-semibold text-gray-800">Próximos Eventos</h2>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 class="ml-2 text-lg font-semibold text-gray-800">Próximos Eventos</h2>
+          </div>
+          <!-- Export Buttons for Events -->
+          <div *ngIf="eventosProximos.length > 0">
+            <app-export-buttons
+              buttonText="Exportar Eventos"
+              [isExporting]="isExportingEvents"
+              (exportPDF)="exportEventsToPDF()"
+              (exportCSV)="exportEventsToCSV()">
+            </app-export-buttons>
+          </div>
         </div>
         <p class="mt-1 text-sm text-gray-500">{{ mesActual }}</p>
       </div>

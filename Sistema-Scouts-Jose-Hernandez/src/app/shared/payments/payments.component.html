@@ -99,6 +99,16 @@
         <p class="text-green-700">¡No hay cuotas {{ feeTypeFilter === 'all' ? 'pendientes' : (feeTypeFilter === 'monthly' ? 'mensuales pendientes' : 'de eventos pendientes') }} para este miembro!</p>
       </div>
 
+      <!-- Exportar cuotas pendientes -->
+      <div *ngIf="filteredFees.length > 0" class="mb-4 flex justify-end">
+        <app-export-buttons
+          buttonText="Exportar Cuotas"
+          [isExporting]="isExportingPendingFees"
+          (exportPDF)="exportPendingFeesToPDF()"
+          (exportCSV)="exportPendingFeesToCSV()">
+        </app-export-buttons>
+      </div>
+
       <!-- Tabla de cuotas pendientes -->
       <div *ngIf="filteredFees.length > 0" class="overflow-x-auto bg-white shadow-md rounded-lg">
         <table class="min-w-full divide-y divide-gray-200">
@@ -223,6 +233,16 @@
           Aplicar filtros
         </button>
       </div>
+    </div>
+
+    <!-- Exportar historial de pagos -->
+    <div *ngIf="paymentsHistory.length > 0" class="mb-4 flex justify-end">
+      <app-export-buttons
+        buttonText="Exportar Historial"
+        [isExporting]="isExportingPaymentHistory"
+        (exportPDF)="exportPaymentHistoryToPDF()"
+        (exportCSV)="exportPaymentHistoryToCSV()">
+      </app-export-buttons>
     </div>
 
     <!-- Tabla de historial de pagos -->

@@ -3,6 +3,8 @@ import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Invitation, InvitationRequest, Section} from '../../core/models/user.model';
 import {InvitationService} from '../../core/services/invitation.service';
+import {ExportService} from '../../core/services/export.service';
+import {ExportButtonsComponent} from '../components/export-buttons/export-buttons.component';
 
 @Component({
   selector: 'app-registry-management',
@@ -11,7 +13,8 @@ import {InvitationService} from '../../core/services/invitation.service';
     NgClass,
     DatePipe,
     ReactiveFormsModule,
-    NgForOf
+    NgForOf,
+    ExportButtonsComponent
   ],
   templateUrl: './registry-management.component.html',
   styleUrl: './registry-management.component.css'
@@ -19,6 +22,7 @@ import {InvitationService} from '../../core/services/invitation.service';
 export class RegistryManagementComponent implements OnInit {
   fb: FormBuilder = inject(FormBuilder);
   invitationService = inject(InvitationService);
+  exportService = inject(ExportService);
 
   activeSection:'invitaciones'|'pendientes'|'completados' = 'invitaciones';
   invitationForm: FormGroup = this.fb.group({
@@ -38,6 +42,10 @@ export class RegistryManagementComponent implements OnInit {
   invitationToDelete: Invitation | null = null;
   sections: Section[] = [];
   isEducatorSelected = false;
+
+  // Export state variables
+  isExportingPendingInvitations = false;
+  isExportingCompletedRegistrations = false;
 
   ngOnInit() {
     this.loadPendingInvitations();
@@ -175,5 +183,114 @@ export class RegistryManagementComponent implements OnInit {
     this.alertType = 'error';
     this.alertText = message;
     this.showAlert = true;
+  }
+
+  // Export Methods
+  exportPendingInvitationsToPDF(): void {
+    if (this.pendingInvitations.length === 0) {
+      this.showErrorAlert('No hay invitaciones pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingInvitations = true;
+
+    const exportData = this.pendingInvitations.map(invitation => ({
+      lastName: invitation.lastName,
+      email: invitation.email,
+      userType: invitation.userType === 'EDUCATOR' ? 'Educador/a' : 'Familiar',
+      sendDate: invitation.sentDate,
+      status: 'Pendiente'
+    }));
+
+    try {
+      this.exportService.exportRegistrationsToPDF(exportData, true);
+      this.showSuccessAlert('Invitaciones pendientes exportadas a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar invitaciones pendientes a PDF:', error);
+      this.showErrorAlert('Error al exportar invitaciones pendientes a PDF');
+    }
+
+    this.isExportingPendingInvitations = false;
+  }
+
+  exportPendingInvitationsToCSV(): void {
+    if (this.pendingInvitations.length === 0) {
+      this.showErrorAlert('No hay invitaciones pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingInvitations = true;
+
+    const exportData = this.pendingInvitations.map(invitation => ({
+      lastName: invitation.lastName,
+      email: invitation.email,
+      userType: invitation.userType === 'EDUCATOR' ? 'Educador/a' : 'Familiar',
+      sendDate: invitation.sentDate,
+      status: 'Pendiente'
+    }));
+
+    try {
+      this.exportService.exportRegistrationsToCSV(exportData, true);
+      this.showSuccessAlert('Invitaciones pendientes exportadas a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar invitaciones pendientes a CSV:', error);
+      this.showErrorAlert('Error al exportar invitaciones pendientes a CSV');
+    }
+
+    this.isExportingPendingInvitations = false;
+  }
+
+  exportCompletedRegistrationsToPDF(): void {
+    if (this.completedRegistrations.length === 0) {
+      this.showErrorAlert('No hay registros completados para exportar');
+      return;
+    }
+
+    this.isExportingCompletedRegistrations = true;
+
+    const exportData = this.completedRegistrations.map(registration => ({
+      firstName: '', // Note: firstName not available in current data
+      lastName: registration.lastName,
+      email: registration.email,
+      registrationDate: registration.sentDate,
+      userType: registration.userType === 'EDUCATOR' ? 'Educador/a' : 'Familiar'
+    }));
+
+    try {
+      this.exportService.exportRegistrationsToPDF(exportData, false);
+      this.showSuccessAlert('Registros completados exportados a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar registros completados a PDF:', error);
+      this.showErrorAlert('Error al exportar registros completados a PDF');
+    }
+
+    this.isExportingCompletedRegistrations = false;
+  }
+
+  exportCompletedRegistrationsToCSV(): void {
+    if (this.completedRegistrations.length === 0) {
+      this.showErrorAlert('No hay registros completados para exportar');
+      return;
+    }
+
+    this.isExportingCompletedRegistrations = true;
+
+    const exportData = this.completedRegistrations.map(registration => ({
+      firstName: '', // Note: firstName not available in current data
+      lastName: registration.lastName,
+      email: registration.email,
+      registrationDate: registration.sentDate,
+      userType: registration.userType === 'EDUCATOR' ? 'Educador/a' : 'Familiar'
+    }));
+
+    try {
+      this.exportService.exportRegistrationsToCSV(exportData, false);
+      this.showSuccessAlert('Registros completados exportados a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar registros completados a CSV:', error);
+      this.showErrorAlert('Error al exportar registros completados a CSV');
+    }
+
+    this.isExportingCompletedRegistrations = false;
   }
 }

@@ -5,12 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { NewsService } from '../../../core/services/news.service';
+import { ExportService } from '../../../core/services/export.service';
+import { ExportButtonsComponent } from '../../components/export-buttons/export-buttons.component';
 import { NewsArticleSummary, PaginatedNewsResponse, NewsStatus } from '../../../core/models/news.model';
 
 @Component({
   selector: 'app-news-admin-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ExportButtonsComponent],
   templateUrl: './news-admin-list.component.html',
   styleUrl: './news-admin-list.component.css'
 })
@@ -32,9 +34,13 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  // Export state
+  isExportingArticles = false;
+
   constructor(
     private newsService: NewsService,
-    private router: Router
+    private router: Router,
+    private exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -172,5 +178,40 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
       return '/media/lis.jpg';
     }
     return imagePath.startsWith('http') ? imagePath : `http://localhost:8080${imagePath}`;
+  }
+
+  // Export Methods
+  exportArticlesToPDF(): void {
+    if (this.articles.length === 0) return;
+    this.isExportingArticles = true;
+    try {
+      this.exportService.exportNewsToPDF(this.articles.map(article => ({
+        title: article.title,
+        status: this.getStatusText(article.status),
+        createdAt: article.createdAt,
+        views: article.viewsCount || 0,
+        categories: article.categories?.map(c => c.name).join(', ') || 'Sin categorías'
+      })));
+    } catch (error) {
+      console.error('Error al exportar artículos a PDF:', error);
+    }
+    this.isExportingArticles = false;
+  }
+
+  exportArticlesToCSV(): void {
+    if (this.articles.length === 0) return;
+    this.isExportingArticles = true;
+    try {
+      this.exportService.exportNewsToCSV(this.articles.map(article => ({
+        title: article.title,
+        status: this.getStatusText(article.status),
+        createdAt: article.createdAt,
+        views: article.viewsCount || 0,
+        categories: article.categories?.map(c => c.name).join(', ') || 'Sin categorías'
+      })));
+    } catch (error) {
+      console.error('Error al exportar artículos a CSV:', error);
+    }
+    this.isExportingArticles = false;
   }
 }

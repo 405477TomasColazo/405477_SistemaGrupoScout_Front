@@ -66,4 +66,13 @@ export class FamilyGroupService {
   getFamilyGroupById(userId: number):Observable<FamilyGroup> {
     return this.http.get<FamilyGroup>(`${this.apiUrl}/${userId}`);
   }
+
+  // Update member account balance (admin only)
+  updateMemberBalance(memberId: number, newBalance: number, reason: string): Observable<any> {
+    const request = {
+      newBalance: newBalance,
+      reason: reason
+    };
+    return this.http.put<any>(`http://localhost:8080/admin/members/${memberId}/balance`, request);
+  }
 }

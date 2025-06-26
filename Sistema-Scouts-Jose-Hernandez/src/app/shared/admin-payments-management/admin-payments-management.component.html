@@ -150,6 +150,16 @@
       </div>
     </div>
 
+    <!-- Export Buttons for Payments -->
+    <div *ngIf="payments.length > 0" class="mb-4 flex justify-end">
+      <app-export-buttons
+        buttonText="Exportar Pagos"
+        [isExporting]="isExportingPayments"
+        (exportPDF)="exportPaymentsToPDF()"
+        (exportCSV)="exportPaymentsToCSV()">
+      </app-export-buttons>
+    </div>
+
     <!-- Payments Table -->
     <div class="bg-white shadow rounded-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -388,6 +398,16 @@
       </div>
     </div>
 
+    <!-- Export Buttons for Pending Fees -->
+    <div *ngIf="pendingFees.length > 0" class="mb-4 flex justify-end">
+      <app-export-buttons
+        buttonText="Exportar Cuotas Pendientes"
+        [isExporting]="isExportingPendingFees"
+        (exportPDF)="exportPendingFeesToPDF()"
+        (exportCSV)="exportPendingFeesToCSV()">
+      </app-export-buttons>
+    </div>
+
     <!-- Pending Fees Table -->
     <div class="bg-white shadow rounded-lg overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -593,6 +613,16 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Export Buttons for Statistics -->
+    <div *ngIf="pendingBySection.length > 0" class="mb-4 flex justify-end">
+      <app-export-buttons
+        buttonText="Exportar Estadísticas"
+        [isExporting]="isExportingStatistics"
+        (exportPDF)="exportStatisticsToPDF()"
+        (exportCSV)="exportStatisticsToCSV()">
+      </app-export-buttons>
     </div>
 
     <!-- Pending Payments by Section -->

@@ -93,6 +93,16 @@
       </div>
     </div>
 
+    <!-- Export Buttons for Articles -->
+    <div *ngIf="!loading && !error && articles.length > 0" class="mb-4 flex justify-end">
+      <app-export-buttons
+        buttonText="Exportar Artículos"
+        [isExporting]="isExportingArticles"
+        (exportPDF)="exportArticlesToPDF()"
+        (exportCSV)="exportArticlesToCSV()">
+      </app-export-buttons>
+    </div>
+
     <!-- Articles Table -->
     <div *ngIf="!loading && !error" class="bg-white rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">

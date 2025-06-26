@@ -201,6 +201,16 @@
           </button>
         </div>
 
+        <!-- Export Buttons for Logs -->
+        <div *ngIf="!logsLoading && generationLogs.length > 0" class="flex justify-end">
+          <app-export-buttons
+            buttonText="Exportar Historial"
+            [isExporting]="isExportingLogs"
+            (exportPDF)="exportLogsToPDF()"
+            (exportCSV)="exportLogsToCSV()">
+          </app-export-buttons>
+        </div>
+
         <!-- Logs Table -->
         <div class="bg-white border border-gray-200 rounded-lg">
           <div class="px-4 py-3 border-b border-gray-200">

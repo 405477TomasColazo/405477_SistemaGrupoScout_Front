@@ -5,6 +5,8 @@ import {Fee, Payment, PaymentFilters} from '../../core/models/payments.model';
 import {Subscription} from 'rxjs';
 import {PaymentService} from '../../core/services/payment.service';
 import {FamilyGroupService} from '../../core/services/family-group.service';
+import {ExportService} from '../../core/services/export.service';
+import {ExportButtonsComponent} from '../components/export-buttons/export-buttons.component';
 
 import {FormsModule} from '@angular/forms';
 
@@ -16,7 +18,8 @@ declare var MercadoPago: any;
     DatePipe,
     NgIf,
     NgClass,
-    FormsModule
+    FormsModule,
+    ExportButtonsComponent
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.css'
@@ -73,11 +76,16 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   alertType: 'success' | 'error' = 'success';
   alertText = '';
 
+  // Variables para exportación
+  isExportingPendingFees = false;
+  isExportingPaymentHistory = false;
+
   // Referencia para Math en el template
   Math = Math;
 
   private readonly paymentService: PaymentService = inject(PaymentService);
   private readonly familyGroupService: FamilyGroupService = inject(FamilyGroupService);
+  private readonly exportService: ExportService = inject(ExportService);
   private cdr = inject(ChangeDetectorRef);
 
   ngOnDestroy(): void {
@@ -552,6 +560,117 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   // Método para formatear fechas en formato local
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('es-AR');
+  }
+
+  // Métodos de exportación
+  exportPendingFeesToPDF(): void {
+    if (this.filteredFees.length === 0) {
+      this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingFees = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.filteredFees.map(fee => ({
+      description: fee.description,
+      period: fee.period,
+      dueDate: 'Por definir', // TODO: Implementar fechas de vencimiento
+      amount: fee.amount
+    }));
+
+    try {
+      this.exportService.exportPaymentsToPDF(exportData, true);
+      this.showAlertMessage('success', 'Cuotas pendientes exportadas a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar cuotas pendientes a PDF:', error);
+      this.showAlertMessage('error', 'Error al exportar cuotas pendientes a PDF');
+    }
+
+    this.isExportingPendingFees = false;
+  }
+
+  exportPendingFeesToCSV(): void {
+    if (this.filteredFees.length === 0) {
+      this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingFees = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.filteredFees.map(fee => ({
+      description: fee.description,
+      period: fee.period,
+      dueDate: 'Por definir', // TODO: Implementar fechas de vencimiento
+      amount: fee.amount
+    }));
+
+    try {
+      this.exportService.exportPaymentsToCSV(exportData, true);
+      this.showAlertMessage('success', 'Cuotas pendientes exportadas a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar cuotas pendientes a CSV:', error);
+      this.showAlertMessage('error', 'Error al exportar cuotas pendientes a CSV');
+    }
+
+    this.isExportingPendingFees = false;
+  }
+
+  exportPaymentHistoryToPDF(): void {
+    if (this.paymentsHistory.length === 0) {
+      this.showAlertMessage('error', 'No hay historial de pagos para exportar');
+      return;
+    }
+
+    this.isExportingPaymentHistory = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.paymentsHistory.map(payment => ({
+      paymentDate: payment.paymentDate,
+      memberName: this.getMemberName(payment.memberId),
+      referenceId: payment.referenceId || 'N/A',
+      amount: payment.amount,
+      status: this.getStatusText(payment.status)
+    }));
+
+    try {
+      this.exportService.exportPaymentsToPDF(exportData, false);
+      this.showAlertMessage('success', 'Historial de pagos exportado a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar historial de pagos a PDF:', error);
+      this.showAlertMessage('error', 'Error al exportar historial de pagos a PDF');
+    }
+
+    this.isExportingPaymentHistory = false;
+  }
+
+  exportPaymentHistoryToCSV(): void {
+    if (this.paymentsHistory.length === 0) {
+      this.showAlertMessage('error', 'No hay historial de pagos para exportar');
+      return;
+    }
+
+    this.isExportingPaymentHistory = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.paymentsHistory.map(payment => ({
+      paymentDate: payment.paymentDate,
+      memberName: this.getMemberName(payment.memberId),
+      referenceId: payment.referenceId || 'N/A',
+      amount: payment.amount,
+      status: this.getStatusText(payment.status)
+    }));
+
+    try {
+      this.exportService.exportPaymentsToCSV(exportData, false);
+      this.showAlertMessage('success', 'Historial de pagos exportado a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar historial de pagos a CSV:', error);
+      this.showAlertMessage('error', 'Error al exportar historial de pagos a CSV');
+    }
+
+    this.isExportingPaymentHistory = false;
   }
 
   // initMercadoPago(): void {
