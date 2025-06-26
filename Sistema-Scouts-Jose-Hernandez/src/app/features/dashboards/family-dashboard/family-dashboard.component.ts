@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { ExportService } from '../../../core/services/export.service';
 import { ExportButtonsComponent } from '../../../shared/components/export-buttons/export-buttons.component';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import { DashboardService, FamilyDashboardDto } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-family-dashboard',
@@ -109,7 +110,8 @@ export class FamilyDashboardComponent implements OnInit {
     private authService: AuthService, 
     private router: Router,
     private sanitizer: DomSanitizer,
-    private exportService: ExportService
+    private exportService: ExportService,
+    private dashboardService: DashboardService
   ) { }
 
   ngOnInit(): void {
@@ -117,9 +119,32 @@ export class FamilyDashboardComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
-    // Get family name from auth service
-    const user = this.authService.getCurrentUser();
-    this.familyName = user?.lastName || 'Scout';
+    this.dashboardService.getFamilyDashboard().subscribe({
+      next: (data: FamilyDashboardDto) => {
+        this.familyName = data.familyName;
+        
+        // Update the summary statistics cards
+        this.resumenEstadisticas[0].valor = data.scoutsInFamily.toString();
+        this.resumenEstadisticas[1].valor = data.upcomingEvents.toString();
+        this.resumenEstadisticas[2].valor = data.pendingPayments.toString();
+        
+        // Update upcoming events from API if available
+        if (data.upcomingEventsList && data.upcomingEventsList.length > 0) {
+          this.eventosProximos = data.upcomingEventsList.map((event, index) => ({
+            id: index + 1,
+            titulo: event.title,
+            fecha: new Date(event.startDate).toLocaleDateString('es-ES'),
+            estado: 'Disponible' // Default status, could be enhanced based on API data
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Error loading family dashboard data:', error);
+        // Fallback to auth service and existing mock data
+        const user = this.authService.getCurrentUser();
+        this.familyName = user?.lastName || 'Scout';
+      }
+    });
   }
 
 

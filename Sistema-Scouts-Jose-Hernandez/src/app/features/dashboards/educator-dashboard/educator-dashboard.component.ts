@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { DashboardService, EducatorDashboardDto } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-educator-dashboard',
@@ -263,22 +264,36 @@ export class EducatorDashboardComponent implements OnInit {
   upcomingEvents = 0;
   progressionRate = 0;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private dashboardService: DashboardService
+  ) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
   }
 
   private loadDashboardData(): void {
-    // Get educator name from auth service
-    const user = this.authService.getCurrentUser();
-    this.educatorName = user?.lastName || 'Educador';
-
-    // Load statistics (these would come from real API calls)
-    this.sectionName = 'Scouts';
-    this.scoutsCount = 15;
-    this.pendingApprovals = 3;
-    this.upcomingEvents = 2;
-    this.progressionRate = 78;
+    this.dashboardService.getEducatorDashboard().subscribe({
+      next: (data: EducatorDashboardDto) => {
+        this.educatorName = data.educatorName;
+        this.sectionName = data.sectionName;
+        this.scoutsCount = data.scoutsCount;
+        this.pendingApprovals = data.pendingApprovals;
+        this.upcomingEvents = data.upcomingEvents;
+        this.progressionRate = data.progressionRate;
+      },
+      error: (error) => {
+        console.error('Error loading educator dashboard data:', error);
+        // Fallback to user name from auth service and mock data
+        const user = this.authService.getCurrentUser();
+        this.educatorName = user?.lastName || 'Educador';
+        this.sectionName = 'Scouts';
+        this.scoutsCount = 15;
+        this.pendingApprovals = 3;
+        this.upcomingEvents = 2;
+        this.progressionRate = 78;
+      }
+    });
   }
 }

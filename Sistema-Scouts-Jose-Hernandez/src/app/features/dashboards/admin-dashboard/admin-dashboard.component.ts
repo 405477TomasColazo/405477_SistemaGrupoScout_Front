@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { DashboardService, DashboardStatsDto } from '../../../core/services/dashboard.service';
 
 
 
@@ -249,23 +250,44 @@ export class AdminDashboardComponent implements OnInit {
   caminantesCount = 0;
   roversCount = 0;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private dashboardService: DashboardService
+  ) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
   }
 
   private loadDashboardData(): void {
-    // Load statistics (these would come from real API calls)
-    this.totalScouts = 85;
-    this.totalFamilies = 42;
-    this.activeEvents = 5;
-    this.monthlyRevenue = 680000;
+    this.dashboardService.getAdminDashboard().subscribe({
+      next: (data: DashboardStatsDto) => {
 
-    // Section distribution
-    this.manadaCount = 18;
-    this.unidadCount = 25;
-    this.caminantesCount = 22;
-    this.roversCount = 20;
+        this.totalScouts = data.totalScouts;
+        this.totalFamilies = data.totalFamilies;
+        this.activeEvents = data.activeEvents;
+        this.monthlyRevenue = data.monthlyRevenue;
+
+        // Section distribution from memberStats
+        if (data.memberStats) {
+          this.manadaCount = data.memberStats.manadaCount;
+          this.unidadCount = data.memberStats.unidadCount;
+          this.caminantesCount = data.memberStats.caminantesCount;
+          this.roversCount = data.memberStats.roversCount;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading dashboard data:', error);
+        // Fallback to mock data if API fails
+        this.totalScouts = 86;
+        this.totalFamilies = 42;
+        this.activeEvents = 5;
+        this.monthlyRevenue = 680000;
+        this.manadaCount = 18;
+        this.unidadCount = 25;
+        this.caminantesCount = 22;
+        this.roversCount = 20;
+      }
+    });
   }
 }
