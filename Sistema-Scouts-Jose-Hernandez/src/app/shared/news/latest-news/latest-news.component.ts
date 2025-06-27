@@ -25,7 +25,7 @@ export class LatestNewsComponent implements OnInit {
   loadLatestNews(): void {
     this.loading = true;
     this.error = '';
-    
+
     this.newsService.getLatestArticles(5).subscribe({
       next: (articles) => {
         this.latestNews = articles;
@@ -44,6 +44,7 @@ export class LatestNewsComponent implements OnInit {
   }
 
   getImageUrl(imagePath?: string): string {
+    console.log(imagePath);
     if (!imagePath) {
       return '/media/lis.jpg'; // Imagen por defecto del scout
     }

@@ -4,6 +4,7 @@ import {NgIf, NgFor, NgClass} from '@angular/common';
 import { AuthService } from '../../../core/auth/auth.service';
 import { User } from '../../../core/models/user.model';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import { DashboardService, DashboardStatsDto } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-admin-dashboard-new',
@@ -69,11 +70,37 @@ export class AdminDashboardNewComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
+    this.loadDashboardStats();
+  }
+
+  private loadDashboardStats(): void {
+    this.dashboardService.getAdminDashboard().subscribe({
+      next: (data: DashboardStatsDto) => {
+        // Update system stats with real data
+        this.systemStats = [
+          { label: 'Total Familias', value: data.totalFamilies.toString(), color: 'blue' },
+          { label: 'Scouts Activos', value: data.totalScouts.toString(), color: 'green' },
+          { label: 'Educadores', value: data.memberStats?.totalEducators?.toString() || '0', color: 'purple' },
+          { label: 'Eventos Activos', value: data.activeEvents.toString(), color: 'yellow' }
+        ];
+      },
+      error: (error) => {
+        console.error('Error loading dashboard stats:', error);
+        // Keep mock data if API fails
+        this.systemStats = [
+          { label: 'Total Usuarios', value: '156', color: 'blue' },
+          { label: 'Scouts Activos', value: '89', color: 'green' },
+          { label: 'Educadores', value: '12', color: 'purple' },
+          { label: 'Eventos Este Mes', value: '8', color: 'yellow' }
+        ];
+      }
+    });
   }
 
   navigateTo(route: string): void {
