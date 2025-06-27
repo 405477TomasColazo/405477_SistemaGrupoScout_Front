@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../footer/footer.component';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-layout',
@@ -15,26 +16,26 @@ import { FooterComponent } from '../footer/footer.component';
     BreadcrumbComponent,
     FooterComponent
   ],
-  template: `
-    <div class="min-h-screen flex flex-col bg-gray-50">
-      <!-- Navigation Header -->
-      <app-navbar></app-navbar>
-      
-      <!-- Main Content Area -->
-      <div class="flex-1 flex flex-col">
-        <!-- Breadcrumb Navigation -->
-        <app-breadcrumb class="bg-white border-b"></app-breadcrumb>
-        
-        <!-- Page Content -->
-        <main class="flex-1 container mx-auto px-4 py-6">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-      
-      <!-- Footer -->
-      <app-footer></app-footer>
-    </div>
-  `,
+  templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  isHomePage = false;
+
+  constructor(private router: Router) {
+    // Check current route
+    this.checkIfHomePage(this.router.url);
+    
+    // Listen to route changes
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.checkIfHomePage(event.urlAfterRedirects);
+    });
+  }
+
+  private checkIfHomePage(url: string): void {
+    // Consider it home page if the URL is '/', '/home', or empty
+    this.isHomePage = url === '/' || url === '/home' || url === '';
+  }
+}

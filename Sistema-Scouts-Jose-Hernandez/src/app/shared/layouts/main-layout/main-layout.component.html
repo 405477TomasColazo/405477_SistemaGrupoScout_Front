@@ -1,10 +1,18 @@
-<div class="min-h-screen flex flex-col">
+<div class="min-h-screen flex flex-col bg-gray-50">
+  <!-- Navigation Header -->
   <app-navbar></app-navbar>
-  <app-breadcrumb></app-breadcrumb>
   
-  <main class="flex-grow">
-    <router-outlet></router-outlet>
-  </main>
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col">
+    <!-- Breadcrumb Navigation -->
+    <app-breadcrumb class="bg-white border-b"></app-breadcrumb>
+    
+    <!-- Page Content -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
   
-  <app-footer></app-footer>
+  <!-- Footer - Hidden on home page -->
+  <app-footer *ngIf="!isHomePage"></app-footer>
 </div>
