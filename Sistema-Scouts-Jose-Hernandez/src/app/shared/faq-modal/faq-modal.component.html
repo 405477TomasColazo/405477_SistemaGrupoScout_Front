@@ -1,0 +1,166 @@
+<!-- Archivo: faq-modal.component.html -->
+<!-- Overlay del modal (fondo oscuro) -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40" (keydown)="onKeyDown($event)">
+  <!-- Contenedor del modal -->
+  <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 h-[90vh] overflow-hidden z-50 transform transition-all">
+    <!-- Cabecera del modal -->
+    <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <img src="/media/lis.jpg" alt="Logo Scout" class="h-10 w-10 rounded-full">
+        <h3 class="text-xl font-bold">Preguntas Frecuentes (FAQ)</h3>
+      </div>
+      <button (click)="onClose()" class="text-white hover:text-gray-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Barra de búsqueda y filtros -->
+    <div class="border-b border-gray-200 p-4 bg-gray-50">
+      <div class="flex flex-col md:flex-row gap-4 items-center">
+        <!-- Barra de búsqueda -->
+        <div class="flex-1 relative">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Buscar preguntas..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Filtros por categoría -->
+        <div class="flex flex-wrap gap-2">
+          <button
+            (click)="setFilter('all')"
+            [class]="'px-3 py-1 rounded-full text-sm transition ' +
+                     (activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+            Todas
+          </button>
+          <button
+            *ngFor="let section of faqSections"
+            (click)="setFilter(section.id)"
+            [class]="'px-3 py-1 rounded-full text-sm transition ' +
+                     (activeFilter === section.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+            {{ section.icon }} {{ section.title }}
+          </button>
+        </div>
+
+        <!-- Botones de control -->
+        <div class="flex gap-2">
+          <button
+            (click)="expandAll()"
+            class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition">
+            Expandir Todo
+          </button>
+          <button
+            (click)="collapseAll()"
+            class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition">
+            Contraer Todo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="overflow-y-auto h-full p-6">
+      <div class="max-w-4xl mx-auto">
+        <!-- Mensaje si no hay resultados -->
+        <div *ngIf="filteredSections.length === 0" class="text-center py-12">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No se encontraron resultados</h3>
+          <p class="text-gray-500">Intenta con otros términos de búsqueda o revisa todas las categorías.</p>
+        </div>
+
+        <!-- Secciones de FAQ -->
+        <div *ngFor="let section of filteredSections; trackBy: trackBySection" class="mb-6">
+          <!-- Cabecera de sección -->
+          <div
+            class="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition"
+            (click)="toggleSection(section.id)">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">{{ section.icon }}</span>
+                <h2 class="text-xl font-bold text-blue-800">{{ section.title }}</h2>
+                <span class="bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                  {{ section.questions.length }} pregunta{{ section.questions.length !== 1 ? 's' : '' }}
+                </span>
+              </div>
+              <svg
+                [class]="'h-6 w-6 text-blue-600 transition-transform ' + (section.isExpanded ? 'rotate-180' : '')"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Preguntas de la sección -->
+          <div *ngIf="section.isExpanded" class="mt-2 space-y-2">
+            <div
+              *ngFor="let question of section.questions; let i = index; trackBy: trackByQuestion"
+              class="border border-gray-200 rounded-lg overflow-hidden">
+
+              <!-- Pregunta -->
+              <div
+                class="bg-white p-4 cursor-pointer hover:bg-gray-50 transition"
+                (click)="toggleQuestion(section.id, i)">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-semibold text-gray-800 pr-4">{{ question.question }}</h3>
+                  <svg
+                    [class]="'h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ' + (question.isExpanded ? 'rotate-180' : '')"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Respuesta -->
+              <div *ngIf="question.isExpanded" class="bg-gray-50 p-4 border-t border-gray-200">
+                <div class="text-gray-700 whitespace-pre-line">{{ question.answer }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div class="text-center">
+            <h3 class="text-xl font-bold text-blue-800 mb-2">¿No encontraste lo que buscabas?</h3>
+            <p class="text-blue-700 mb-4">Contacta al equipo de soporte para obtener ayuda personalizada.</p>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+              <div class="flex items-center space-x-2 text-blue-700">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+                <span class="font-medium">soporte&#64;scout-josehernandez.org</span>
+              </div>
+
+              <div class="text-blue-600">
+                <span class="font-medium">Tiempo de respuesta: </span>
+                <span>48 horas hábiles</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer del modal -->
+        <div class="text-center mt-6 pt-6 border-t border-gray-200">
+          <p class="text-gray-600 text-sm mb-4">
+            <strong>Documento actualizado en enero 2025 - Grupo Scout José Hernández</strong>
+          </p>
+          <button (click)="onClose()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+            Cerrar FAQ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -102,9 +102,12 @@ import { CommonModule } from '@angular/common';
             <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">
               Política de Privacidad
             </a>
-            <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">
-              Términos de Uso
-            </a>
+            <button (click)="onOpenTermsModal()" class="text-gray-400 hover:text-white text-sm transition-colors">
+              Términos y Condiciones
+            </button>
+            <button (click)="onOpenFaqModal()" class="text-gray-400 hover:text-white text-sm transition-colors">
+              Preguntas Frecuentes
+            </button>
           </div>
         </div>
       </div>
@@ -113,5 +116,16 @@ import { CommonModule } from '@angular/common';
   styleUrl: './footer.component.css'
 })
 export class FooterComponent {
+  @Output() openTermsModal = new EventEmitter<void>();
+  @Output() openFaqModal = new EventEmitter<void>();
+  
   currentYear = new Date().getFullYear();
+
+  onOpenTermsModal(): void {
+    this.openTermsModal.emit();
+  }
+
+  onOpenFaqModal(): void {
+    this.openFaqModal.emit();
+  }
 }
