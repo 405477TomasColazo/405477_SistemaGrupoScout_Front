@@ -18,16 +18,17 @@
     </div>
 
     <!-- Quick Actions Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <div 
         *ngFor="let action of quickActions"
         (click)="navigateTo(action.route)"
-        class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 border-l-4"
+        class="bg-white rounded-lg shadow-sm transition-shadow p-6 border-l-4"
         [ngClass]="{
-          'border-blue-500': action.color === 'blue',
-          'border-green-500': action.color === 'green',
-          'border-purple-500': action.color === 'purple',
-          'border-yellow-500': action.color === 'yellow'
+          'border-blue-500 hover:shadow-md cursor-pointer': action.color === 'blue',
+          'border-green-500 hover:shadow-md cursor-pointer': action.color === 'green',
+          'border-purple-500 hover:shadow-md cursor-pointer': action.color === 'purple',
+          'border-yellow-500 opacity-60 cursor-not-allowed': action.color === 'yellow' && action.route === '#',
+          'border-yellow-500 hover:shadow-md cursor-pointer': action.color === 'yellow' && action.route !== '#'
         }"
       >
         <div class="flex items-center">
@@ -68,46 +69,39 @@
       <!-- Scout Progress Summary -->
       <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Progreso de Scouts - Mi Sección</h2>
-        <div class="space-y-4">
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div class="space-y-4" *ngIf="scoutsWithPendingApprovals.length > 0; else noApprovals">
+          <div 
+            *ngFor="let scout of scoutsWithPendingApprovals"
+            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+          >
             <div>
-              <h4 class="font-medium text-gray-900">Scout Ana García</h4>
-              <p class="text-sm text-gray-500">Etapa Aire - Competencias pendientes de aprobación</p>
+              <h4 class="font-medium text-gray-900">{{ scout.memberName }}</h4>
+              <p class="text-sm text-gray-500">Competencias pendientes de aprobación</p>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">3 Pendientes</span>
-              <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                Revisar
-              </button>
-            </div>
-          </div>
-          
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 class="font-medium text-gray-900">Scout Carlos Mendez</h4>
-              <p class="text-sm text-gray-500">Etapa Tierra - Progreso excelente</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Al día</span>
-              <button class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
-                Ver
-              </button>
-            </div>
-          </div>
-          
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 class="font-medium text-gray-900">Scout Lucía Fernández</h4>
-              <p class="text-sm text-gray-500">Etapa Fuego - Nueva hoja de marcha</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Nueva</span>
-              <button class="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700">
-                Configurar
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                {{ scout.pendingCount }} Pendientes
+              </span>
+              <button 
+                (click)="viewScoutMarchSheet(scout.memberId)"
+                class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+              >
+                Ver Hoja de Marcha
               </button>
             </div>
           </div>
         </div>
+        
+        <ng-template #noApprovals>
+          <div class="text-center py-8">
+            <div class="text-gray-400 mb-2">
+              <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="text-gray-500">No hay competencias pendientes de aprobación</p>
+          </div>
+        </ng-template>
         <button 
           (click)="navigateTo('/progression')"
           class="mt-4 w-full text-center text-blue-600 hover:text-blue-500 font-medium"
@@ -120,19 +114,21 @@
       <div class="space-y-6">
         <!-- Section Stats -->
         <div class="bg-white rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Mi Sección</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Mi Sección - {{ sectionStats.sectionName }}
+          </h3>
           <div class="space-y-3">
             <div class="flex justify-between">
-              <span class="text-gray-600">Total Scouts:</span>
-              <span class="font-medium">24</span>
+              <span class="text-gray-600">Total Protagonistas:</span>
+              <span class="font-medium">{{ sectionStats.totalScouts }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total Educadores:</span>
+              <span class="font-medium text-blue-600">{{ sectionStats.totalEducators }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Activos:</span>
-              <span class="font-medium text-green-600">22</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Pendientes:</span>
-              <span class="font-medium text-yellow-600">8</span>
+              <span class="font-medium text-green-600">{{ sectionStats.activeScouts }}</span>
             </div>
           </div>
         </div>
@@ -140,16 +136,28 @@
         <!-- Upcoming Events -->
         <div class="bg-white rounded-lg shadow-sm p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Próximos Eventos</h3>
-          <div class="space-y-3">
-            <div class="text-sm">
-              <div class="font-medium text-gray-900">Reunión de Sección</div>
-              <div class="text-gray-500">Sábado 15 Jul</div>
-            </div>
-            <div class="text-sm">
-              <div class="font-medium text-gray-900">Campamento</div>
-              <div class="text-gray-500">22-24 Jul</div>
+          <div class="space-y-3" *ngIf="upcomingEvents.length > 0; else noEvents">
+            <div 
+              *ngFor="let event of upcomingEvents | slice:0:3"
+              class="text-sm"
+            >
+              <div class="font-medium text-gray-900">{{ event.title || event.name }}</div>
+              <div class="text-gray-500">{{ event.date || event.eventDate | date:'dd MMM' }}</div>
+              <div class="text-xs text-gray-400" *ngIf="event.description">{{ event.description }}</div>
             </div>
           </div>
+          
+          <ng-template #noEvents>
+            <div class="text-center py-4">
+              <div class="text-gray-400 mb-2">
+                <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+              </div>
+              <p class="text-gray-500 text-sm">No hay eventos próximos para tu sección</p>
+            </div>
+          </ng-template>
+          
           <button 
             (click)="navigateTo('/event-crud')"
             class="mt-3 w-full text-center text-blue-600 hover:text-blue-500 text-sm font-medium"

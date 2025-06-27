@@ -1,28 +1,41 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import {NgIf, NgFor, NgClass} from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth.service';
 import { User } from '../../../core/models/user.model';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import { DashboardService, DashboardStatsDto } from '../../../core/services/dashboard.service';
+import { PaymentService } from '../../../core/services/payment.service';
+import Chart from 'chart.js/auto';
+
+interface PaymentChartData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface SectionChartData {
+  nombre: string;
+  miembros: number;
+  color: string;
+}
 
 @Component({
   selector: 'app-admin-dashboard-new',
   standalone: true,
-  imports: [NgFor, NgClass],
+  imports: [NgFor, NgClass, NgIf, FormsModule],
   templateUrl: './admin-dashboard-new.component.html',
   styleUrl: './admin-dashboard-new.component.css'
 })
-export class AdminDashboardNewComponent implements OnInit {
+export class AdminDashboardNewComponent implements OnInit, AfterViewInit {
+  @ViewChild('pagosCuotasChart') pagosCuotasChartRef: ElementRef | undefined;
+  @ViewChild('miembrosSeccionChart') miembrosSeccionChartRef: ElementRef | undefined;
+  
   user: User | null = null;
+  isLoading = false;
+  dashboardData: DashboardStatsDto | null = null;
   quickActions = [
-    {
-      title: 'Dashboard Completo',
-      description: 'Ver dashboard con gráficos y estadísticas',
-      icon: 'chart-bar',
-      route: '/dashboard',
-      color: 'blue'
-    },
     {
       title: 'Gestión de Usuarios',
       description: 'Administrar invitaciones y usuarios',
@@ -67,44 +80,255 @@ export class AdminDashboardNewComponent implements OnInit {
     { label: 'Eventos Este Mes', value: '8', color: 'yellow' }
   ];
 
+  // Chart references
+  pagosCuotasChart: Chart | undefined;
+  miembrosSeccionChart: Chart | undefined;
+  
+  // Chart data
+  pagosCuotasData: PaymentChartData[] = [];
+  miembrosSeccionData: SectionChartData[] = [];
+  
+  // Chart control states
+  showEducators = false; // Toggle for showing educators vs protagonists
+  isLoadingPayments = false;
+  isLoadingSections = false;
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private sanitizer: DomSanitizer,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private paymentService: PaymentService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
-    this.loadDashboardStats();
+    this.loadDashboardData();
+    this.loadPaymentStatistics();
   }
 
-  private loadDashboardStats(): void {
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.ngZone.runOutsideAngular(() => {
+        this.createPagosCuotasChart();
+        this.createMiembrosSeccionChart();
+      });
+    }, 100);
+  }
+
+  private loadDashboardData(): void {
+    this.isLoading = true;
     this.dashboardService.getAdminDashboard().subscribe({
       next: (data: DashboardStatsDto) => {
-        // Update system stats with real data
-        this.systemStats = [
-          { label: 'Total Familias', value: data.totalFamilies.toString(), color: 'blue' },
-          { label: 'Scouts Activos', value: data.totalScouts.toString(), color: 'green' },
-          { label: 'Educadores', value: data.memberStats?.totalEducators?.toString() || '0', color: 'purple' },
-          { label: 'Eventos Activos', value: data.activeEvents.toString(), color: 'yellow' }
-        ];
+        this.dashboardData = data;
+        this.updateSystemStats(data);
+        this.updateChartData(data);
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading dashboard stats:', error);
-        // Keep mock data if API fails
-        this.systemStats = [
-          { label: 'Total Usuarios', value: '156', color: 'blue' },
-          { label: 'Scouts Activos', value: '89', color: 'green' },
-          { label: 'Educadores', value: '12', color: 'purple' },
-          { label: 'Eventos Este Mes', value: '8', color: 'yellow' }
-        ];
+        console.error('Error loading dashboard data:', error);
+        this.loadFallbackData();
+        this.isLoading = false;
       }
     });
   }
 
+  private updateSystemStats(data: DashboardStatsDto): void {
+    this.systemStats = [
+      { label: 'Total Familias', value: data.totalFamilies.toString(), color: 'blue' },
+      { label: 'Scouts Activos', value: data.totalScouts.toString(), color: 'green' },
+      { label: 'Educadores', value: data.memberStats?.totalEducators?.toString() || '0', color: 'purple' },
+      { label: 'Eventos Activos', value: data.activeEvents.toString(), color: 'yellow' }
+    ];
+  }
+
+  private updateChartData(data: DashboardStatsDto): void {
+    if (data.memberStats) {
+      this.updateSectionData(data.memberStats);
+    }
+  }
+
+  private loadPaymentStatistics(): void {
+    this.isLoadingPayments = true;
+    
+    // Load pending fees by section to get fee status counts
+    this.paymentService.getPendingPaymentsBySection().subscribe({
+      next: (sectionData) => {
+        // Calculate total pending fees across all sections
+        const totalPendingFees = sectionData.reduce((sum, section) => sum + section.totalPendingFees, 0);
+        
+        // Load dashboard data to get completed payment count
+        this.dashboardService.getAdminDashboard().subscribe({
+          next: (dashboardData) => {
+            const completedPayments = dashboardData.financialStats?.completedPaymentCount || 0;
+            
+            this.pagosCuotasData = [
+              { name: 'Pagadas', value: completedPayments, color: '#10b981' },
+              { name: 'Pendientes', value: totalPendingFees, color: '#f59e0b' }
+            ];
+            this.isLoadingPayments = false;
+            this.updatePaymentsChart();
+          },
+          error: (error) => {
+            console.error('Error loading dashboard data for payments:', error);
+            this.loadFallbackPaymentData();
+            this.isLoadingPayments = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading pending fees by section:', error);
+        this.loadFallbackPaymentData();
+        this.isLoadingPayments = false;
+      }
+    });
+  }
+
+  private loadFallbackPaymentData(): void {
+    this.pagosCuotasData = [
+      { name: 'Pagadas', value: 45, color: '#10b981' },
+      { name: 'Pendientes', value: 78, color: '#f59e0b' }
+    ];
+    this.updatePaymentsChart();
+  }
+
+  private updateSectionData(memberStats: any): void {
+    const sectionData = [
+      { nombre: 'Manada', miembros: 0, color: '#f1d717' },
+      { nombre: 'Scout', miembros: 0, color: '#21ff10' },
+      { nombre: 'Caminante', miembros: 0, color: '#01bce4' },
+      { nombre: 'Rover', miembros: 0, color: '#ff0000' }
+    ];
+
+    if (this.showEducators) {
+      // For educators, we need to distribute the total educators across sections
+      // This is simplified - in a real scenario you'd have educator counts per section
+      const totalEducators = memberStats.totalEducators || 0;
+      const educatorsPerSection = Math.floor(totalEducators / 4);
+      sectionData.forEach(section => {
+        section.miembros = educatorsPerSection;
+      });
+    } else {
+      // For protagonists (scouts)
+      sectionData[0].miembros = memberStats.manadaCount || 0;
+      sectionData[1].miembros = memberStats.unidadCount || 0;
+      sectionData[2].miembros = memberStats.caminantesCount || 0;
+      sectionData[3].miembros = memberStats.roversCount || 0;
+    }
+
+    this.miembrosSeccionData = sectionData;
+    this.updateSectionsChart();
+  }
+
+  private loadFallbackData(): void {
+    this.systemStats = [
+      { label: 'Total Usuarios', value: '156', color: 'blue' },
+      { label: 'Scouts Activos', value: '89', color: 'green' },
+      { label: 'Educadores', value: '12', color: 'purple' },
+      { label: 'Eventos Este Mes', value: '8', color: 'yellow' }
+    ];
+  }
+
+  private createPagosCuotasChart(): void {
+    try {
+      const ctx = this.pagosCuotasChartRef?.nativeElement as HTMLCanvasElement;
+
+      if (ctx) {
+        this.pagosCuotasChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: this.pagosCuotasData.map(item => item.name),
+            datasets: [{
+              data: this.pagosCuotasData.map(item => item.value),
+              backgroundColor: this.pagosCuotasData.map(item => item.color),
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw as number;
+                    return `${label}: ${value}%`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error en createPagosCuotasChart:', error);
+    }
+  }
+
+  private createMiembrosSeccionChart(): void {
+    try {
+      const ctx = this.miembrosSeccionChartRef?.nativeElement as HTMLCanvasElement;
+
+      if (ctx) {
+        this.miembrosSeccionChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: this.miembrosSeccionData.map(item => item.nombre),
+            datasets: [{
+              label: 'Miembros Activos',
+              data: this.miembrosSeccionData.map(item => item.miembros),
+              backgroundColor: this.miembrosSeccionData.map(item => item.color),
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error en createMiembrosSeccionChart:', error);
+    }
+  }
+
   navigateTo(route: string): void {
     this.router.navigate([route]);
+  }
+
+  toggleMemberType(): void {
+    this.showEducators = !this.showEducators;
+    if (this.dashboardData?.memberStats) {
+      this.updateSectionData(this.dashboardData.memberStats);
+    }
+  }
+
+  private updatePaymentsChart(): void {
+    if (this.pagosCuotasChart && this.pagosCuotasData.length > 0) {
+      this.pagosCuotasChart.data.labels = this.pagosCuotasData.map(item => item.name);
+      this.pagosCuotasChart.data.datasets[0].data = this.pagosCuotasData.map(item => item.value);
+      this.pagosCuotasChart.data.datasets[0].backgroundColor = this.pagosCuotasData.map(item => item.color);
+      this.pagosCuotasChart.update();
+    }
+  }
+
+  private updateSectionsChart(): void {
+    if (this.miembrosSeccionChart && this.miembrosSeccionData.length > 0) {
+      this.miembrosSeccionChart.data.labels = this.miembrosSeccionData.map(item => item.nombre);
+      this.miembrosSeccionChart.data.datasets[0].data = this.miembrosSeccionData.map(item => item.miembros);
+      this.miembrosSeccionChart.data.datasets[0].backgroundColor = this.miembrosSeccionData.map(item => item.color);
+      this.miembrosSeccionChart.update();
+    }
   }
 
   getIconSvg(iconName: string): SafeHtml {
