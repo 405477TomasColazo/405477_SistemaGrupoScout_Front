@@ -155,7 +155,7 @@ import { AuthService } from '../../../core/auth/auth.service';
       <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">
           ¿No tienes una cuenta?
-          <a href="#" class="text-green-600 hover:text-green-500 font-medium">
+          <a href="home/#contacto" class="text-green-600 hover:text-green-500 font-medium">
             Contacta al administrador
           </a>
         </p>

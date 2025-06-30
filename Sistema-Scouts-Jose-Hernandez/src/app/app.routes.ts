@@ -55,6 +55,9 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
+  {
+    path: 'fuera', component: AdminDashboardComponent
+  },
 
   // Main Application Routes (with MainLayoutComponent)
   {
