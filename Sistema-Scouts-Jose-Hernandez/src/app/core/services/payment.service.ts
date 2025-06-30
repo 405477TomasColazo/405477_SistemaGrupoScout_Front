@@ -14,13 +14,14 @@ import {
   UpdatePaymentStatusRequest
 } from '../models/payments.model';
 import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
-  private readonly url = "http://localhost:8080/payments";
-  private readonly adminUrl = "http://localhost:8080/admin/payments";
+  private readonly url = `${environment.apiUrl}/payments`;
+  private readonly adminUrl = `${environment.apiUrl}/admin/payments`;
   private readonly client = inject(HttpClient);
 
   getPendingFeed(memberId: number) {

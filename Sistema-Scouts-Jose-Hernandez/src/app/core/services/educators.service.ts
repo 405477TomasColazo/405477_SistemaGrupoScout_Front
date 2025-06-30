@@ -4,13 +4,14 @@ import {HttpClient} from '@angular/common/http';
 import {map, Observable} from 'rxjs';
 import {SectionMember} from '../models/user.model';
 import {FamilyGroup} from '../models/family-group.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EducatorsService {
 
-  private apiUrl = 'http://localhost:8080';
+  private apiUrl = environment.apiUrl;
   client:HttpClient = inject(HttpClient);
 
   getNomina():Observable<SectionMember[]> {

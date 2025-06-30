@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { NewsService } from '../../../core/services/news.service';
 import { NewsArticleSummary, NewsCategory, PaginatedNewsResponse } from '../../../core/models/news.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-news-list',
@@ -119,7 +120,7 @@ export class NewsListComponent implements OnInit {
     if (!imagePath) {
       return '/media/lis.jpg';
     }
-    return imagePath.startsWith('http') ? imagePath : `http://localhost:8080${imagePath}`;
+    return imagePath.startsWith('http') ? imagePath : `${environment.apiUrl}${imagePath}`;
   }
 
   get hasActiveFilters(): boolean {

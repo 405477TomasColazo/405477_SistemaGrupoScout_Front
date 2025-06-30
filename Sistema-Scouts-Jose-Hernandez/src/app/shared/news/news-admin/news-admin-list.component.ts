@@ -8,6 +8,7 @@ import { NewsService } from '../../../core/services/news.service';
 import { ExportService } from '../../../core/services/export.service';
 import { ExportButtonsComponent } from '../../components/export-buttons/export-buttons.component';
 import { NewsArticleSummary, PaginatedNewsResponse, NewsStatus } from '../../../core/models/news.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-news-admin-list',
@@ -177,7 +178,7 @@ export class NewsAdminListComponent implements OnInit, OnDestroy {
     if (!imagePath) {
       return '/media/lis.jpg';
     }
-    return imagePath.startsWith('http') ? imagePath : `http://localhost:8080${imagePath}`;
+    return imagePath.startsWith('http') ? imagePath : `${environment.apiUrl}${imagePath}`;
   }
 
   // Export Methods

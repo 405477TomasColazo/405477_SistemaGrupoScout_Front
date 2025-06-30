@@ -4,13 +4,14 @@ import {filter, Observable, of, switchMap} from 'rxjs';
 import { FamilyGroup, MemberProtagonist, Tutor, Relationship } from '../models/family-group.model';
 import {AuthService} from '../auth/auth.service';
 import {User} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FamilyGroupService {
-  private apiUrl = 'http://localhost:8080/familyGroup';
+  private apiUrl = `${environment.apiUrl}/familyGroup`;
 
   constructor(private http: HttpClient,private authService: AuthService) {}
 
@@ -73,6 +74,6 @@ export class FamilyGroupService {
       newBalance: newBalance,
       reason: reason
     };
-    return this.http.put<any>(`http://localhost:8080/admin/members/${memberId}/balance`, request);
+    return this.http.put<any>(`${environment.apiUrl}/admin/members/${memberId}/balance`, request);
   }
 }

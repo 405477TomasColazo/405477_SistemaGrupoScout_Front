@@ -1,12 +1,13 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Invitation, InvitationRequest, Section} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InvitationService {
-  private readonly url = "http://localhost:8080/user";
+  private readonly url = `${environment.apiUrl}/user`;
   private client = inject(HttpClient);
 
   sendInvitation(invitation: InvitationRequest) {

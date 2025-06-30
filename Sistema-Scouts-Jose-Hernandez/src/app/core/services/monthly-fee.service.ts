@@ -10,12 +10,13 @@ import {
   GlobalFeeConfiguration
 } from '../models/payments.model';
 import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MonthlyFeeService {
-  private readonly url = "http://localhost:8080/api/admin/monthly-fees";
+  private readonly url = `${environment.apiUrl}/api/admin/monthly-fees`;
   private readonly client = inject(HttpClient);
 
   // Fee generation methods

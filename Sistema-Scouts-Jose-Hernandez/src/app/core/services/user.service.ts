@@ -10,13 +10,14 @@ import {
   ResetPasswordRequest,
   AvatarOption
 } from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private readonly http = inject(HttpClient);
-  private readonly url: string = 'http://localhost:8080';
+  private readonly url: string = environment.apiUrl;
 
   registerUser(user: RegisterRequest) {
     return this.http.post<string>(`${this.url}/auth/register`, user)

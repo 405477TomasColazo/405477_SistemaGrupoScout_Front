@@ -3,6 +3,7 @@ import {TokenService} from './token.service';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {User} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import {User} from '../models/user.model';
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  private apiUrl = 'http://localhost:8080/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient,
               private tokenService: TokenService) {
@@ -69,7 +70,7 @@ export class AuthService {
     }
   }
   getUserByEmail(email: string): Observable<User> {
-    return this.http.get<User>(`http://localhost:8080/user/${email}`);
+    return this.http.get<User>(`${environment.apiUrl}/user/${email}`);
   }
 
   private decodeToken(token: string): any {

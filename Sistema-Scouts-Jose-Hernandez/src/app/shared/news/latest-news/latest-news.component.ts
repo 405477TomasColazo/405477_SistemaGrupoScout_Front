@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NewsService } from '../../../core/services/news.service';
 import { NewsArticleSummary } from '../../../core/models/news.model';
+import {environment} from '../../../../environments/environment';
+
 
 @Component({
   selector: 'app-latest-news',
@@ -48,6 +50,6 @@ export class LatestNewsComponent implements OnInit {
     if (!imagePath) {
       return '/media/lis.jpg'; // Imagen por defecto del scout
     }
-    return imagePath.startsWith('http') ? imagePath : `http://localhost:8080${imagePath}`;
+    return imagePath.startsWith('http') ? imagePath : `${environment.apiUrl}${imagePath}`;
   }
 }

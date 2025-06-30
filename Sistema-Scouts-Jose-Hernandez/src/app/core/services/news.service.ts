@@ -13,12 +13,13 @@ import {
   CreateDistribution,
   PaginatedNewsResponse
 } from '../models/news.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NewsService {
-  private readonly apiUrl = 'http://localhost:8080/api/news';
+  private readonly apiUrl = `${environment.apiUrl}/api/news`;
   private loadingSubject = new BehaviorSubject<boolean>(false);
   
   public loading$ = this.loadingSubject.asObservable();
