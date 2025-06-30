@@ -1,0 +1,108 @@
+/* Estilos específicos para el modal de FAQ */
+
+/* Transiciones suaves para acordeones */
+.transition {
+  transition: all 0.3s ease;
+}
+
+/* Scroll personalizado */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Focus styles para accesibilidad */
+button:focus,
+input:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animación para iconos rotativos */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Hover effects para secciones */
+.cursor-pointer:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Estilo para preguntas expandidas */
+.whitespace-pre-line {
+  line-height: 1.6;
+}
+
+/* Animación suave para la aparición del modal */
+.transform {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .flex-col.md\:flex-row {
+    flex-direction: column;
+  }
+  
+  .gap-4 {
+    gap: 0.75rem;
+  }
+  
+  .max-w-6xl {
+    max-width: 95vw;
+  }
+}
+
+/* Estilo para badges de conteo */
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* Mejora de legibilidad para respuestas largas */
+.text-gray-700 {
+  line-height: 1.7;
+}
+
+/* Efectos hover para botones de filtro */
+.hover\:bg-gray-300:hover {
+  background-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.hover\:bg-green-700:hover {
+  background-color: #15803d;
+}
+
+.hover\:bg-gray-700:hover {
+  background-color: #374151;
+}
+
+/* Estilo para el estado activo de filtros */
+.bg-blue-600 {
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}

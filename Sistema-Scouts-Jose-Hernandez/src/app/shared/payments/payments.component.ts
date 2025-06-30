@@ -5,6 +5,8 @@ import {Fee, Payment, PaymentFilters} from '../../core/models/payments.model';
 import {Subscription} from 'rxjs';
 import {PaymentService} from '../../core/services/payment.service';
 import {FamilyGroupService} from '../../core/services/family-group.service';
+import {ExportService} from '../../core/services/export.service';
+import {ExportButtonsComponent} from '../components/export-buttons/export-buttons.component';
 
 import {FormsModule} from '@angular/forms';
 
@@ -16,7 +18,8 @@ declare var MercadoPago: any;
     DatePipe,
     NgIf,
     NgClass,
-    FormsModule
+    FormsModule,
+    ExportButtonsComponent
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.css'
@@ -27,12 +30,22 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   seccionActiva: 'cuotas' | 'historial' = 'cuotas';
   selectedMember: MemberProtagonist | undefined;
   pendingFees: Fee[] = [];
+  filteredFees: Fee[] = [];
   selectedFees: number[] = [];
   paymentsHistory: Payment[] = [];
   familyGroup: FamilyGroup | undefined;
   subscriptions: Subscription[] = [];
 
+  // Filtro de tipo de cuota
+  feeTypeFilter: 'all' | 'monthly' | 'event' = 'all';
+
   filters: PaymentFilters = {
+    familyGroupId: null,
+    maxAmount: null,
+    memberName: null,
+    paymentMethod: null,
+    sectionId: null,
+    status: null,
     memberId: null,
     dateFrom: null,
     dateTo: null,
@@ -63,11 +76,20 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   alertType: 'success' | 'error' = 'success';
   alertText = '';
 
+  // Variables para exportación
+  isExportingPendingFees = false;
+  isExportingPaymentHistory = false;
+
+  // Variables para balance de cuenta
+  memberBalance: number = 0;
+  showBalanceSection: boolean = false;
+
   // Referencia para Math en el template
   Math = Math;
 
   private readonly paymentService: PaymentService = inject(PaymentService);
   private readonly familyGroupService: FamilyGroupService = inject(FamilyGroupService);
+  private readonly exportService: ExportService = inject(ExportService);
   private cdr = inject(ChangeDetectorRef);
 
   ngOnDestroy(): void {
@@ -101,6 +123,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
       const sub = this.paymentService.getPendingFeed(memberId).subscribe({
         next: data => {
           this.pendingFees = data;
+          this.applyFeeTypeFilter();
         },
         error: err => {
           console.error('Error al cargar datos de familia:', err);
@@ -108,6 +131,46 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         }
       })
     }
+  }
+
+  private applyFeeTypeFilter() {
+    if (this.feeTypeFilter === 'all') {
+      this.filteredFees = [...this.pendingFees];
+    } else {
+      this.filteredFees = this.pendingFees.filter(fee => {
+        const feeType = this.determineFeeType(fee);
+        return feeType === this.feeTypeFilter;
+      });
+    }
+  }
+
+  determineFeeType(fee: Fee): 'monthly' | 'event' {
+    // Estrategia para identificar fees de eventos:
+    // 1. Si la descripción contiene palabras relacionadas con eventos
+    // 2. Si el formato del período no es mensual típico
+    // 3. Otros patrones que puedas identificar
+
+    const description = fee.description.toLowerCase();
+    const eventKeywords = ['evento', 'campamento', 'salida', 'actividad', 'excursión', 'fogón', 'raid'];
+
+    // Verificar si contiene palabras clave de eventos
+    if (eventKeywords.some(keyword => description.includes(keyword))) {
+      return 'event';
+    }
+
+    // Si la descripción no parece una cuota mensual estándar
+    if (!description.includes('cuota') && !description.includes('mensual') && !description.includes('mes')) {
+      return 'event';
+    }
+
+    // Por defecto, asumir que es mensual
+    return 'monthly';
+  }
+
+  changeFeeTypeFilter(type: 'all' | 'monthly' | 'event') {
+    this.feeTypeFilter = type;
+    this.selectedFees = []; // Limpiar selección al cambiar filtro
+    this.applyFeeTypeFilter();
   }
 
   loadPaymentsHistory(page = 1): void {
@@ -127,12 +190,12 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   toggleAllFees(): void {
-    if (this.pendingFees.length === this.selectedFees.length) {
+    if (this.filteredFees.length === this.selectedFees.length) {
       // Si ya están todos seleccionados, los deselecciona
       this.selectedFees = [];
     } else {
-      // Selecciona todos
-      this.selectedFees = this.pendingFees.map(fee => fee.id);
+      // Selecciona todos los filtrados
+      this.selectedFees = this.filteredFees.map(fee => fee.id);
     }
   }
 
@@ -148,10 +211,17 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   selectMember(member: MemberProtagonist): void {
     this.selectedMember = member;
     this.loadPendingFees();
+    this.loadMemberBalance();
   }
 
   clearFilters(): void {
     this.filters = {
+      familyGroupId: null,
+      maxAmount: null,
+      memberName: null,
+      paymentMethod: null,
+      sectionId: null,
+      status: null,
       memberId: null,
       dateFrom: null,
       dateTo: null,
@@ -232,21 +302,22 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   downloadRecipe(payment: Payment): void {
-    // this.paymentService.downloadPaymentReceipt(payment.id).subscribe({
-    //   next: (blob) => {
-    //     const url = window.URL.createObjectURL(blob);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = `comprobante-pago-${payment.referenceId}.pdf`;
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     document.body.removeChild(a);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error al descargar comprobante:', error);
-    //     this.showAlertMessage('error', 'No se pudo descargar el comprobante');
-    //   }
-    // });
+    this.paymentService.downloadPaymentReceipt(payment.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `comprobante-pago-${payment.referenceId || payment.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al descargar comprobante:', error);
+        this.showAlertMessage('error', 'No se pudo descargar el comprobante');
+      }
+    });
   }
   retryPayment(payment: Payment): void {
     // Se pueden recuperar los conceptos del pago fallido
@@ -336,20 +407,29 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (preferenceResponse) => {
 
-        // Inicializa el Brick de Card Payment
-        const cardPaymentBrickSettings = {
+        // Inicializa el Payment Brick completo (incluye todos los métodos de pago)
+        const paymentBrickSettings = {
           initialization: {
-            amount:totalAmount,
+            amount: totalAmount,
             preferenceId: preferenceResponse.preferenceId
           },
           customization: {
             paymentMethods: {
-              ticket: "all",
-              creditCard: "all",
-              prepaidCard: "all",
-              debitCard: "all",
-              mercadoPago: "all",
+              ticket: "all",           // Rapipago, PagoFácil, etc.
+              creditCard: "all",       // Tarjetas de crédito
+              prepaidCard: "all",      // Tarjetas prepagas
+              debitCard: "all",        // Tarjetas de débito
+              mercadoPago: "all",      // Cuenta de MercadoPago
+              bankTransfer: "all",     // Transferencias bancarias
+              atm: "all"              // Cajeros automáticos
             },
+            visual: {
+              hidePaymentButton: false,
+              hideFormTitle: false,
+              style: {
+                theme: 'default'
+              }
+            }
           },
           callbacks: {
             onReady: () => {
@@ -360,8 +440,8 @@ export class PaymentsComponent implements OnInit, OnDestroy {
               this.loadingPaymentBrick = false;
               this.showAlertMessage('error', 'Hubo un problema con el servicio de pago');
             },
-            onSubmit: (cardFormData: any) => {
-              this.processCardPayment(cardFormData, preferenceResponse.preferenceId);
+            onSubmit: (paymentFormData: any) => {
+              this.processPayment(paymentFormData, preferenceResponse.preferenceId);
             }
           }
         };
@@ -370,8 +450,8 @@ export class PaymentsComponent implements OnInit, OnDestroy {
         const brickContainerId = 'mercadopago-bricks-container';
 
         if (brickContainer) {
-          // Renderiza el Brick
-          this.mpCardPaymentBrickController = this.mpInstance.bricks().create('cardPayment', brickContainerId, cardPaymentBrickSettings );
+          // Renderiza el Payment Brick completo
+          this.mpCardPaymentBrickController = this.mpInstance.bricks().create('payment', brickContainerId, paymentBrickSettings );
           this.loadingPaymentBrick = false;
         } else {
           console.error('No se encontró el contenedor para el Brick de MercadoPago');
@@ -386,11 +466,11 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     });
   }
 
-  processCardPayment(cardFormData: any, preferenceId: string): void {
+  processPayment(paymentFormData: any, preferenceId: string): void {
     this.processingPayment = true;
 
     this.paymentService.processPayment({
-      cardFormData: cardFormData,
+      paymentFormData: paymentFormData,
       preferenceId: preferenceId,
       feeIds: this.selectedFees
     }).subscribe({
@@ -461,16 +541,16 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }, 300); // Un retraso un poco mayor para asegurar que la UI esté lista
   }
 
-  processPayment(): void {
-    // Este método se llama desde el botón "Confirmar pago"
-    // El procesamiento real lo gestiona MercadoPago al hacer submit del formulario
-    // Por lo que este método queda para compatibilidad con la plantilla
-    if (this.mpCardPaymentBrickController) {
-      this.processingPayment = true;
-    } else {
-      this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
-    }
-  }
+  // processPayment(): void {
+  //   // Este método se llama desde el botón "Confirmar pago"
+  //   // El procesamiento real lo gestiona MercadoPago al hacer submit del formulario
+  //   // Por lo que este método queda para compatibilidad con la plantilla
+  //   if (this.mpCardPaymentBrickController) {
+  //     this.processingPayment = true;
+  //   } else {
+  //     this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
+  //   }
+  // }
 
   // Métodos para cambio de secciones
   changeTab(tab: 'cuotas' | 'historial'): void {
@@ -485,6 +565,117 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   // Método para formatear fechas en formato local
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('es-AR');
+  }
+
+  // Métodos de exportación
+  exportPendingFeesToPDF(): void {
+    if (this.filteredFees.length === 0) {
+      this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingFees = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.filteredFees.map(fee => ({
+      description: fee.description,
+      period: fee.period,
+      dueDate: 'Por definir', // TODO: Implementar fechas de vencimiento
+      amount: fee.amount
+    }));
+
+    try {
+      this.exportService.exportPaymentsToPDF(exportData, true);
+      this.showAlertMessage('success', 'Cuotas pendientes exportadas a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar cuotas pendientes a PDF:', error);
+      this.showAlertMessage('error', 'Error al exportar cuotas pendientes a PDF');
+    }
+
+    this.isExportingPendingFees = false;
+  }
+
+  exportPendingFeesToCSV(): void {
+    if (this.filteredFees.length === 0) {
+      this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
+      return;
+    }
+
+    this.isExportingPendingFees = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.filteredFees.map(fee => ({
+      description: fee.description,
+      period: fee.period,
+      dueDate: 'Por definir', // TODO: Implementar fechas de vencimiento
+      amount: fee.amount
+    }));
+
+    try {
+      this.exportService.exportPaymentsToCSV(exportData, true);
+      this.showAlertMessage('success', 'Cuotas pendientes exportadas a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar cuotas pendientes a CSV:', error);
+      this.showAlertMessage('error', 'Error al exportar cuotas pendientes a CSV');
+    }
+
+    this.isExportingPendingFees = false;
+  }
+
+  exportPaymentHistoryToPDF(): void {
+    if (this.paymentsHistory.length === 0) {
+      this.showAlertMessage('error', 'No hay historial de pagos para exportar');
+      return;
+    }
+
+    this.isExportingPaymentHistory = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.paymentsHistory.map(payment => ({
+      paymentDate: payment.paymentDate,
+      memberName: this.getMemberName(payment.memberId),
+      referenceId: payment.referenceId || 'N/A',
+      amount: payment.amount,
+      status: this.getStatusText(payment.status)
+    }));
+
+    try {
+      this.exportService.exportPaymentsToPDF(exportData, false);
+      this.showAlertMessage('success', 'Historial de pagos exportado a PDF exitosamente');
+    } catch (error) {
+      console.error('Error al exportar historial de pagos a PDF:', error);
+      this.showAlertMessage('error', 'Error al exportar historial de pagos a PDF');
+    }
+
+    this.isExportingPaymentHistory = false;
+  }
+
+  exportPaymentHistoryToCSV(): void {
+    if (this.paymentsHistory.length === 0) {
+      this.showAlertMessage('error', 'No hay historial de pagos para exportar');
+      return;
+    }
+
+    this.isExportingPaymentHistory = true;
+    
+    // Preparar datos para exportación
+    const exportData = this.paymentsHistory.map(payment => ({
+      paymentDate: payment.paymentDate,
+      memberName: this.getMemberName(payment.memberId),
+      referenceId: payment.referenceId || 'N/A',
+      amount: payment.amount,
+      status: this.getStatusText(payment.status)
+    }));
+
+    try {
+      this.exportService.exportPaymentsToCSV(exportData, false);
+      this.showAlertMessage('success', 'Historial de pagos exportado a CSV exitosamente');
+    } catch (error) {
+      console.error('Error al exportar historial de pagos a CSV:', error);
+      this.showAlertMessage('error', 'Error al exportar historial de pagos a CSV');
+    }
+
+    this.isExportingPaymentHistory = false;
   }
 
   // initMercadoPago(): void {
@@ -605,5 +796,81 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   //     this.showAlertMessage('error', 'No se pudo inicializar el servicio de pago');
   //   }
   // }
+
+  // Métodos para balance de cuenta
+  loadMemberBalance(): void {
+    if (!this.selectedMember?.id) {
+      this.memberBalance = 0;
+      this.showBalanceSection = false;
+      return;
+    }
+
+    this.paymentService.getMemberBalance(this.selectedMember.id).subscribe({
+      next: (response) => {
+        this.memberBalance = response.balance || 0;
+        this.showBalanceSection = true;
+      },
+      error: (error) => {
+        console.error('Error loading member balance:', error);
+        this.memberBalance = 0;
+        this.showBalanceSection = false;
+        this.showAlertMessage('error', 'No se pudo cargar el balance del miembro');
+      }
+    });
+  }
+
+  getMaxBalanceToUse(): number {
+    if (!this.selectedFees.length) return 0;
+    const totalAmount = this.calculateTotalAmount();
+    return Math.min(this.memberBalance, totalAmount);
+  }
+
+  canApplyBalance(): boolean {
+    return this.memberBalance > 0 && this.selectedFees.length > 0;
+  }
+
+  applyBalanceToSelectedFees(): void {
+    if (!this.selectedMember?.id || !this.canApplyBalance()) {
+      this.showAlertMessage('error', 'No se puede aplicar balance en este momento');
+      return;
+    }
+
+    const totalAmount = this.calculateTotalAmount();
+    const balanceToUse = Math.min(this.memberBalance, totalAmount);
+    
+    // Mostrar confirmación
+    const message = `¿Aplicar $${balanceToUse} de tu balance a las cuotas seleccionadas?\n\n` +
+                   `Balance actual: $${this.memberBalance}\n` +
+                   `Total cuotas: $${totalAmount}\n` +
+                   `${balanceToUse < totalAmount ? `Restante a pagar: $${totalAmount - balanceToUse}` : 'Las cuotas quedarán completamente pagadas'}`;
+    
+    if (!confirm(message)) {
+      return;
+    }
+
+    this.paymentService.applyBalanceToFees(this.selectedMember.id, this.selectedFees).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.showAlertMessage('success', response.message);
+          
+          // Actualizar datos
+          this.memberBalance = response.remainingBalance;
+          this.loadPendingFees(); // Recargar cuotas para ver los cambios
+          this.selectedFees = []; // Limpiar selección
+          
+          if (response.feesPaidCompletely > 0) {
+            this.showAlertMessage('success', 
+              `¡${response.feesPaidCompletely} cuota(s) pagada(s) completamente con balance!`);
+          }
+        } else {
+          this.showAlertMessage('error', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error applying balance:', error);
+        this.showAlertMessage('error', 'Error al aplicar balance a las cuotas');
+      }
+    });
+  }
 
 }

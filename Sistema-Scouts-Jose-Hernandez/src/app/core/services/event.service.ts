@@ -3,12 +3,13 @@ import {BehaviorSubject, Observable, tap, map} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {EventFilter, EventRegistration,Event} from '../models/events.model';
 import {SectionMember} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventService {
-  private apiUrl = 'http://localhost:8080/events';
+  private apiUrl = `${environment.apiUrl}/events`;
   private eventsSubject = new BehaviorSubject<Event[]>([]);
   public events$ = this.eventsSubject.asObservable();
 
@@ -101,7 +102,7 @@ export class EventService {
   // Método para obtener miembros por sección
   getMembersBySection(sections: string[]): Observable<SectionMember[]> {
     const params = new HttpParams().set('sections', sections.join(','));
-    return this.http.get<SectionMember[]>('http://localhost:8080/members', { params });
+    return this.http.get<SectionMember[]>(`${environment.apiUrl}/members`, { params });
   }
 
   // Método auxiliar para convertir strings de fecha a objetos Date

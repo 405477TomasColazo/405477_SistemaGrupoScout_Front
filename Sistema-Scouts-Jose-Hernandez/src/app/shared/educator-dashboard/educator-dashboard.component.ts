@@ -7,6 +7,9 @@ import {FamilyGroupService} from '../../core/services/family-group.service';
 import {Tutor} from '../../core/models/family-group.model';
 import {ProgressionService} from '../../core/services/progression.service';
 import {MarchSheet, ProgressionStage, GrowthArea, AREA_LABELS} from '../../core/models/progression.model';
+import {ExportService} from '../../core/services/export.service';
+import {ExportButtonsComponent} from '../components/export-buttons/export-buttons.component';
+import {AuthService} from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-educator-dashboard',
@@ -16,7 +19,8 @@ import {MarchSheet, ProgressionStage, GrowthArea, AREA_LABELS} from '../../core/
     NgIf,
     NgClass,
     CurrencyPipe,
-    DatePipe
+    DatePipe,
+    ExportButtonsComponent
   ],
   templateUrl: './educator-dashboard.component.html',
   styleUrl: './educator-dashboard.component.css'
@@ -34,6 +38,11 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
   loadingProgression: boolean = false;
   changingStage: boolean = false;
   error: string | null = null;
+  
+  // Balance editing properties
+  showEditBalanceModal: boolean = false;
+  selectedMemberForBalance: SectionMember | null = null;
+  updatingBalance: boolean = false;
 
   filtrosForm = new FormGroup({
     searchText: new FormControl(''),
@@ -45,10 +54,20 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
     comments: new FormControl('')
   });
 
+  editBalanceForm = new FormGroup({
+    newBalance: new FormControl(0, [Validators.required, Validators.min(0.01)]),
+    reason: new FormControl('', [Validators.required, Validators.minLength(5)])
+  });
+
+  // Export state variables
+  isExportingMembers = false;
+
   constructor(
     private educatorService: EducatorsService, 
     private familyGroupService: FamilyGroupService,
-    private progressionService: ProgressionService
+    private progressionService: ProgressionService,
+    private exportService: ExportService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -280,5 +299,126 @@ export class EducatorDashboardComponent implements OnInit, OnDestroy {
     const firstInitial = name && name.length > 0 ? name.charAt(0).toUpperCase() : '';
     const lastInitial = lastName && lastName.length > 0 ? lastName.charAt(0).toUpperCase() : '';
     return firstInitial + lastInitial;
+  }
+
+  // Export Methods
+  exportMembersToPDF(): void {
+    if (this.miembrosFiltrados.length === 0) {
+      this.error = 'No hay miembros para exportar';
+      return;
+    }
+
+    this.isExportingMembers = true;
+
+    const exportData = this.miembrosFiltrados.map(miembro => ({
+      firstName: miembro.name,
+      lastName: miembro.lastName,
+      dni: miembro.dni,
+      age: this.getAge(miembro.birthdate),
+      section: miembro.section,
+      memberType: this.getRolLabel(miembro)
+    }));
+
+    try {
+      this.exportService.exportMembersToPDF(exportData, 'Lista de Miembros de la Sección');
+      // No hay sistema de alertas en este componente, solo limpiamos el error
+      this.error = null;
+    } catch (error) {
+      console.error('Error al exportar miembros a PDF:', error);
+      this.error = 'Error al exportar miembros a PDF';
+    }
+
+    this.isExportingMembers = false;
+  }
+
+  exportMembersToCSV(): void {
+    if (this.miembrosFiltrados.length === 0) {
+      this.error = 'No hay miembros para exportar';
+      return;
+    }
+
+    this.isExportingMembers = true;
+
+    const exportData = this.miembrosFiltrados.map(miembro => ({
+      firstName: miembro.name,
+      lastName: miembro.lastName,
+      dni: miembro.dni,
+      age: this.getAge(miembro.birthdate),
+      section: miembro.section,
+      memberType: this.getRolLabel(miembro)
+    }));
+
+    try {
+      this.exportService.exportMembersToCSV(exportData, 'lista-miembros-seccion');
+      // No hay sistema de alertas en este componente, solo limpiamos el error
+      this.error = null;
+    } catch (error) {
+      console.error('Error al exportar miembros a CSV:', error);
+      this.error = 'Error al exportar miembros a CSV';
+    }
+
+    this.isExportingMembers = false;
+  }
+
+  // Balance editing methods
+  isAdmin(): boolean {
+    return this.authService.hasRole('ADMIN');
+  }
+
+  editBalance(member: SectionMember): void {
+    this.selectedMemberForBalance = member;
+    this.editBalanceForm.patchValue({
+      newBalance: member.accountBalance,
+      reason: ''
+    });
+    this.showEditBalanceModal = true;
+  }
+
+  saveBalance(): void {
+    if (!this.editBalanceForm.valid || !this.selectedMemberForBalance) {
+      return;
+    }
+
+    this.updatingBalance = true;
+    this.error = null;
+
+    const newBalance = this.editBalanceForm.get('newBalance')?.value || 0;
+    const reason = this.editBalanceForm.get('reason')?.value || '';
+
+    this.familyGroupService.updateMemberBalance(
+      this.selectedMemberForBalance.id,
+      newBalance,
+      reason
+    ).subscribe({
+      next: (updatedMember) => {
+        // Update the member in local arrays
+        const memberIndex = this.miembrosSeccion.findIndex(m => m.id === this.selectedMemberForBalance?.id);
+        if (memberIndex !== -1) {
+          this.miembrosSeccion[memberIndex].accountBalance = updatedMember.accountBalance;
+        }
+        
+        const filteredIndex = this.miembrosFiltrados.findIndex(m => m.id === this.selectedMemberForBalance?.id);
+        if (filteredIndex !== -1) {
+          this.miembrosFiltrados[filteredIndex].accountBalance = updatedMember.accountBalance;
+        }
+
+        this.updatingBalance = false;
+        this.showEditBalanceModal = false;
+        this.selectedMemberForBalance = null;
+        this.editBalanceForm.reset();
+      },
+      error: (err) => {
+        console.error('Error updating member balance:', err);
+        this.error = 'Error al actualizar el balance. Intente nuevamente.';
+        this.updatingBalance = false;
+      }
+    });
+  }
+
+  cancelEditBalance(): void {
+    this.showEditBalanceModal = false;
+    this.selectedMemberForBalance = null;
+    this.editBalanceForm.reset();
+    this.error = null;
   }
 }

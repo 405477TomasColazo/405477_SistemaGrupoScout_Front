@@ -1,0 +1,212 @@
+<!-- Archivo: terms-modal.component.html -->
+<!-- Overlay del modal (fondo oscuro) -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40" (keydown)="onKeyDown($event)">
+  <!-- Contenedor del modal -->
+  <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 h-[90vh] overflow-hidden z-50 transform transition-all">
+    <!-- Cabecera del modal -->
+    <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <img src="/media/lis.jpg" alt="Logo Scout" class="h-10 w-10 rounded-full">
+        <h3 class="text-xl font-bold">Términos y Condiciones</h3>
+      </div>
+      <button (click)="onClose()" class="text-white hover:text-gray-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Contenido del modal con navegación lateral -->
+    <div class="flex h-full">
+      <!-- Navegación lateral -->
+      <div class="w-1/4 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+        <div class="p-4">
+          <h4 class="font-semibold text-gray-800 mb-3">Navegación</h4>
+          <nav class="space-y-1">
+            <button
+              *ngFor="let section of sections"
+              (click)="scrollToSection(section.id)"
+              [class]="'w-full text-left px-3 py-2 rounded text-sm transition ' +
+                       (activeSection === section.id ? 'bg-blue-100 text-blue-800 border-blue-300' : 'hover:bg-gray-100 text-gray-700')">
+              {{ section.title }}
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Contenido principal -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="max-w-4xl">
+          <!-- Fecha y metadata -->
+          <div class="text-sm text-gray-600 mb-6">
+            <p><strong>Fecha de entrada en vigencia:</strong> Junio 2025</p>
+            <p><strong>Última actualización:</strong> Junio 2025</p>
+          </div>
+
+          <!-- Bienvenida y Aceptación de Términos -->
+          <section id="bienvenida" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Bienvenida y Aceptación de Términos</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>Bienvenido a <strong>Sistema de Gestión del Grupo Scout José Hernández</strong> proporcionado por el <strong>Grupo Scout José Hernández</strong> (la "Organización", "nosotros" o "nos"). Nos complace ofrecerle acceso al Servicio (como se define más abajo), sujeto a estos términos y condiciones (los "Términos de Servicio") y a la Política de Privacidad correspondiente.</p>
+
+              <p>Al acceder y utilizar el Sistema, usted expresa su consentimiento, acuerdo y entendimiento de los Términos de Servicio y la Política de Privacidad. Si no está de acuerdo con los Términos de Servicio o la Política de Privacidad, no utilice el Sistema.</p>
+
+              <p>Si utiliza el servicio está aceptando las modalidades operativas en vigencia descriptas más adelante, las declara conocer y aceptar, las que se habiliten en el futuro y en los términos y condiciones que a continuación se detallan:</p>
+            </div>
+          </section>
+
+          <!-- Operaciones Habilitadas -->
+          <section id="operaciones" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Operaciones Habilitadas</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>Las operaciones habilitadas son aquellas que estarán disponibles para los usuarios del Grupo Scout, quienes deberán cumplir los requisitos que se encuentren vigentes en su momento para operar el Sistema. Las mismas podrán ser ampliadas o restringidas por la organización, comunicándolo previamente con una antelación no menor a 30 días, y comprenden entre otras:</p>
+
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li><strong>Gestión de Miembros:</strong> Administración de scouts, familias y educadores</li>
+                <li><strong>Actividades y Eventos:</strong> Organización y registro de actividades scouts</li>
+                <li><strong>Progresión Personal:</strong> Seguimiento del desarrollo de competencias scouts</li>
+                <li><strong>Gestión Financiera:</strong> Procesamiento de cuotas y pagos</li>
+                <li><strong>Comunicación:</strong> Facilitar la comunicación entre familias, scouts y educadores</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Acceso y Uso del Sistema -->
+          <section id="acceso" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Acceso y Uso del Sistema</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>En ningún caso debe entenderse que la solicitud de un servicio implica obligación alguna para el Grupo Scout más allá de lo establecido en estos términos.</p>
+
+              <p>Para operar el Sistema se requerirá siempre que se trate de miembros registrados del <strong>Grupo Scout José Hernández</strong>, quienes podrán acceder mediante cualquier dispositivo con conexión a Internet. El usuario deberá proporcionar los datos de identificación y la clave personal, que será provista por el sistema como requisito previo a la primera operación.</p>
+
+              <p>La clave personal y todo mecanismo adicional de autenticación tiene el carácter de <strong>secreto e intransferible</strong>, por lo tanto el usuario asume las consecuencias de su divulgación a terceros, liberando al <strong>Grupo Scout José Hernández</strong> de toda responsabilidad que de ello se derive. En ningún caso el Grupo Scout requerirá que suministre la totalidad de los datos por medios no seguros, ni enviará emails requiriendo información personal completa.</p>
+            </div>
+          </section>
+
+          <!-- Costo del Servicio -->
+          <section id="costo" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Costo del Servicio</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>El <strong>Grupo Scout José Hernández</strong> podrá establecer cuotas por el mantenimiento y/o uso de este Sistema o los servicios que en el futuro implemente, entendiéndose facultado para gestionar los correspondientes cobros según las modalidades establecidas por la dirigencia. En caso de cualquier modificación a las cuotas, lo comunicará con al menos 30 días de antelación.</p>
+
+              <p>Los pagos se procesan a través de <strong>MercadoPago</strong> y otros medios autorizados. Los usuarios aceptan los términos de servicio de los proveedores de pago. El Grupo Scout no almacena información de tarjetas de crédito.</p>
+            </div>
+          </section>
+
+          <!-- Vigencia -->
+          <section id="vigencia" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Vigencia</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>El Usuario podrá dejar sin efecto la relación que surja de la presente, en forma inmediata, sin otra responsabilidad que la derivada de las obligaciones scouts pendientes hasta ese momento.</p>
+
+              <p>Si el usuario incumpliera cualquiera de las obligaciones asumidas en su relación con el <strong>Grupo Scout José Hernández</strong>, o de los presentes Términos y Condiciones, la organización podrá decretar la suspensión del acceso al Sistema en forma inmediata, sin que ello genere derecho a indemnización o compensación alguna.</p>
+
+              <p>El <strong>Grupo Scout José Hernández</strong> podrá modificar o discontinuar el Sistema con un preaviso mínimo de 60 días, sin otra responsabilidad más allá de la devolución proporcional de cuotas pre-pagadas.</p>
+            </div>
+          </section>
+
+          <!-- Validez de Operaciones y Notificaciones -->
+          <section id="validez" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Validez de Operaciones y Notificaciones</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>Los registros emitidos por el Sistema serán prueba suficiente de las operaciones realizadas. Los usuarios renuncian expresamente a cuestionar la idoneidad o habilidad de este medio de prueba.</p>
+
+              <p>A los efectos del cumplimiento de disposiciones del Movimiento Scout o contractuales, se otorga a las notificaciones por este medio el mismo alcance que las notificaciones mediante documento escrito.</p>
+            </div>
+          </section>
+
+          <!-- Propiedad Intelectual -->
+          <section id="propiedad" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Propiedad Intelectual</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>El software en Argentina está protegido por la ley 11.723, que regula la propiedad intelectual y los derechos de autor. El Sistema y su código fuente son propiedad del <strong>Grupo Scout José Hernández</strong>. Los logos, marcas y diseños están protegidos por derechos de autor.</p>
+
+              <p>Los usuarios mantienen la propiedad de su contenido personal, pero otorgan licencia para su uso dentro del ámbito scout. El Grupo Scout puede remover contenido inapropiado que no se alinee con los valores del Movimiento Scout.</p>
+            </div>
+          </section>
+
+          <!-- Privacidad de la Información -->
+          <section id="privacidad" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Privacidad de la Información</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>Para utilizar los Servicios ofrecidos por el <strong>Grupo Scout José Hernández</strong>, los Usuarios deberán facilitar determinados datos de carácter personal requeridos para la gestión scout. Su información personal se procesa y almacena en servidores que mantienen altos estándares de seguridad y protección tanto física como tecnológica.</p>
+
+              <p>Solo recopilamos datos necesarios para la gestión scout. Los datos de menores requieren consentimiento parental. Los educadores acceden únicamente a información de scouts de sus secciones asignadas.</p>
+
+              <p>Para mayor información sobre la privacidad de los Datos Personales y casos en los que será revelada la información personal, se pueden consultar nuestras políticas de privacidad detalladas.</p>
+            </div>
+          </section>
+
+          <!-- Limitación de Responsabilidad -->
+          <section id="responsabilidad" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Limitación de Responsabilidad</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>El Sistema se proporciona "tal como está". No garantizamos la ausencia de errores o interrupciones. Los usuarios utilizan el Sistema bajo su propio riesgo. Nuestra responsabilidad se limita al ámbito de las actividades scouts.</p>
+
+              <p>No somos responsables por daños indirectos o consecuenciales derivados del uso del Sistema.</p>
+            </div>
+          </section>
+
+          <!-- Valores Scouts -->
+          <section id="valores" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Valores Scouts</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>El uso de este Sistema debe estar alineado con los valores fundamentales del Movimiento Scout:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li><strong>Honestidad e Integridad:</strong> En todas las interacciones</li>
+                <li><strong>Respeto:</strong> Hacia todos los miembros de la comunidad scout</li>
+                <li><strong>Responsabilidad:</strong> En el uso de la información y recursos</li>
+                <li><strong>Solidaridad:</strong> Apoyando el crecimiento de todos los scouts</li>
+                <li><strong>Compromiso:</strong> Con la misión educativa del Movimiento Scout</li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Jurisdicción -->
+          <section id="jurisdiccion" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Jurisdicción</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <p>Estos términos se rigen por las leyes de la República Argentina. Cualquier disputa se resolverá en los tribunales competentes de Córdoba, Argentina.</p>
+            </div>
+          </section>
+
+          <!-- Contáctanos -->
+          <section id="contacto" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Contáctanos</h2>
+            <div class="prose text-gray-700 space-y-4">
+              <h3 class="text-xl font-semibold">¿Tienes alguna duda o quieres comunicarte con nosotros?</h3>
+
+              <div class="bg-blue-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-2">Información de Contacto</h4>
+                <ul class="space-y-1 text-blue-700">
+                  <li><strong>Grupo Scout:</strong> José Hernández</li>
+                  <li><strong>Email de soporte:</strong> admin&#64;scout.com</li>
+                  <li><strong>Email legal:</strong> tomas.colazo.federico&#64;gmail.com</li>
+                  <li><strong>Teléfono:</strong> [Número de contacto]</li>
+                  <li><strong>Dirección:</strong> [Dirección del Grupo Scout]</li>
+                </ul>
+              </div>
+
+              <div class="bg-green-50 p-4 rounded-lg mt-4">
+                <h4 class="font-semibold text-green-800 mb-2">Soporte Técnico</h4>
+                <p class="text-green-700">El soporte está disponible durante horarios de actividad del Grupo Scout. Las consultas técnicas se responden en un plazo máximo de 48 horas. Para emergencias, contactar directamente a los administradores del sistema.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Footer del modal -->
+          <div class="border-t border-gray-200 pt-6 mt-8">
+            <p class="text-center text-gray-600 text-sm font-medium">
+              <strong>Al utilizar el Sistema de Gestión del Grupo Scout José Hernández, usted confirma que ha leído, entendido y acepta estos Términos y Condiciones en su totalidad.</strong>
+            </p>
+            <div class="flex justify-center mt-4">
+              <button (click)="onClose()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,171 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            ¡Bienvenido, Educador {{ user?.lastName }}!
+          </h1>
+          <p class="text-gray-600 mt-2">
+            Panel de control para educadores scout
+          </p>
+        </div>
+        <div class="hidden md:block">
+          <img src="/media/lis.jpg" alt="Logo Scout" class="h-16 w-16 rounded-full">
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div 
+        *ngFor="let action of quickActions"
+        (click)="navigateTo(action.route)"
+        class="bg-white rounded-lg shadow-sm transition-shadow p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500 hover:shadow-md cursor-pointer': action.color === 'blue',
+          'border-green-500 hover:shadow-md cursor-pointer': action.color === 'green',
+          'border-purple-500 hover:shadow-md cursor-pointer': action.color === 'purple',
+          'border-yellow-500 opacity-60 cursor-not-allowed': action.color === 'yellow' && action.route === '#',
+          'border-yellow-500 hover:shadow-md cursor-pointer': action.color === 'yellow' && action.route !== '#'
+        }"
+      >
+        <div class="flex items-center">
+          <div 
+            class="flex-shrink-0 p-3 rounded-md"
+            [ngClass]="{
+              'bg-blue-100': action.color === 'blue',
+              'bg-green-100': action.color === 'green',
+              'bg-purple-100': action.color === 'purple',
+              'bg-yellow-100': action.color === 'yellow'
+            }"
+          >
+            <svg 
+              class="h-6 w-6"
+              [ngClass]="{
+                'text-blue-600': action.color === 'blue',
+                'text-green-600': action.color === 'green',
+                'text-purple-600': action.color === 'purple',
+                'text-yellow-600': action.color === 'yellow'
+              }"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+              [innerHTML]="getIconSvg(action.icon)"
+            >
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900">{{ action.title }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ action.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Scout Progress Summary -->
+      <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Progreso de Scouts - Mi Sección</h2>
+        <div class="space-y-4" *ngIf="scoutsWithPendingApprovals.length > 0; else noApprovals">
+          <div 
+            *ngFor="let scout of scoutsWithPendingApprovals"
+            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+          >
+            <div>
+              <h4 class="font-medium text-gray-900">{{ scout.memberName }}</h4>
+              <p class="text-sm text-gray-500">Competencias pendientes de aprobación</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                {{ scout.pendingCount }} Pendientes
+              </span>
+              <button 
+                (click)="viewScoutMarchSheet(scout.memberId)"
+                class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+              >
+                Ver Hoja de Marcha
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <ng-template #noApprovals>
+          <div class="text-center py-8">
+            <div class="text-gray-400 mb-2">
+              <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="text-gray-500">No hay competencias pendientes de aprobación</p>
+          </div>
+        </ng-template>
+        <button 
+          (click)="navigateTo('/progression')"
+          class="mt-4 w-full text-center text-blue-600 hover:text-blue-500 font-medium"
+        >
+          Ver toda la progresión →
+        </button>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="space-y-6">
+        <!-- Section Stats -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Mi Sección - {{ sectionStats.sectionName }}
+          </h3>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total Protagonistas:</span>
+              <span class="font-medium">{{ sectionStats.totalScouts }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total Educadores:</span>
+              <span class="font-medium text-blue-600">{{ sectionStats.totalEducators }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Activos:</span>
+              <span class="font-medium text-green-600">{{ sectionStats.activeScouts }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Próximos Eventos</h3>
+          <div class="space-y-3" *ngIf="upcomingEvents.length > 0; else noEvents">
+            <div 
+              *ngFor="let event of upcomingEvents | slice:0:3"
+              class="text-sm"
+            >
+              <div class="font-medium text-gray-900">{{ event.title || event.name }}</div>
+              <div class="text-gray-500">{{ event.date || event.eventDate | date:'dd MMM' }}</div>
+              <div class="text-xs text-gray-400" *ngIf="event.description">{{ event.description }}</div>
+            </div>
+          </div>
+          
+          <ng-template #noEvents>
+            <div class="text-center py-4">
+              <div class="text-gray-400 mb-2">
+                <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+              </div>
+              <p class="text-gray-500 text-sm">No hay eventos próximos para tu sección</p>
+            </div>
+          </ng-template>
+          
+          <button 
+            (click)="navigateTo('/event-crud')"
+            class="mt-3 w-full text-center text-blue-600 hover:text-blue-500 text-sm font-medium"
+          >
+            Gestionar eventos →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

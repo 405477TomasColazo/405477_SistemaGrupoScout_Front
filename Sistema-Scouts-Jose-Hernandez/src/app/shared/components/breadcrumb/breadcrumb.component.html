@@ -1,0 +1,23 @@
+<nav class="bg-gray-50 border-b border-gray-200 py-3" *ngIf="breadcrumbs.length > 1">
+  <div class="container mx-auto px-4">
+    <ol class="flex items-center space-x-2 text-sm">
+      <li *ngFor="let breadcrumb of breadcrumbs; let last = last" class="flex items-center">
+        <ng-container *ngIf="!breadcrumb.active">
+          <button 
+            (click)="navigateTo(breadcrumb.url)"
+            class="text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            {{ breadcrumb.label }}
+          </button>
+          <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </ng-container>
+        
+        <ng-container *ngIf="breadcrumb.active">
+          <span class="text-gray-600 font-medium">{{ breadcrumb.label }}</span>
+        </ng-container>
+      </li>
+    </ol>
+  </div>
+</nav>

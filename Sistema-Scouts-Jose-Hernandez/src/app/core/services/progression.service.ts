@@ -11,12 +11,13 @@ import {
   CompetenceStatus,
   ProgressionStage
 } from '../models/progression.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressionService {
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = `${environment.apiUrl}/api`;
   private currentProgressionSubject = new BehaviorSubject<MarchSheet | null>(null);
   public currentProgression$ = this.currentProgressionSubject.asObservable();
 

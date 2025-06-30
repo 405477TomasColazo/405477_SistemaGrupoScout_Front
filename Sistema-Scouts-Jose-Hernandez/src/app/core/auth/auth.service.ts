@@ -3,6 +3,7 @@ import {TokenService} from './token.service';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {User} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import {User} from '../models/user.model';
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  private apiUrl = 'http://localhost:8080/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient,
               private tokenService: TokenService) {
@@ -55,7 +56,7 @@ export class AuthService {
       // Llamas al backend para obtener el usuario por email
       this.getUserByEmail(email).subscribe({
         next: (user) => {
-          user.roles = roles;
+          user.roles = roles || [];
           // Después de recibir el usuario, actualizas el currentUserSubject
           this.currentUserSubject.next(user);
           console.log(this.currentUserSubject.value);
@@ -69,7 +70,7 @@ export class AuthService {
     }
   }
   getUserByEmail(email: string): Observable<User> {
-    return this.http.get<User>(`http://localhost:8080/user/${email}`);
+    return this.http.get<User>(`${environment.apiUrl}/user/${email}`);
   }
 
   private decodeToken(token: string): any {
@@ -81,6 +82,54 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
-    return user ? user.roles.includes(role) : false;
+    if (!user || !user.roles) return false;
+    
+    // Check both with and without "ROLE_" prefix
+    const roleWithPrefix = role.startsWith('ROLE_') ? role : `ROLE_${role}`;
+    const roleWithoutPrefix = role.startsWith('ROLE_') ? role.substring(5) : role;
+    
+    return user.roles.includes(role) || 
+           user.roles.includes(roleWithPrefix) || 
+           user.roles.includes(roleWithoutPrefix);
+  }
+
+  // Method to update current user data (for profile updates)
+  updateCurrentUser(updatedUser: Partial<User>): void {
+    const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      const newUser = { ...currentUser, ...updatedUser };
+      this.currentUserSubject.next(newUser);
+    }
+  }
+
+  // Method to refresh user data from backend
+  refreshCurrentUser(): void {
+    const currentUser = this.getCurrentUser();
+    if (currentUser && currentUser.email) {
+      this.getUserByEmail(currentUser.email).subscribe({
+        next: (user) => {
+          user.roles = currentUser.roles; // Keep the roles from token
+          this.currentUserSubject.next(user);
+        },
+        error: () => {
+          // Handle error if needed
+          console.error('Error refreshing user data');
+        }
+      });
+    }
+  }
+
+  isAuthenticated(): boolean {
+    return this.isLoggedIn();
+  }
+
+  getUserRole(): string | null {
+    const user = this.getCurrentUser();
+    if (user && user.roles && user.roles.length > 0) {
+      const role = user.roles[0]; 
+      // Remove "ROLE_" prefix if present
+      return role.startsWith('ROLE_') ? role.substring(5) : role;
+    }
+    return null;
   }
 }

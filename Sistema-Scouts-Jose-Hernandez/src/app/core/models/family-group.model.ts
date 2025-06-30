@@ -2,6 +2,7 @@ import {User} from './user.model';
 
 
 export interface Relationship{
+  id?: number;
   memberId: number;
   tutorId: number;
   relationship: string;
@@ -30,7 +31,8 @@ export interface MemberProtagonist extends Member {
   memberType: string;
   section: string;
   accountBalance: number;
-
+  email?: string;
+  contactPhone?: string;
 }
 export interface Tutor extends Member {
   contactPhone: string;

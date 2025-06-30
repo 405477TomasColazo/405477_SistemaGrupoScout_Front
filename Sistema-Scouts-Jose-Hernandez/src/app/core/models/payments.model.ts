@@ -10,6 +10,8 @@ export interface Fee {
 export interface Payment {
   id: number;
   memberId: number;
+  memberName?: string;
+  memberLastName?: string;
   amount: number;
   paymentDate: string;
   status: 'completed' | 'processing' | 'failed' | 'pending';
@@ -30,9 +32,15 @@ export interface PaymentItem {
 
 export interface PaymentFilters {
   memberId: number | null;
+  familyGroupId: number | null;
+  sectionId: number | null;
   dateFrom: string | null;
   dateTo: string | null;
   minAmount: number | null;
+  maxAmount: number | null;
+  status: string | null;
+  paymentMethod: string | null;
+  memberName: string | null;
 }
 
 export interface PaymentPreferenceRequest {
@@ -57,9 +65,10 @@ export interface PaymentPreferenceResponse {
 }
 
 export interface ProcessPaymentRequest {
-  cardFormData: any;
+  paymentFormData: any; // Generic payment data for any method
   preferenceId: string;
   feeIds: number[];
+  paymentMethod?: string; // Optional payment method type
 }
 
 export interface ProcessPaymentResponse {
@@ -83,4 +92,74 @@ export interface EventPaymentItem {
   amount: number;
   paymentStatus: 'pending' | 'paid' | 'exempt';
   registrationId: number;
+}
+
+// Interfaces for admin functionality
+export interface PaymentStatistics {
+  totalPayments: number;
+  completedPayments: number;
+  pendingPayments: number;
+  failedPayments: number;
+  totalAmount: number;
+  completedAmount: number;
+  pendingAmount: number;
+  averagePaymentAmount: number;
+}
+
+export interface PendingPaymentsBySection {
+  sectionId: number;
+  sectionName: string;
+  totalPendingFees: number;
+  totalPendingAmount: number;
+  membersWithPendingPayments: number;
+}
+
+export interface UpdatePaymentStatusRequest {
+  status: string;
+  reason?: string;
+}
+
+// Monthly Fee Management interfaces
+export interface Section {
+  id: number;
+  description: string;
+  minAge?: number;
+  maxAge?: number;
+}
+
+export interface MemberType {
+  id: number;
+  description: string;
+}
+
+export interface FeeGenerationLog {
+  id: number;
+  generationType: 'AUTOMATIC' | 'MANUAL' | 'NEW_MEMBER' | 'GLOBAL_PRICE_UPDATE';
+  executedAt: string;
+  totalFeesGenerated: number;
+  targetMonth: string;
+  section?: string;
+  memberId?: number;
+  memberName?: string;
+  details?: string;
+}
+
+export interface FeeGenerationRequest {
+  targetMonth: string; // Format: YYYY-MM
+  section?: string;
+}
+
+export interface GlobalPriceUpdateRequest {
+  newAmount: number;
+}
+
+export interface GlobalPriceUpdateResult {
+  message: string;
+  newPrice: number;
+  updatedPendingFees: number;
+}
+
+export interface GlobalFeeConfiguration {
+  monthlyFeeAmount: number;
+  message: string;
 }

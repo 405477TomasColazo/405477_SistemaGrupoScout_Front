@@ -4,13 +4,14 @@ import {filter, Observable, of, switchMap} from 'rxjs';
 import { FamilyGroup, MemberProtagonist, Tutor, Relationship } from '../models/family-group.model';
 import {AuthService} from '../auth/auth.service';
 import {User} from '../models/user.model';
+import {environment} from '../../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FamilyGroupService {
-  private apiUrl = 'http://localhost:8080/familyGroup';
+  private apiUrl = `${environment.apiUrl}/familyGroup`;
 
   constructor(private http: HttpClient,private authService: AuthService) {}
 
@@ -33,11 +34,11 @@ export class FamilyGroupService {
   }
 
   updateTutor(tutor: Tutor): Observable<Tutor> {
-    return this.http.put<Tutor>(`${this.apiUrl}/tutors/${tutor.id}`, tutor);
+    return this.http.put<Tutor>(`${this.apiUrl}/tutor/${tutor.id}`, tutor);
   }
 
   deleteTutor(tutorId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/tutors/${tutorId}`);
+    return this.http.delete<void>(`${this.apiUrl}/tutor/${tutorId}`);
   }
 
   // Gestión de beneficiarios
@@ -46,11 +47,12 @@ export class FamilyGroupService {
   }
 
   updateMember(member: MemberProtagonist): Observable<MemberProtagonist> {
-    return this.http.put<MemberProtagonist>(`${this.apiUrl}/members/${member.id}`, member);
+    return this.http.put<MemberProtagonist>(`${this.apiUrl}/member/${member.id}`, member);
   }
 
   deleteMember(memberId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/members/${memberId}`);
+    console.log(this.authService.getCurrentUser())
+    return this.http.delete<void>(`${this.apiUrl}/member/${memberId}`);
   }
 
   // Gestión de relaciones
@@ -58,13 +60,20 @@ export class FamilyGroupService {
     return this.http.post<Relationship>(`${this.apiUrl}/relationship`, relationship);
   }
 
-  deleteRelationship(relationship: Relationship): Observable<void> {
-    return this.http.delete<void>(
-      `${this.apiUrl}/relationships/${relationship.memberId}/${relationship.tutorId}`
-    );
+  deleteRelationship(relationshipId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/relationShip/${relationshipId}`);
   }
 
   getFamilyGroupById(userId: number):Observable<FamilyGroup> {
     return this.http.get<FamilyGroup>(`${this.apiUrl}/${userId}`);
+  }
+
+  // Update member account balance (admin only)
+  updateMemberBalance(memberId: number, newBalance: number, reason: string): Observable<any> {
+    const request = {
+      newBalance: newBalance,
+      reason: reason
+    };
+    return this.http.put<any>(`${environment.apiUrl}/admin/members/${memberId}/balance`, request);
   }
 }

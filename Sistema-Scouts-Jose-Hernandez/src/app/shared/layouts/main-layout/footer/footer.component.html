@@ -1,0 +1,31 @@
+<footer class="bg-blue-800 text-white py-8 mt-auto">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Grupo Scout José Hernández</h3>
+        <p class="text-blue-200">Formando jóvenes, construyendo un mundo mejor desde 1967.</p>
+      </div>
+      
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Enlaces Rápidos</h3>
+        <ul class="space-y-2">
+          <li><a href="/noticias" class="text-blue-200 hover:text-white transition">Noticias</a></li>
+          <li><a href="/events" class="text-blue-200 hover:text-white transition">Eventos</a></li>
+          <li><a href="#contacto" class="text-blue-200 hover:text-white transition">Contacto</a></li>
+          <li><button (click)="onOpenTermsModal()" class="text-blue-200 hover:text-white transition text-left">Términos y Condiciones</button></li>
+          <li><button (click)="onOpenFaqModal()" class="text-blue-200 hover:text-white transition text-left">Preguntas Frecuentes</button></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Contacto</h3>
+        <p class="text-blue-200 mb-2">Email: info@scoutjosehernandez.org</p>
+        <p class="text-blue-200">Tel: +54 11 1234-5678</p>
+      </div>
+    </div>
+    
+    <div class="border-t border-blue-700 mt-8 pt-8 text-center">
+      <p class="text-blue-200">&copy; {{ currentYear }} Grupo Scout José Hernández. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>

@@ -3,6 +3,8 @@ import {AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild} from '@
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import Chart from 'chart.js/auto'
 import {FormsModule} from '@angular/forms';
+import { ExportService } from '../../core/services/export.service';
+import { ExportButtonsComponent } from '../components/export-buttons/export-buttons.component';
 
 interface PagoCuota {
   name: string;
@@ -33,6 +35,7 @@ interface HistoricoMiembrosSeccion {
     NgForOf,
     FormsModule,
     DatePipe,
+    ExportButtonsComponent
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
@@ -235,7 +238,13 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   pagosCuotasChart: Chart | undefined;
   miembrosSeccionChart: Chart | undefined;
 
-  constructor(private ngZone: NgZone) { }
+  // Export state
+  isExportingEvents = false;
+
+  constructor(
+    private ngZone: NgZone,
+    private exportService: ExportService
+  ) { }
 
   ngOnInit(): void {
     // Inicialización de datos
@@ -503,5 +512,46 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.showAlert = false;
     }, 5000);
+  }
+
+  // Export Methods for Events Table
+  exportEventsToPDF(): void {
+    if (this.eventosProximos.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const columns = [
+        { key: 'titulo', header: 'Evento', type: 'text' as const },
+        { key: 'fecha', header: 'Fecha', type: 'text' as const },
+        { key: 'hora', header: 'Hora', type: 'text' as const },
+        { key: 'lugar', header: 'Lugar', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToPDF(this.eventosProximos, columns, 'proximos-eventos', 'Próximos Eventos');
+    } catch (error) {
+      console.error('Error al exportar eventos a PDF:', error);
+    }
+    
+    this.isExportingEvents = false;
+  }
+
+  exportEventsToCSV(): void {
+    if (this.eventosProximos.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const columns = [
+        { key: 'titulo', header: 'Evento', type: 'text' as const },
+        { key: 'fecha', header: 'Fecha', type: 'text' as const },
+        { key: 'hora', header: 'Hora', type: 'text' as const },
+        { key: 'lugar', header: 'Lugar', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToCSV(this.eventosProximos, columns, 'proximos-eventos');
+    } catch (error) {
+      console.error('Error al exportar eventos a CSV:', error);
+    }
+    
+    this.isExportingEvents = false;
   }
 }

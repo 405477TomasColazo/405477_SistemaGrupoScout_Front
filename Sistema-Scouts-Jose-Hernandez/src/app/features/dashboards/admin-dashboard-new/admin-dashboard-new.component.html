@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Welcome Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">
+            Panel de Administración
+          </h1>
+          <p class="text-gray-600 mt-2">
+            Bienvenido, Administrador {{ user?.lastName }}
+          </p>
+        </div>
+        <div class="hidden md:block">
+          <img src="/media/lis.jpg" alt="Logo Scout" class="h-16 w-16 rounded-full">
+        </div>
+      </div>
+    </div>
+
+    <!-- System Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div
+        *ngFor="let stat of systemStats"
+        class="bg-white rounded-lg shadow-sm p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500': stat.color === 'blue',
+          'border-green-500': stat.color === 'green',
+          'border-purple-500': stat.color === 'purple',
+          'border-yellow-500': stat.color === 'yellow'
+        }"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">{{ stat.label }}</p>
+            <p class="text-3xl font-bold"
+               [ngClass]="{
+                 'text-blue-600': stat.color === 'blue',
+                 'text-green-600': stat.color === 'green',
+                 'text-purple-600': stat.color === 'purple',
+                 'text-yellow-600': stat.color === 'yellow'
+               }"
+            >
+              {{ stat.value }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+      <div
+        *ngFor="let action of quickActions"
+        (click)="navigateTo(action.route)"
+        class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer p-6 border-l-4"
+        [ngClass]="{
+          'border-blue-500': action.color === 'blue',
+          'border-green-500': action.color === 'green',
+          'border-purple-500': action.color === 'purple',
+          'border-yellow-500': action.color === 'yellow',
+          'border-indigo-500': action.color === 'indigo',
+          'border-red-500': action.color === 'red'
+        }"
+      >
+        <div class="flex items-center">
+          <div
+            class="flex-shrink-0 p-3 rounded-md"
+            [ngClass]="{
+              'bg-blue-100': action.color === 'blue',
+              'bg-green-100': action.color === 'green',
+              'bg-purple-100': action.color === 'purple',
+              'bg-yellow-100': action.color === 'yellow',
+              'bg-indigo-100': action.color === 'indigo',
+              'bg-red-100': action.color === 'red'
+            }"
+          >
+            <svg
+              class="h-6 w-6"
+              [ngClass]="{
+                'text-blue-600': action.color === 'blue',
+                'text-green-600': action.color === 'green',
+                'text-purple-600': action.color === 'purple',
+                'text-yellow-600': action.color === 'yellow',
+                'text-indigo-600': action.color === 'indigo',
+                'text-red-600': action.color === 'red'
+              }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              [innerHTML]="getIconSvg(action.icon)"
+            >
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-gray-900">{{ action.title }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ action.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Dashboard -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Payments Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Estado de Pagos</h2>
+        <div class="relative h-64">
+          <canvas #pagosCuotasChart class="w-full h-full"></canvas>
+          <div *ngIf="isLoading || isLoadingPayments" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections Distribution Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Distribución por Secciones</h2>
+          <div class="flex items-center space-x-2">
+            <label class="flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="showEducators"
+                (change)="toggleMemberType()"
+                class="sr-only"
+              >
+              <div class="relative">
+                <div class="block bg-gray-600 w-14 h-8 rounded-full" 
+                     [class.bg-blue-600]="showEducators"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition" 
+                     [class.translate-x-6]="showEducators"></div>
+              </div>
+              <span class="ml-3 text-sm font-medium text-gray-700">
+                {{ showEducators ? 'Educadores' : 'Protagonistas' }}
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="relative h-64">
+          <canvas #miembrosSeccionChart class="w-full h-full"></canvas>
+          <div *ngIf="isLoading || isLoadingSections" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

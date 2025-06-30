@@ -5,6 +5,8 @@ import {EventFilter, EventRegistration,Event} from '../../core/models/events.mod
 import {SectionMember} from '../../core/models/user.model';
 import {AuthService} from '../../core/auth/auth.service';
 import {EventService} from '../../core/services/event.service';
+import {ExportService} from '../../core/services/export.service';
+import {ExportButtonsComponent} from '../components/export-buttons/export-buttons.component';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {join} from '@angular/compiler-cli';
 
@@ -15,7 +17,8 @@ import {join} from '@angular/compiler-cli';
     NgClass,
     FormsModule,
     NgForOf,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ExportButtonsComponent
   ],
   templateUrl: './event-management.component.html',
   styleUrl: './event-management.component.css'
@@ -52,6 +55,10 @@ export class EventManagementComponent implements OnInit, OnDestroy {
   selectedMembers: number[] = [];
   eventRegistrations: EventRegistration[] = [];
 
+  // Export state
+  isExportingEvents = false;
+  isExportingParticipants = false;
+
   // Opciones
   eventTypes = [
     { value: 'campamento', label: 'Campamento' },
@@ -71,7 +78,8 @@ export class EventManagementComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private eventService: EventService
+    private eventService: EventService,
+    private exportService: ExportService
   ) {
     this.initializeForm();
   }
@@ -509,5 +517,146 @@ export class EventManagementComponent implements OnInit, OnDestroy {
 
   areAllSectionsSelected(): boolean {
     return this.eventForm.get('sections')?.value?.length === this.sections.length;
+  }
+
+  // Export Methods for Events List
+  exportEventsToPDF(): void {
+    if (this.filteredEvents.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const exportData = this.filteredEvents.map(event => ({
+        title: event.title,
+        eventType: this.getEventTypeLabel(event.eventType),
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        sections: this.getSectionLabelsJoined(event.sections),
+        status: this.getStatusLabel(event.status),
+        capacity: this.getRegistrationStats(event),
+        cost: event.requiresPayment ? `$${event.cost}` : 'Gratuito'
+      }));
+      
+      const columns = [
+        { key: 'title', header: 'Título', type: 'text' as const },
+        { key: 'eventType', header: 'Tipo', type: 'text' as const },
+        { key: 'startDate', header: 'Fecha Inicio', type: 'date' as const },
+        { key: 'endDate', header: 'Fecha Fin', type: 'date' as const },
+        { key: 'location', header: 'Ubicación', type: 'text' as const },
+        { key: 'sections', header: 'Secciones', type: 'text' as const },
+        { key: 'status', header: 'Estado', type: 'text' as const },
+        { key: 'capacity', header: 'Capacidad', type: 'text' as const },
+        { key: 'cost', header: 'Costo', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToPDF(exportData, columns, 'listado-eventos', 'Listado de Eventos');
+    } catch (error) {
+      console.error('Error al exportar eventos a PDF:', error);
+    }
+    
+    this.isExportingEvents = false;
+  }
+
+  exportEventsToCSV(): void {
+    if (this.filteredEvents.length === 0) return;
+    this.isExportingEvents = true;
+    
+    try {
+      const exportData = this.filteredEvents.map(event => ({
+        title: event.title,
+        eventType: this.getEventTypeLabel(event.eventType),
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        sections: this.getSectionLabelsJoined(event.sections),
+        status: this.getStatusLabel(event.status),
+        capacity: this.getRegistrationStats(event),
+        cost: event.requiresPayment ? `$${event.cost}` : 'Gratuito'
+      }));
+      
+      const columns = [
+        { key: 'title', header: 'Título', type: 'text' as const },
+        { key: 'eventType', header: 'Tipo', type: 'text' as const },
+        { key: 'startDate', header: 'Fecha Inicio', type: 'date' as const },
+        { key: 'endDate', header: 'Fecha Fin', type: 'date' as const },
+        { key: 'location', header: 'Ubicación', type: 'text' as const },
+        { key: 'sections', header: 'Secciones', type: 'text' as const },
+        { key: 'status', header: 'Estado', type: 'text' as const },
+        { key: 'capacity', header: 'Capacidad', type: 'text' as const },
+        { key: 'cost', header: 'Costo', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToCSV(exportData, columns, 'listado-eventos');
+    } catch (error) {
+      console.error('Error al exportar eventos a CSV:', error);
+    }
+    
+    this.isExportingEvents = false;
+  }
+
+  // Export Methods for Participants Table
+  exportParticipantsToPDF(): void {
+    if (!this.selectedEvent || this.eventRegistrations.length === 0) return;
+    this.isExportingParticipants = true;
+    
+    try {
+      const exportData = this.eventRegistrations.map(registration => ({
+        participantName: `${registration.memberName} ${registration.memberLastName}`,
+        registrationDate: registration.registrationDate,
+        status: this.getRegistrationStatusLabel(registration.status),
+        paymentStatus: this.selectedEvent!.requiresPayment ? 
+          this.getPaymentStatusLabel(registration.paymentStatus || 'pending') : 'N/A'
+      }));
+      
+      const columns = [
+        { key: 'participantName', header: 'Participante', type: 'text' as const },
+        { key: 'registrationDate', header: 'Fecha de Inscripción', type: 'date' as const },
+        { key: 'status', header: 'Estado', type: 'text' as const },
+        { key: 'paymentStatus', header: 'Estado de Pago', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToPDF(
+        exportData, 
+        columns, 
+        `participantes-${this.selectedEvent.title.replace(/\s+/g, '-').toLowerCase()}`, 
+        `Participantes - ${this.selectedEvent.title}`
+      );
+    } catch (error) {
+      console.error('Error al exportar participantes a PDF:', error);
+    }
+    
+    this.isExportingParticipants = false;
+  }
+
+  exportParticipantsToCSV(): void {
+    if (!this.selectedEvent || this.eventRegistrations.length === 0) return;
+    this.isExportingParticipants = true;
+    
+    try {
+      const exportData = this.eventRegistrations.map(registration => ({
+        participantName: `${registration.memberName} ${registration.memberLastName}`,
+        registrationDate: registration.registrationDate,
+        status: this.getRegistrationStatusLabel(registration.status),
+        paymentStatus: this.selectedEvent!.requiresPayment ? 
+          this.getPaymentStatusLabel(registration.paymentStatus || 'pending') : 'N/A'
+      }));
+      
+      const columns = [
+        { key: 'participantName', header: 'Participante', type: 'text' as const },
+        { key: 'registrationDate', header: 'Fecha de Inscripción', type: 'date' as const },
+        { key: 'status', header: 'Estado', type: 'text' as const },
+        { key: 'paymentStatus', header: 'Estado de Pago', type: 'text' as const }
+      ];
+      
+      this.exportService.exportToCSV(
+        exportData, 
+        columns, 
+        `participantes-${this.selectedEvent.title.replace(/\s+/g, '-').toLowerCase()}`
+      );
+    } catch (error) {
+      console.error('Error al exportar participantes a CSV:', error);
+    }
+    
+    this.isExportingParticipants = false;
   }
 }

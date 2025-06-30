@@ -299,11 +299,31 @@
             {{ event.currentCapacity || 0 }}/{{ event.maxCapacity }} participantes
           </div>
 
-          <div *ngIf="event.requiresPayment" class="flex items-center font-medium text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            ${{ event.cost }}
+          <div *ngIf="event.requiresPayment" class="flex items-center space-x-2">
+            <!-- Costo del evento -->
+            <div class="flex items-center font-medium text-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              ${{ event.cost }}
+            </div>
+            
+            <!-- Badge de estado de pago -->
+            <span *ngIf="hasFamilyConfirmedRegistrations(event) && !hasEventPendingPayments(event)"
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Pagado
+            </span>
+            
+            <span *ngIf="hasFamilyConfirmedRegistrations(event) && hasEventPendingPayments(event)"
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Pendiente
+            </span>
           </div>
         </div>
 
@@ -364,8 +384,8 @@
             Confirmar asistencia pendiente
           </button>
 
-          <!-- Botón para pagar si ya confirmó y el evento requiere pago -->
-          <button *ngIf="event.requiresPayment && hasFamilyConfirmedRegistrations(event) && !hasFamilyPendingRegistrations(event)"
+          <!-- Botón para pagar si ya confirmó y el evento requiere pago Y tiene pagos pendientes -->
+          <button *ngIf="event.requiresPayment && hasFamilyConfirmedRegistrations(event) && !hasFamilyPendingRegistrations(event) && hasEventPendingPayments(event)"
                   (click)="openEventPaymentModal(event)"
                   class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm font-medium flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -373,6 +393,15 @@
             </svg>
             Pagar Evento
           </button>
+
+          <!-- Badge de "Pagado" cuando el evento requiere pago pero ya está completamente pagado -->
+          <div *ngIf="event.requiresPayment && hasFamilyConfirmedRegistrations(event) && !hasFamilyPendingRegistrations(event) && !hasEventPendingPayments(event)"
+               class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-green-100 text-green-800 border border-green-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Evento Pagado
+          </div>
 
           <button (click)="exportToCalendar(event)"
                   class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm font-medium">
