@@ -4,37 +4,19 @@ import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './shared/layouts/auth-layout/auth-layout.component';
 
-// Auth Components
+// Auth Components (keep these eagerly loaded as they're needed immediately)
 import { LoginComponent } from './features/auth/login/login.component';
 import { LogoutComponent } from './features/auth/logout/logout.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
-import { ProfileComponent } from './shared/profile/profile.component';
 
-// Dashboard Components
-import { FamilyDashboardComponent } from './features/dashboards/family-dashboard/family-dashboard.component';
-import { EducatorDashboardNewComponent } from './features/dashboards/educator-dashboard-new/educator-dashboard-new.component';
-import { AdminDashboardNewComponent } from './features/dashboards/admin-dashboard-new/admin-dashboard-new.component';
-
-// Existing Components
+// Light Components (keep eagerly loaded)
 import { HomeComponent } from './shared/home/home.component';
-import { FamilyGestionComponent } from './shared/family-gestion/family-gestion.component';
-import { RegistryManagementComponent } from './shared/registry-management/registry-management.component';
+import { ProfileComponent } from './shared/profile/profile.component';
 import { RegistryComponent } from './shared/registry/registry.component';
 import { PaymentsComponent } from './shared/payments/payments.component';
-import { EducatorDashboardComponent } from './shared/educator-dashboard/educator-dashboard.component';
-import { AdminDashboardComponent } from './shared/admin-dashboard/admin-dashboard.component';
-import { EventManagementComponent } from './shared/event-management/event-management.component';
-import { FamilyEventsComponent } from './shared/family-events/family-events.component';
-import { ProgressionDashboardComponent } from './shared/progression/progression-dashboard/progression-dashboard.component';
-import { MarchSheetComponent } from './shared/progression/march-sheet/march-sheet.component';
-import { SelectCompetencesComponent } from './shared/progression/select-competences/select-competences.component';
 import { NewsListComponent } from './shared/news/news-list/news-list.component';
 import { NewsDetailComponent } from './shared/news/news-detail/news-detail.component';
-import { NewsAdminListComponent } from './shared/news/news-admin/news-admin-list.component';
-import { NewsFormComponent } from './shared/news/news-admin/news-form.component';
-import { AdminPaymentsManagementComponent } from './shared/admin-payments-management/admin-payments-management.component';
-import { MonthlyFeeManagementComponent } from './shared/admin-dashboard/monthly-fee-management/monthly-fee-management.component';
 
 // Guards
 import { AuthGuard } from './core/auth/auth.guard';
@@ -55,9 +37,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
-  {
-    path: 'fuera', component: AdminDashboardComponent
-  },
 
   // Main Application Routes (with MainLayoutComponent)
   {
@@ -71,64 +50,39 @@ export const routes: Routes = [
       { path: 'noticias/:slug', component: NewsDetailComponent },
       { path: 'registro', component: RegistryComponent },
 
-      // Admin Routes
+      // Admin Routes (Lazy Loaded with Standalone Components)
       {
         path: 'admin',
         canActivate: [AdminGuard],
-        children: [
-          { path: 'dashboard', component: AdminDashboardNewComponent },
-          { path: 'stats', component: AdminDashboardComponent }, // Original dashboard with charts
-          { path: 'users', component: RegistryManagementComponent },
-          { path: 'payments', component: AdminPaymentsManagementComponent },
-          { path: 'monthly-fees', component: MonthlyFeeManagementComponent },
-          { path: 'noticias', component: NewsAdminListComponent },
-          { path: 'noticias/crear', component: NewsFormComponent },
-          { path: 'noticias/:id/editar', component: NewsFormComponent },
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-        ]
+        loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes)
       },
 
-      // Educator Routes
+      // Educator Routes (Lazy Loaded with Standalone Components)
       {
         path: 'educator',
         canActivate: [EducatorGuard],
-        children: [
-          { path: 'dashboard', component: EducatorDashboardNewComponent },
-          { path: 'scouts', component: EducatorDashboardComponent }, // Original educator dashboard
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-        ]
+        loadChildren: () => import('./features/educator/educator.routes').then(m => m.educatorRoutes)
       },
 
-      // Family Routes
+      // Family Routes (Lazy Loaded with Standalone Components)
       {
         path: 'family',
         canActivate: [FamilyGuard],
-        children: [
-          { path: 'dashboard', component: FamilyDashboardComponent },
-          { path: 'gestion', component: FamilyGestionComponent },
-          { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-        ]
+        loadChildren: () => import('./features/family/family.routes').then(m => m.familyRoutes)
       },
 
-      // Shared Protected Routes (accessible by authenticated users with appropriate roles)
+      // Events Routes (Lazy Loaded with Standalone Components)
       {
         path: 'events',
         canActivate: [AuthGuard],
-        children: [
-          { path: '', component: FamilyEventsComponent },
-          { path: 'manage', component: EventManagementComponent, canActivate: [EducatorGuard] }
-        ]
+        loadChildren: () => import('./features/events/events.routes').then(m => m.eventsRoutes)
       },
 
+      // Progression Routes (Lazy Loaded with Standalone Components)
       {
         path: 'progression',
         canActivate: [AuthGuard],
-        children: [
-          { path: '', component: ProgressionDashboardComponent },
-          { path: 'dashboard', component: ProgressionDashboardComponent },
-          { path: 'march-sheet', component: MarchSheetComponent },
-          { path: 'select-competences', component: SelectCompetencesComponent }
-        ]
+        loadChildren: () => import('./features/progression/progression.routes').then(m => m.progressionRoutes)
       },
 
       {

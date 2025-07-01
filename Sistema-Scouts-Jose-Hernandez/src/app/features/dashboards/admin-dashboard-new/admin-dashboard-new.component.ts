@@ -7,7 +7,31 @@ import { User } from '../../../core/models/user.model';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import { DashboardService, DashboardStatsDto } from '../../../core/services/dashboard.service';
 import { PaymentService } from '../../../core/services/payment.service';
-import Chart from 'chart.js/auto';
+import {
+  Chart,
+  DoughnutController,
+  BarController,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+
+// Register only the components we need
+Chart.register(
+  DoughnutController,
+  BarController,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 interface PaymentChartData {
   name: string;

@@ -568,7 +568,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   // Métodos de exportación
-  exportPendingFeesToPDF(): void {
+  async exportPendingFeesToPDF(): Promise<void> {
     if (this.filteredFees.length === 0) {
       this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
       return;
@@ -585,7 +585,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }));
 
     try {
-      this.exportService.exportPaymentsToPDF(exportData, true);
+      await this.exportService.exportPaymentsToPDF(exportData, true);
       this.showAlertMessage('success', 'Cuotas pendientes exportadas a PDF exitosamente');
     } catch (error) {
       console.error('Error al exportar cuotas pendientes a PDF:', error);
@@ -595,7 +595,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     this.isExportingPendingFees = false;
   }
 
-  exportPendingFeesToCSV(): void {
+  async exportPendingFeesToCSV(): Promise<void> {
     if (this.filteredFees.length === 0) {
       this.showAlertMessage('error', 'No hay cuotas pendientes para exportar');
       return;
@@ -612,7 +612,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }));
 
     try {
-      this.exportService.exportPaymentsToCSV(exportData, true);
+      await this.exportService.exportPaymentsToCSV(exportData, true);
       this.showAlertMessage('success', 'Cuotas pendientes exportadas a CSV exitosamente');
     } catch (error) {
       console.error('Error al exportar cuotas pendientes a CSV:', error);
@@ -622,7 +622,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     this.isExportingPendingFees = false;
   }
 
-  exportPaymentHistoryToPDF(): void {
+  async exportPaymentHistoryToPDF(): Promise<void> {
     if (this.paymentsHistory.length === 0) {
       this.showAlertMessage('error', 'No hay historial de pagos para exportar');
       return;
@@ -640,7 +640,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }));
 
     try {
-      this.exportService.exportPaymentsToPDF(exportData, false);
+      await this.exportService.exportPaymentsToPDF(exportData, false);
       this.showAlertMessage('success', 'Historial de pagos exportado a PDF exitosamente');
     } catch (error) {
       console.error('Error al exportar historial de pagos a PDF:', error);
@@ -650,7 +650,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     this.isExportingPaymentHistory = false;
   }
 
-  exportPaymentHistoryToCSV(): void {
+  async exportPaymentHistoryToCSV(): Promise<void> {
     if (this.paymentsHistory.length === 0) {
       this.showAlertMessage('error', 'No hay historial de pagos para exportar');
       return;
@@ -668,7 +668,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     }));
 
     try {
-      this.exportService.exportPaymentsToCSV(exportData, false);
+      await this.exportService.exportPaymentsToCSV(exportData, false);
       this.showAlertMessage('success', 'Historial de pagos exportado a CSV exitosamente');
     } catch (error) {
       console.error('Error al exportar historial de pagos a CSV:', error);

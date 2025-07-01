@@ -1,8 +1,4 @@
 import { Injectable } from '@angular/core';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as Papa from 'papaparse';
-import { saveAs } from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +8,18 @@ export class ExportService {
   constructor() { }
 
   /**
-   * Export data to PDF format
+   * Export data to PDF format (with dynamic import)
    * @param data Array of objects to export
    * @param columns Array of column definitions
    * @param fileName Name of the file (without extension)
    * @param title Title for the PDF document
    */
-  exportToPDF(data: any[], columns: ExportColumn[], fileName: string, title: string): void {
+  async exportToPDF(data: any[], columns: ExportColumn[], fileName: string, title: string): Promise<void> {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]);
+    
     const doc = new jsPDF();
     
     // Add title
@@ -68,12 +69,17 @@ export class ExportService {
   }
 
   /**
-   * Export data to CSV format
+   * Export data to CSV format (with dynamic import)
    * @param data Array of objects to export
    * @param columns Array of column definitions
    * @param fileName Name of the file (without extension)
    */
-  exportToCSV(data: any[], columns: ExportColumn[], fileName: string): void {
+  async exportToCSV(data: any[], columns: ExportColumn[], fileName: string): Promise<void> {
+    const [{ unparse }, { saveAs }] = await Promise.all([
+      import('papaparse'),
+      import('file-saver')
+    ]);
+    
     // Prepare data for CSV
     const csvData = data.map(item => {
       const row: any = {};
@@ -84,7 +90,7 @@ export class ExportService {
     });
     
     // Convert to CSV
-    const csv = Papa.unparse(csvData, {
+    const csv = unparse(csvData, {
       delimiter: ',',
       header: true
     });
@@ -99,9 +105,9 @@ export class ExportService {
   }
 
   /**
-   * Export payments data to PDF
+   * Export payments data to PDF (with dynamic import)
    */
-  exportPaymentsToPDF(payments: any[], isPendingFees: boolean = false): void {
+  async exportPaymentsToPDF(payments: any[], isPendingFees: boolean = false): Promise<void> {
     const title = isPendingFees ? 'Cuotas Pendientes' : 'Historial de Pagos';
     const fileName = isPendingFees ? 'cuotas-pendientes' : 'historial-pagos';
     
@@ -118,13 +124,13 @@ export class ExportService {
       { key: 'status', header: 'Estado', type: 'text' }
     ];
     
-    this.exportToPDF(payments, columns, fileName, title);
+    await this.exportToPDF(payments, columns, fileName, title);
   }
 
   /**
-   * Export payments data to CSV
+   * Export payments data to CSV (with dynamic import)
    */
-  exportPaymentsToCSV(payments: any[], isPendingFees: boolean = false): void {
+  async exportPaymentsToCSV(payments: any[], isPendingFees: boolean = false): Promise<void> {
     const fileName = isPendingFees ? 'cuotas-pendientes' : 'historial-pagos';
     
     const columns: ExportColumn[] = isPendingFees ? [
@@ -140,13 +146,13 @@ export class ExportService {
       { key: 'status', header: 'Estado', type: 'text' }
     ];
     
-    this.exportToCSV(payments, columns, fileName);
+    await this.exportToCSV(payments, columns, fileName);
   }
 
   /**
-   * Export members data to PDF
+   * Export members data to PDF (with dynamic import)
    */
-  exportMembersToPDF(members: any[], title: string = 'Lista de Miembros'): void {
+  async exportMembersToPDF(members: any[], title: string = 'Lista de Miembros'): Promise<void> {
     const columns: ExportColumn[] = [
       { key: 'firstName', header: 'Nombre', type: 'text' },
       { key: 'lastName', header: 'Apellido', type: 'text' },
@@ -156,13 +162,13 @@ export class ExportService {
       { key: 'memberType', header: 'Tipo', type: 'text' }
     ];
     
-    this.exportToPDF(members, columns, 'lista-miembros', title);
+    await this.exportToPDF(members, columns, 'lista-miembros', title);
   }
 
   /**
-   * Export members data to CSV
+   * Export members data to CSV (with dynamic import)
    */
-  exportMembersToCSV(members: any[], fileName: string = 'lista-miembros'): void {
+  async exportMembersToCSV(members: any[], fileName: string = 'lista-miembros'): Promise<void> {
     const columns: ExportColumn[] = [
       { key: 'firstName', header: 'Nombre', type: 'text' },
       { key: 'lastName', header: 'Apellido', type: 'text' },
@@ -172,13 +178,13 @@ export class ExportService {
       { key: 'memberType', header: 'Tipo', type: 'text' }
     ];
     
-    this.exportToCSV(members, columns, fileName);
+    await this.exportToCSV(members, columns, fileName);
   }
 
   /**
-   * Export events data to PDF
+   * Export events data to PDF (with dynamic import)
    */
-  exportEventsToPDF(events: any[], title: string = 'Lista de Eventos'): void {
+  async exportEventsToPDF(events: any[], title: string = 'Lista de Eventos'): Promise<void> {
     const columns: ExportColumn[] = [
       { key: 'name', header: 'Evento', type: 'text' },
       { key: 'eventDate', header: 'Fecha', type: 'date' },
@@ -187,7 +193,7 @@ export class ExportService {
       { key: 'registrationCount', header: 'Inscriptos', type: 'number' }
     ];
     
-    this.exportToPDF(events, columns, 'lista-eventos', title);
+    await this.exportToPDF(events, columns, 'lista-eventos', title);
   }
 
   /**

@@ -1,7 +1,31 @@
 import {AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
 
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import Chart from 'chart.js/auto'
+import {
+  Chart,
+  DoughnutController,
+  BarController,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+
+// Register only the components we need
+Chart.register(
+  DoughnutController,
+  BarController,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
 import {FormsModule} from '@angular/forms';
 import { ExportService } from '../../core/services/export.service';
 import { ExportButtonsComponent } from '../components/export-buttons/export-buttons.component';
