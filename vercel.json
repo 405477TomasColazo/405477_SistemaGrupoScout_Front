@@ -1,11 +1,8 @@
 {
-  "buildCommand": "cd Sistema-Scouts-Jose-Hernandez && npm run build",
-  "outputDirectory": "Sistema-Scouts-Jose-Hernandez/dist/sistema-scouts-jose-hernandez",
-  "installCommand": "cd Sistema-Scouts-Jose-Hernandez && npm install",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
