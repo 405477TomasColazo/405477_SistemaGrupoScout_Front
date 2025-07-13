@@ -3,6 +3,7 @@ import { CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
 import {User} from '../../core/models/user.model';
 import {AuthService} from '../../core/auth/auth.service';
+import { NotificationBellComponent } from '../components/notification-bell/notification-bell.component';
 
 interface NavigationItem {
   label: string;
@@ -18,7 +19,8 @@ interface NavigationItem {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    NotificationBellComponent
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'

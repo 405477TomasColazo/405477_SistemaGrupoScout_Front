@@ -17,6 +17,7 @@ import { RegistryComponent } from './shared/registry/registry.component';
 import { PaymentsComponent } from './shared/payments/payments.component';
 import { NewsListComponent } from './shared/news/news-list/news-list.component';
 import { NewsDetailComponent } from './shared/news/news-detail/news-detail.component';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
 
 // Guards
 import { AuthGuard } from './core/auth/auth.guard';
@@ -94,6 +95,12 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+        canActivate: [AuthGuard]
+      },
+
+      {
+        path: 'notifications',
+        component: NotificationsComponent,
         canActivate: [AuthGuard]
       },
 

@@ -76,4 +76,9 @@ export class FamilyGroupService {
     };
     return this.http.put<any>(`${environment.apiUrl}/admin/members/${memberId}/balance`, request);
   }
+
+  // Check if DNI exists for members (protagonists)
+  checkDniExists(dni: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/member/dni-exists/${dni}`);
+  }
 }
