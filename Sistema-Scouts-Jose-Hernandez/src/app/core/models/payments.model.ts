@@ -136,7 +136,9 @@ export interface FeeGenerationLog {
   id: number;
   generationType: 'AUTOMATIC' | 'MANUAL' | 'NEW_MEMBER' | 'GLOBAL_PRICE_UPDATE';
   executedAt: string;
+  totalMembersProcessed: number;
   totalFeesGenerated: number;
+  totalFeesUpdated: number;
   targetMonth: string;
   section?: string;
   memberId?: number;

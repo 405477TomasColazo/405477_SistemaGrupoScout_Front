@@ -218,7 +218,9 @@ export class MonthlyFeeManagementComponent implements OnInit {
       date: log.executedAt,
       type: this.getGenerationTypeLabel(log.generationType),
       targetMonth: log.targetMonth,
+      membersProcessed: log.totalMembersProcessed,
       feesGenerated: log.totalFeesGenerated,
+      feesUpdated: log.totalFeesUpdated,
       details: log.details || 'N/A'
     }));
 
@@ -227,7 +229,9 @@ export class MonthlyFeeManagementComponent implements OnInit {
         { key: 'date', header: 'Fecha', type: 'date' as const },
         { key: 'type', header: 'Tipo', type: 'text' as const },
         { key: 'targetMonth', header: 'Mes Objetivo', type: 'text' as const },
+        { key: 'membersProcessed', header: 'Miembros Procesados', type: 'number' as const },
         { key: 'feesGenerated', header: 'Cuotas Generadas', type: 'number' as const },
+        { key: 'feesUpdated', header: 'Cuotas Actualizadas', type: 'number' as const },
         { key: 'details', header: 'Detalles', type: 'text' as const }
       ];
       
@@ -251,7 +255,9 @@ export class MonthlyFeeManagementComponent implements OnInit {
       date: log.executedAt,
       type: this.getGenerationTypeLabel(log.generationType),
       targetMonth: log.targetMonth,
+      membersProcessed: log.totalMembersProcessed,
       feesGenerated: log.totalFeesGenerated,
+      feesUpdated: log.totalFeesUpdated,
       details: log.details || 'N/A'
     }));
 
@@ -260,7 +266,9 @@ export class MonthlyFeeManagementComponent implements OnInit {
         { key: 'date', header: 'Fecha', type: 'date' as const },
         { key: 'type', header: 'Tipo', type: 'text' as const },
         { key: 'targetMonth', header: 'Mes Objetivo', type: 'text' as const },
+        { key: 'membersProcessed', header: 'Miembros Procesados', type: 'number' as const },
         { key: 'feesGenerated', header: 'Cuotas Generadas', type: 'number' as const },
+        { key: 'feesUpdated', header: 'Cuotas Actualizadas', type: 'number' as const },
         { key: 'details', header: 'Detalles', type: 'text' as const }
       ];
       
