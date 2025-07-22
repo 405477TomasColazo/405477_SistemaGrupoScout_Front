@@ -14,7 +14,7 @@ export interface Payment {
   memberLastName?: string;
   amount: number;
   paymentDate: string;
-  status: 'completed' | 'processing' | 'failed' | 'pending';
+  status: 'completed' | 'processing' | 'failed' | 'pending' | 'refunded' | 'unknown';
   referenceId?: string; // Referencia externa del pago (ej: ID de MercadoPago)
   paymentMethod?: string;
   items: PaymentItem[]; // Cuotas incluidas en este pago

@@ -30,6 +30,7 @@ export class NavbarComponent implements OnInit {
   user: User | null = null;
   authService: AuthService = inject(AuthService);
   router: Router = inject(Router);
+  isMobileMenuOpen: boolean = false;
 
   // Define navigation structure based on roles
   navigationItems: NavigationItem[] = [
@@ -209,5 +210,20 @@ export class NavbarComponent implements OnInit {
       return `https://api.dicebear.com/9.x/lorelei-neutral/svg?seed=${avatar}`;
     }
     return '';
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
+  navigateToMobile(route?: string): void {
+    if (route) {
+      this.router.navigate([route]);
+    }
+    this.closeMobileMenu();
   }
 }

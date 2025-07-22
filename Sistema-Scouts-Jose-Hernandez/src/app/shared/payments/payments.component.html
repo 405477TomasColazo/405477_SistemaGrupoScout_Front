@@ -333,6 +333,9 @@
               Estado
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Método
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
             </th>
           </tr>
@@ -361,6 +364,9 @@
                   {{ getStatusText(payment.status) }}
                 </span>
             </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ getPaymentMethodText(payment.paymentMethod) }}</div>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button (click)="openPaymentDetails(payment)" class="text-blue-600 hover:text-blue-900 mr-3">
                 Detalles
@@ -376,7 +382,7 @@
 
           <!-- Mensaje si no hay resultados -->
           <tr *ngIf="paymentsHistory.length === 0">
-            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
               No se encontraron pagos que coincidan con los filtros seleccionados.
             </td>
           </tr>
@@ -588,7 +594,7 @@
               </div>
               <div>
                 <p class="text-sm text-gray-500">Método de pago</p>
-                <p class="text-base font-medium text-gray-800">{{ selectedPayment.paymentMethod || 'MercadoPago' }}</p>
+                <p class="text-base font-medium text-gray-800">{{ getPaymentMethodText(selectedPayment.paymentMethod) }}</p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Monto</p>

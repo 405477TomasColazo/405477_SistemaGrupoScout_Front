@@ -339,14 +339,41 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     return member ? `${member.name} ${member.lastName}` : 'Miembro no encontrado';
   }
 
-  getStatusText(status: "completed" | "processing" | "failed" | "pending"): string {
+  getStatusText(status: "completed" | "processing" | "failed" | "pending" | "refunded" | "unknown"): string {
     const statusMap = {
       completed: "Completado",
       processing: "Procesando",
       pending: "Pendiente",
-      failed: "Fallido"
+      failed: "Fallido",
+      refunded: "Reembolsado",
+      unknown: "Desconocido"
     };
-    return statusMap[status];
+    return statusMap[status as keyof typeof statusMap] || "Estado desconocido";
+  }
+
+  getPaymentMethodText(paymentMethod: string | undefined): string {
+    if (!paymentMethod) return "Método no especificado";
+    
+    // Si ya viene traducido del backend, lo retornamos tal como está
+    if (paymentMethod.includes("Tarjeta") || paymentMethod.includes("Efectivo") || 
+        paymentMethod.includes("Transferencia") || paymentMethod.includes("Billetera")) {
+      return paymentMethod;
+    }
+    
+    // Fallback para casos donde el backend no traduzca
+    const methodMap: { [key: string]: string } = {
+      'card': 'Tarjeta de crédito/débito',
+      'ticket': 'Efectivo',
+      'bank_transfer': 'Transferencia bancaria',
+      'digital_wallet': 'Billetera digital',
+      'account_money': 'Dinero en cuenta',
+      'atm': 'Cajero automático',
+      'visa': 'Tarjeta Visa',
+      'mastercard': 'Tarjeta Mastercard',
+      'american_express': 'Tarjeta American Express'
+    };
+    
+    return methodMap[paymentMethod.toLowerCase()] || paymentMethod;
   }
 
   showAlertMessage(type: 'success' | 'error', text: string): void {
