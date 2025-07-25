@@ -103,12 +103,109 @@
             </p>
           </div>
 
-          <div class="flex justify-end">
-            <button type="submit" [disabled]="registrationForm.invalid" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300">
+          <!-- Aceptación de Términos y Condiciones -->
+          <div class="space-y-2">
+            <div class="flex items-start" [ngClass]="{'border-l-2 border-red-500 pl-2': registrationForm.get('acceptTerms')?.invalid && registrationForm.get('acceptTerms')?.touched}">
+              <input type="checkbox" id="acceptTerms" formControlName="acceptTerms" 
+                     [ngClass]="{'border-red-500 ring-red-500': registrationForm.get('acceptTerms')?.invalid && registrationForm.get('acceptTerms')?.touched}"
+                     class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <label for="acceptTerms" class="ml-2 text-sm text-gray-700">
+                He leído y acepto los 
+                <button type="button" (click)="openTermsModal()" class="text-blue-600 hover:text-blue-800 underline font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded">
+                  Términos y Condiciones
+                </button>
+                <span class="text-red-500">*</span>
+              </label>
+            </div>
+            <p *ngIf="registrationForm.get('acceptTerms')?.invalid && registrationForm.get('acceptTerms')?.touched" class="text-red-600 text-xs ml-6 flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              Debe aceptar los términos y condiciones para continuar
+            </p>
+          </div>
+
+          <div class="flex flex-col items-end space-y-2">
+            <button type="submit" [disabled]="registrationForm.invalid" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed">
               Completar Registro
             </button>
+            <p *ngIf="registrationForm.invalid" class="text-xs text-gray-500 text-right">
+              Complete todos los campos requeridos para continuar
+            </p>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div *ngIf="showTermsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <!-- Cabecera del modal -->
+        <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <img src="/media/lis.jpg" alt="Logo Scout" class="h-8 w-8 rounded-full">
+            <h3 class="text-lg font-bold">Términos y Condiciones</h3>
+          </div>
+          <button (click)="closeTermsModal()" class="text-white hover:text-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido del modal -->
+        <div class="p-6 overflow-y-auto max-h-[70vh]">
+          <div class="prose max-w-none">
+            <div class="text-sm text-gray-600 mb-4">
+              <p><strong>Fecha de entrada en vigencia:</strong> Junio 2025</p>
+              <p><strong>Última actualización:</strong> Junio 2025</p>
+            </div>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Bienvenida y Aceptación de Términos</h2>
+            <p class="text-gray-700 mb-4">
+              Al acceder y utilizar el Sistema de Gestión del Grupo Scout José Hernández, usted expresa su consentimiento, 
+              acuerdo y entendimiento de estos Términos de Servicio. Si no está de acuerdo con estos términos, no utilice el Sistema.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Operaciones Habilitadas</h2>
+            <p class="text-gray-700 mb-2">Las operaciones habilitadas incluyen:</p>
+            <ul class="list-disc list-inside text-gray-700 mb-4 space-y-1">
+              <li>Gestión de Miembros del grupo familiar</li>
+              <li>Actividades y Eventos scouts</li>
+              <li>Progresión Personal scout</li>
+              <li>Gestión Financiera y pagos</li>
+              <li>Comunicación entre miembros</li>
+            </ul>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Responsabilidades del Usuario</h2>
+            <p class="text-gray-700 mb-4">
+              Los usuarios son responsables de mantener la confidencialidad de sus credenciales de acceso y 
+              de toda actividad realizada bajo su cuenta. El uso del sistema debe estar alineado con los valores scouts.
+            </p>
+
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Privacidad de la Información</h2>
+            <p class="text-gray-700 mb-4">
+              Su información personal se procesa de acuerdo con las leyes argentinas de protección de datos. 
+              Solo recopilamos información necesaria para la gestión scout y protegemos su privacidad.
+            </p>
+
+            <div class="bg-blue-50 p-4 rounded-lg mt-6">
+              <p class="text-blue-800 font-medium text-center">
+                Al hacer clic en "Acepto", confirma que ha leído, entendido y acepta estos Términos y Condiciones.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones del modal -->
+        <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+          <button (click)="closeTermsModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition">
+            Cancelar
+          </button>
+          <button (click)="onTermsAccepted()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+            Acepto
+          </button>
+        </div>
       </div>
     </div>
   </div>

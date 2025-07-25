@@ -25,6 +25,7 @@ export class RegistryComponent implements OnInit {
   alertType: string = '';
   alertText: string = '';
   invitationToken: string | null = null;
+  showTermsModal: boolean = false;
 
   registrationForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
@@ -35,7 +36,8 @@ export class RegistryComponent implements OnInit {
     birthdate: ['', [Validators.required]],
     address: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', [Validators.required]]
+    confirmPassword: ['', [Validators.required]],
+    acceptTerms: [false, [Validators.requiredTrue]]
   }, { validators: this.passwordMatchValidator });
 
   ngOnInit(): void {
@@ -126,6 +128,18 @@ export class RegistryComponent implements OnInit {
       Object.keys(this.registrationForm.controls).forEach(key => {
         this.registrationForm.get(key)?.markAsTouched();
       });
+      
+      // Check specifically for terms acceptance
+      if (!this.registrationForm.get('acceptTerms')?.value) {
+        this.showErrorAlert('Debe aceptar los términos y condiciones para continuar con el registro');
+      }
+      return;
+    }
+
+    // Double check that terms are accepted before sending
+    if (!this.registrationForm.get('acceptTerms')?.value) {
+      this.showErrorAlert('Debe aceptar los términos y condiciones para continuar');
+      this.registrationForm.get('acceptTerms')?.markAsTouched();
       return;
     }
 
@@ -162,5 +176,18 @@ export class RegistryComponent implements OnInit {
         this.showErrorAlert(error.message || 'Error al completar el registro');
       }
     })
+  }
+
+  openTermsModal(): void {
+    this.showTermsModal = true;
+  }
+
+  closeTermsModal(): void {
+    this.showTermsModal = false;
+  }
+
+  onTermsAccepted(): void {
+    this.registrationForm.patchValue({ acceptTerms: true });
+    this.closeTermsModal();
   }
 }

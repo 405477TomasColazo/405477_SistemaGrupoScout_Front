@@ -24,6 +24,7 @@ import { AuthGuard } from './core/auth/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { EducatorGuard } from './core/guards/educator.guard';
 import { FamilyGuard } from './core/guards/family.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
   // Auth Routes (no layout, uses AuthLayoutComponent)
@@ -31,10 +32,10 @@ export const routes: Routes = [
     path: 'auth',
     component: AuthLayoutComponent,
     children: [
-      { path: 'login', component: LoginComponent },
+      { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
       { path: 'logout', component: LogoutComponent },
-      { path: 'forgot-password', component: ForgotPasswordComponent },
-      { path: 'reset-password', component: ResetPasswordComponent },
+      { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard] },
+      { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
@@ -49,7 +50,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'noticias', component: NewsListComponent },
       { path: 'noticias/:slug', component: NewsDetailComponent },
-      { path: 'registro', component: RegistryComponent },
+      { path: 'registro', component: RegistryComponent, canActivate: [guestGuard] },
 
       // Admin Routes (Lazy Loaded with Standalone Components)
       {
