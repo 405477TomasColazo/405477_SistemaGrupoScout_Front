@@ -7,25 +7,21 @@
     </div>
     <div class="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
       <button
-        (click)="toggleFilters()"
+        routerLink="/accounting/entries/new"
         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        Nueva Entrada
+      </button>
+      <button
+        (click)="toggleFilters()"
+        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
         <i class="fas fa-filter mr-2"></i>
         {{ showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
       </button>
-      <div class="flex gap-2">
-        <button
-          (click)="exportToPDF()"
-          class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-          <i class="fas fa-file-pdf mr-2"></i>
-          PDF
-        </button>
-        <button
-          (click)="exportToExcel()"
-          class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-          <i class="fas fa-file-excel mr-2"></i>
-          Excel
-        </button>
-      </div>
+      <app-export-buttons
+        (exportPDF)="exportToPDF()"
+        (exportCSV)="exportToCSV()">
+      </app-export-buttons>
     </div>
   </div>
 
@@ -68,7 +64,7 @@
           formControlName="dateFrom"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
-      
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
         <input
@@ -146,7 +142,7 @@
       <thead class="bg-gray-50">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Entrada #
+            Asiento #
           </th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Fecha
@@ -161,11 +157,11 @@
             Estado
           </th>
           <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Débitos
+            Importe
           </th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Créditos
-          </th>
+<!--          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">-->
+<!--            Créditos-->
+<!--          </th>-->
           <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
             Acciones
           </th>
@@ -183,13 +179,13 @@
             {{ entry.description }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span [class]="getOriginBadgeClass(entry.originType)" 
+            <span [class]="getOriginBadgeClass(entry.originType)"
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
               {{ ORIGIN_TYPE_LABELS[entry.originType] }}
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span [class]="getStatusBadgeClass(entry.status)" 
+            <span [class]="getStatusBadgeClass(entry.status)"
                   class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
               {{ ENTRY_STATUS_LABELS[entry.status] }}
             </span>
@@ -197,15 +193,36 @@
           <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
             {{ formatCurrency(entry.totalDebits) }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-            {{ formatCurrency(entry.totalCredits) }}
-          </td>
-          <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-            <button
-              (click)="viewEntryDetails(entry)"
-              class="text-blue-600 hover:text-blue-900 transition-colors">
-              <i class="fas fa-eye"></i>
-            </button>
+<!--          <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">-->
+<!--            {{ formatCurrency(entry.totalCredits) }}-->
+<!--          </td>-->
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <div class="flex space-x-2">
+              <button (click)="viewEntryDetails(entry)"
+                      class="text-blue-600 hover:text-blue-900 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Ver detalles
+              </button>
+              <button *ngIf="canEditEntry(entry)"
+                      [routerLink]="['/accounting/entries/edit', entry.id]"
+                      class="text-green-600 hover:text-green-900 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar
+              </button>
+              <button *ngIf="canCancelEntry(entry)"
+                      (click)="openCancelModal(entry)"
+                      class="text-red-600 hover:text-red-900 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Cancelar
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -236,10 +253,10 @@
 
     <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-700">
-        Mostrando {{ currentPage * pageSize + 1 }} a {{ Math.min((currentPage + 1) * pageSize, totalElements) }} 
+        Mostrando {{ currentPage * pageSize + 1 }} a {{ Math.min((currentPage + 1) * pageSize, totalElements) }}
         de {{ totalElements }} entradas
       </span>
-      
+
       <div class="flex space-x-1 ml-4">
         <button
           [disabled]="currentPage === 0"
@@ -247,7 +264,7 @@
           class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
           Anterior
         </button>
-        
+
         <button
           *ngFor="let page of getPageNumbers()"
           [class.bg-blue-600]="page === currentPage"
@@ -257,7 +274,7 @@
           class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
           {{ page + 1 }}
         </button>
-        
+
         <button
           [disabled]="currentPage >= totalPages - 1"
           (click)="onPageChange(currentPage + 1)"
@@ -270,16 +287,16 @@
 </div>
 
 <!-- Entry Details Modal -->
-<div *ngIf="showEntryModal && selectedEntry" 
+<div *ngIf="showEntryModal && selectedEntry"
      class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
      (click)="closeEntryModal()">
   <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white"
        (click)="$event.stopPropagation()">
-    
+
     <!-- Modal Header -->
     <div class="flex items-center justify-between pb-4 border-b">
       <h3 class="text-lg font-bold text-gray-900">
-        Accounting Entry #{{ selectedEntry.entryNumber }}
+        Entrada Contable #{{ selectedEntry.entryNumber }}
       </h3>
       <button
         (click)="closeEntryModal()"
@@ -293,25 +310,25 @@
       <!-- Entry Information -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
-          <h4 class="font-semibold text-gray-700 mb-2">Entry Details</h4>
+          <h4 class="font-semibold text-gray-700 mb-2">Detalles de la Entrada</h4>
           <dl class="space-y-2">
             <div class="flex">
-              <dt class="w-24 text-sm text-gray-500">Date:</dt>
+              <dt class="w-24 text-sm text-gray-500">Fecha:</dt>
               <dd class="text-sm text-gray-900">{{ formatDate(selectedEntry.entryDate) }}</dd>
             </div>
             <div class="flex">
-              <dt class="w-24 text-sm text-gray-500">Origin:</dt>
+              <dt class="w-24 text-sm text-gray-500">Origen:</dt>
               <dd>
-                <span [class]="getOriginBadgeClass(selectedEntry.originType)" 
+                <span [class]="getOriginBadgeClass(selectedEntry.originType)"
                       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                   {{ ORIGIN_TYPE_LABELS[selectedEntry.originType] }}
                 </span>
               </dd>
             </div>
             <div class="flex">
-              <dt class="w-24 text-sm text-gray-500">Status:</dt>
+              <dt class="w-24 text-sm text-gray-500">Estado:</dt>
               <dd>
-                <span [class]="getStatusBadgeClass(selectedEntry.status)" 
+                <span [class]="getStatusBadgeClass(selectedEntry.status)"
                       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                   {{ ENTRY_STATUS_LABELS[selectedEntry.status] }}
                 </span>
@@ -319,20 +336,20 @@
             </div>
           </dl>
         </div>
-        
+
         <div>
-          <h4 class="font-semibold text-gray-700 mb-2">Audit Information</h4>
+          <h4 class="font-semibold text-gray-700 mb-2">Información de Auditoría</h4>
           <dl class="space-y-2">
             <div class="flex">
-              <dt class="w-24 text-sm text-gray-500">Created by:</dt>
-              <dd class="text-sm text-gray-900">{{ selectedEntry.createdByUserName || 'System' }}</dd>
+              <dt class="w-24 text-sm text-gray-500">Creado por:</dt>
+              <dd class="text-sm text-gray-900">{{ selectedEntry.createdByUserName || 'Sistema' }}</dd>
             </div>
             <div class="flex">
-              <dt class="w-24 text-sm text-gray-500">Created at:</dt>
+              <dt class="w-24 text-sm text-gray-500">Creado el:</dt>
               <dd class="text-sm text-gray-900">{{ formatDateTime(selectedEntry.createdAt) }}</dd>
             </div>
             <div *ngIf="selectedEntry.modifiedAt" class="flex">
-              <dt class="w-24 text-sm text-gray-500">Modified at:</dt>
+              <dt class="w-24 text-sm text-gray-500">Modificado el:</dt>
               <dd class="text-sm text-gray-900">{{ formatDateTime(selectedEntry.modifiedAt) }}</dd>
             </div>
           </dl>
@@ -341,21 +358,21 @@
 
       <!-- Description -->
       <div class="mb-6">
-        <h4 class="font-semibold text-gray-700 mb-2">Description</h4>
+        <h4 class="font-semibold text-gray-700 mb-2">Descripción</h4>
         <p class="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{{ selectedEntry.description }}</p>
       </div>
 
       <!-- Movements Table -->
       <div>
-        <h4 class="font-semibold text-gray-700 mb-3">Account Movements</h4>
+        <h4 class="font-semibold text-gray-700 mb-3">Movimientos de Cuentas</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full bg-white border border-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Debit</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Credit</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cuenta</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Debe</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Haber</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -395,7 +412,60 @@
       <button
         (click)="closeEntryModal()"
         class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-        Close
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Entry Modal -->
+<div *ngIf="showCancelModal && entryToCancel"
+     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+     (click)="closeCancelModal()">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white"
+       (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b">
+      <h3 class="text-lg font-bold text-gray-900">
+        Cancelar Entrada #{{ entryToCancel.entryNumber }}
+      </h3>
+      <button
+        (click)="closeCancelModal()"
+        class="text-gray-400 hover:text-gray-600 transition-colors">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="mt-4">
+      <p class="text-sm text-gray-600 mb-4">
+        Esto cancelará la entrada contable y creará una entrada de reversión. Por favor proporcione una razón para la cancelación.
+      </p>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Motivo de Cancelación *</label>
+        <textarea
+          [(ngModel)]="cancelReason"
+          rows="3"
+          placeholder="Ingrese el motivo para cancelar esta entrada..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex justify-end space-x-3 pt-4 border-t mt-6">
+      <button
+        (click)="closeCancelModal()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+        Cancelar
+      </button>
+      <button
+        (click)="confirmCancelEntry()"
+        [disabled]="!cancelReason.trim()"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        Confirmar Cancelación
       </button>
     </div>
   </div>

@@ -77,7 +77,7 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
 
   // Status options for dropdown
   statusOptions = [
-    { value: 'COMPLETED', label: 'Completado' },
+    { value: 'COMPLETED', label: 'Realizado' },
     { value: 'PENDING', label: 'Pendiente' },
     { value: 'PROCESSING', label: 'Procesando' },
     { value: 'FAILED', label: 'Fallido' }
@@ -286,7 +286,7 @@ export class AdminPaymentsManagementComponent implements OnInit, OnDestroy {
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'completed': 'Completado',
+      'completed': 'Realizado',
       'pending': 'Pendiente',
       'processing': 'Procesando',
       'failed': 'Fallido'

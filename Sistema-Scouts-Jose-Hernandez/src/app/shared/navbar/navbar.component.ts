@@ -56,8 +56,13 @@ export class NavbarComponent implements OnInit {
           roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
         },
         {
-          label: 'Panel Administrador',
+          label: 'Dashboard Administrador',
           route: '/admin/dashboard',
+          roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Dashboard Contable',
+          route: '/accounting/dashboard',
           roles: ['ROLE_ADMIN']
         }
       ]
@@ -91,23 +96,18 @@ export class NavbarComponent implements OnInit {
           roles: ['ROLE_ADMIN']
         },
         {
+          label: 'Eventos',
+          route: '/events/manage',
+          roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
+        },
+        {
           label: 'Cuotas Mensuales',
           route: '/admin/monthly-fees',
           roles: ['ROLE_ADMIN']
         },
         {
-          label: 'Dashboard Contable',
-          route: '/accounting/dashboard',
-          roles: ['ROLE_ADMIN']
-        },
-        {
           label: 'Libro Diario',
           route: '/accounting/journal',
-          roles: ['ROLE_ADMIN']
-        },
-        {
-          label: 'Ingresos y Egresos',
-          route: '/accounting/entries',
           roles: ['ROLE_ADMIN']
         }
       ]
@@ -119,11 +119,6 @@ export class NavbarComponent implements OnInit {
           label: 'Ver Eventos',
           route: '/events',
           roles: ['ROLE_FAMILY', 'ROLE_EDUCATOR', 'ROLE_ADMIN']
-        },
-        {
-          label: 'Gestionar Eventos',
-          route: '/events/manage',
-          roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
         },
         {
           label: 'Progresión Personal',

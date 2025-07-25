@@ -5,6 +5,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angul
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AccountingService } from '../../../core/services/accounting.service';
+import { ExportService, ExportColumn } from '../../../core/services/export.service';
+import { ExportButtonsComponent } from '../../components/export-buttons/export-buttons.component';
 import {
   AccountingEntry,
   AccountingEntriesResponse,
@@ -21,7 +23,7 @@ import {
 @Component({
   selector: 'app-accounting-entries',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, ExportButtonsComponent],
   templateUrl: './accounting-entries.component.html',
   styleUrls: ['./accounting-entries.component.css']
 })
@@ -67,6 +69,7 @@ export class AccountingEntriesComponent implements OnInit, OnDestroy {
 
   constructor(
     private accountingService: AccountingService,
+    private exportService: ExportService,
     private fb: FormBuilder
   ) {
     this.filterForm = this.createFilterForm();
@@ -163,15 +166,40 @@ export class AccountingEntriesComponent implements OnInit, OnDestroy {
     if (formValue.description && formValue.description.trim()) {
       filters.description = formValue.description.trim();
     }
-    if (formValue.accountId) {
-      filters.accountId = formValue.accountId;
+    if (formValue.accountId && formValue.accountId !== '' && formValue.accountId !== null) {
+      filters.accountId = parseInt(formValue.accountId, 10);
     }
 
     return filters;
   }
 
-  private formatDateForAPI(date: Date): string {
-    return date.toISOString().split('T')[0];
+  private formatDateForAPI(date: Date | string | null): string {
+    if (!date) {
+      return '';
+    }
+
+    // Si ya es un string en formato YYYY-MM-DD, devolverlo tal como está
+    if (typeof date === 'string') {
+      return date;
+    }
+
+    // Si es un objeto Date, convertirlo
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    // Intentar crear un Date desde el valor
+    try {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        console.warn('Invalid date value:', date);
+        return '';
+      }
+      return dateObj.toISOString().split('T')[0];
+    } catch (error) {
+      console.warn('Error parsing date:', date, error);
+      return '';
+    }
   }
 
   // Pagination methods
@@ -342,12 +370,62 @@ export class AccountingEntriesComponent implements OnInit, OnDestroy {
     return entry.id;
   }
 
-  // Export methods (will be implemented later)
+  // Export methods
   exportToPDF(): void {
-    console.log('Export to PDF - To be implemented');
+    const data = this.prepareExportData();
+    const columns = this.getExportColumns();
+    const filters = this.buildFilters();
+    const startDate = filters.dateFrom || this.formatDateForAPI(new Date(new Date().getFullYear(), 0, 1));
+    const endDate = filters.dateTo || this.formatDateForAPI(new Date());
+    const filename = `entradas-contables-${startDate}-${endDate}`;
+    const title = 'Gestión de Entradas Contables - Sistema Scout José Hernández';
+
+    this.exportService.exportToPDF(data, columns, filename, title);
   }
 
-  exportToExcel(): void {
-    console.log('Export to Excel - To be implemented');
+  exportToCSV(): void {
+    const data = this.prepareExportData();
+    const columns = this.getExportColumns();
+    const filters = this.buildFilters();
+    const startDate = filters.dateFrom || this.formatDateForAPI(new Date(new Date().getFullYear(), 0, 1));
+    const endDate = filters.dateTo || this.formatDateForAPI(new Date());
+    const filename = `entradas-contables-${startDate}-${endDate}`;
+
+    this.exportService.exportToCSV(data, columns, filename);
   }
+
+  private prepareExportData(): any[] {
+    return this.entries.map(entry => ({
+      entryNumber: entry.entryNumber,
+      entryDate: this.formatDate(entry.entryDate),
+      description: entry.description,
+      originType: ORIGIN_TYPE_LABELS[entry.originType],
+      status: ENTRY_STATUS_LABELS[entry.status],
+      totalDebits: entry.totalDebits,
+      totalCredits: entry.totalCredits,
+      createdBy: entry.createdByUserName || 'Sistema',
+      createdAt: this.formatDateTime(entry.createdAt)
+    }));
+  }
+
+  private getExportColumns(): ExportColumn[] {
+    return [
+      { key: 'entryNumber', header: 'Entrada #', type: 'text' },
+      { key: 'entryDate', header: 'Fecha', type: 'date' },
+      { key: 'description', header: 'Descripción', type: 'text' },
+      { key: 'originType', header: 'Origen', type: 'text' },
+      { key: 'status', header: 'Estado', type: 'text' },
+      { key: 'totalDebits', header: 'Débitos', type: 'currency' },
+      { key: 'totalCredits', header: 'Créditos', type: 'currency' },
+      { key: 'createdBy', header: 'Creado por', type: 'text' },
+      { key: 'createdAt', header: 'Fecha de creación', type: 'date' }
+    ];
+  }
+
+  // private formatDateForAPI(date: Date): string {
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, '0');
+  //   const day = String(date.getDate()).padStart(2, '0');
+  //   return `${year}-${month}-${day}`;
+  // }
 }

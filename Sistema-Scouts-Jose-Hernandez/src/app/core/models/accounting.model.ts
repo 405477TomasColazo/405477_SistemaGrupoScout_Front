@@ -174,8 +174,8 @@ export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
 };
 
 export const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
-  [MovementType.DEBIT]: 'Débito',
-  [MovementType.CREDIT]: 'Crédito'
+  [MovementType.DEBIT]: 'Debe',
+  [MovementType.CREDIT]: 'Haber'
 };
 
 export const ORIGIN_TYPE_LABELS: Record<OriginType, string> = {
@@ -185,5 +185,5 @@ export const ORIGIN_TYPE_LABELS: Record<OriginType, string> = {
 
 export const ENTRY_STATUS_LABELS: Record<EntryStatus, string> = {
   [EntryStatus.ACTIVE]: 'Activo',
-  [EntryStatus.CANCELLED]: 'Cancelado'
+  [EntryStatus.CANCELLED]: 'Anulado'
 };

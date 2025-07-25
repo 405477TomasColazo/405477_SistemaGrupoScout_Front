@@ -341,7 +341,7 @@ export class PaymentsComponent implements OnInit, OnDestroy {
 
   getStatusText(status: "completed" | "processing" | "failed" | "pending" | "refunded" | "unknown"): string {
     const statusMap = {
-      completed: "Completado",
+      completed: "Realizado",
       processing: "Procesando",
       pending: "Pendiente",
       failed: "Fallido",

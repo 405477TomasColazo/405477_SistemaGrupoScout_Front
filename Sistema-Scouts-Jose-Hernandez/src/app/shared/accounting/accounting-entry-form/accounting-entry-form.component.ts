@@ -191,8 +191,8 @@ export class AccountingEntryFormComponent implements OnInit, OnDestroy {
 
   getBalanceText(): string {
     const difference = this.getBalanceDifference();
-    if (Math.abs(difference) < 0.01) return 'Balanced';
-    return difference > 0 ? 'Debits exceed Credits' : 'Credits exceed Debits';
+    if (Math.abs(difference) < 0.01) return 'Balanceado';
+    return difference > 0 ? 'El debe es superior al haber' : 'El haber es superior al debe';
   }
 
   getAbsoluteBalanceDifference(): number {
@@ -213,7 +213,7 @@ export class AccountingEntryFormComponent implements OnInit, OnDestroy {
     this.error = null;
 
     const formValue = this.entryForm.value;
-    
+
     if (this.isEditMode && this.entryId) {
       this.updateEntry(this.entryId, formValue);
     } else {
