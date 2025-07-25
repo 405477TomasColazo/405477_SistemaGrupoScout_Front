@@ -94,6 +94,21 @@ export class NavbarComponent implements OnInit {
           label: 'Cuotas Mensuales',
           route: '/admin/monthly-fees',
           roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Dashboard Contable',
+          route: '/accounting/dashboard',
+          roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Libro Diario',
+          route: '/accounting/journal',
+          roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Ingresos y Egresos',
+          route: '/accounting/entries',
+          roles: ['ROLE_ADMIN']
         }
       ]
     },

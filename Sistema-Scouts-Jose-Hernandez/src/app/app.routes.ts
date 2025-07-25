@@ -87,6 +87,13 @@ export const routes: Routes = [
         loadChildren: () => import('./features/progression/progression.routes').then(m => m.progressionRoutes)
       },
 
+      // Accounting Routes (Lazy Loaded with Standalone Components)
+      {
+        path: 'accounting',
+        canActivate: [AdminGuard],
+        loadChildren: () => import('./features/accounting/accounting.routes').then(m => m.accountingRoutes)
+      },
+
       {
         path: 'payments',
         component: PaymentsComponent,

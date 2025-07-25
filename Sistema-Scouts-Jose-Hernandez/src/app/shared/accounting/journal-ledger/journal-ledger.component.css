@@ -1,0 +1,227 @@
+/* Journal Ledger Component Styles */
+
+/* Table responsive behavior */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Custom scrollbar for table */
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background-color: #f3f4f6;
+  border-radius: 0.25rem;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+  border-radius: 0.25rem;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+/* Modal backdrop animation */
+.modal-backdrop {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal content animation */
+.modal-content {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Filter section transition */
+.filter-section {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Status badge animations */
+.badge {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Table row hover effects */
+.table-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Button hover effects */
+.btn-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Quick filter pills */
+.quick-filter-pill {
+  transition: all 0.2s ease-in-out;
+}
+
+.quick-filter-pill:hover {
+  transform: scale(1.05);
+}
+
+/* Form input focus styles */
+.form-input:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #3b82f6;
+  border-color: #3b82f6;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Pagination button styles */
+.pagination-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.pagination-btn.active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Export button styles */
+.export-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Currency formatting */
+.currency {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Table header sorting indicator */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.sortable-header:hover {
+  background-color: #f3f4f6;
+}
+
+/* Error message animation */
+.error-message {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.empty-state i {
+  color: #d1d5db;
+  font-size: 3.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .table-mobile {
+    font-size: 0.875rem;
+  }
+  
+  .table-mobile th,
+  .table-mobile td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode .table-responsive::-webkit-scrollbar-track {
+    background-color: #1f2937;
+  }
+  
+  .dark-mode .table-responsive::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+  }
+  
+  .dark-mode .table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: #6b7280;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .table {
+    font-size: 0.75rem;
+  }
+  
+  .modal-backdrop {
+    display: none !important;
+  }
+}

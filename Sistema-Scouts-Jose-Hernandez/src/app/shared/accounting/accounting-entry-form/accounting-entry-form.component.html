@@ -1,0 +1,251 @@
+<div class="p-6 bg-white rounded-lg shadow-md max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">
+        {{ isEditMode ? 'Edit Accounting Entry' : 'New Accounting Entry' }}
+      </h1>
+      <p class="text-gray-600">
+        {{ isEditMode ? 'Modify the accounting entry details' : 'Create a new manual accounting entry' }}
+      </p>
+    </div>
+    <div class="flex gap-3 mt-4 md:mt-0">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+        <i class="fas fa-times mr-2"></i>
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    {{ error }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="entryForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <!-- Entry Details -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Entry Details</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Entry Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Entry Date *
+          </label>
+          <input
+            type="date"
+            formControlName="entryDate"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="isFieldInvalid('entryDate')">
+          <div *ngIf="isFieldInvalid('entryDate')" class="text-red-500 text-sm mt-1">
+            {{ getFieldError('entryDate') }}
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Description *
+          </label>
+          <input
+            type="text"
+            formControlName="description"
+            placeholder="Enter a description for this entry..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [class.border-red-500]="isFieldInvalid('description')">
+          <div *ngIf="isFieldInvalid('description')" class="text-red-500 text-sm mt-1">
+            {{ getFieldError('description') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Movements -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Account Movements</h3>
+        <button
+          type="button"
+          (click)="addMovement()"
+          class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+          <i class="fas fa-plus mr-1"></i>
+          Add Movement
+        </button>
+      </div>
+
+      <!-- Movements Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-md">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Account *
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Type *
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount *
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Description
+              </th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200" formArrayName="movements">
+            <tr *ngFor="let movement of movementsArray.controls; let i = index" [formGroupName]="i">
+              <!-- Account Selection -->
+              <td class="px-4 py-3">
+                <select
+                  formControlName="accountId"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [class.border-red-500]="isMovementFieldInvalid(i, 'accountId')">
+                  <option value="">Select account...</option>
+                  <option *ngFor="let account of accounts" [value]="account.id">
+                    {{ account.code }} - {{ account.name }}
+                  </option>
+                </select>
+                <div *ngIf="isMovementFieldInvalid(i, 'accountId')" class="text-red-500 text-xs mt-1">
+                  Account is required
+                </div>
+              </td>
+
+              <!-- Movement Type -->
+              <td class="px-4 py-3">
+                <select
+                  formControlName="movementType"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option [value]="MovementType.DEBIT">{{ MOVEMENT_TYPE_LABELS[MovementType.DEBIT] }}</option>
+                  <option [value]="MovementType.CREDIT">{{ MOVEMENT_TYPE_LABELS[MovementType.CREDIT] }}</option>
+                </select>
+              </td>
+
+              <!-- Amount -->
+              <td class="px-4 py-3">
+                <input
+                  type="number"
+                  formControlName="amount"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="0.00"
+                  class="w-full px-3 py-2 text-sm text-right border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [class.border-red-500]="isMovementFieldInvalid(i, 'amount')">
+                <div *ngIf="isMovementFieldInvalid(i, 'amount')" class="text-red-500 text-xs mt-1">
+                  {{ getMovementFieldError(i, 'amount') }}
+                </div>
+              </td>
+
+              <!-- Description -->
+              <td class="px-4 py-3">
+                <input
+                  type="text"
+                  formControlName="description"
+                  placeholder="Optional description..."
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </td>
+
+              <!-- Actions -->
+              <td class="px-4 py-3 text-center">
+                <button
+                  type="button"
+                  (click)="removeMovement(i)"
+                  [disabled]="movementsArray.length <= 2"
+                  class="text-red-600 hover:text-red-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                  title="Remove movement">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Movements Validation -->
+      <div *ngIf="movementsArray.length < 2" class="text-red-500 text-sm mt-2">
+        At least 2 movements are required for a double-entry system
+      </div>
+    </div>
+
+    <!-- Balance Summary -->
+    <div class="bg-blue-50 rounded-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Balance Summary</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Debits -->
+        <div class="text-center">
+          <div class="text-sm text-gray-600 mb-1">Total Debits</div>
+          <div class="text-xl font-bold text-green-600">
+            {{ formatCurrency(calculateTotalDebits()) }}
+          </div>
+        </div>
+
+        <!-- Total Credits -->
+        <div class="text-center">
+          <div class="text-sm text-gray-600 mb-1">Total Credits</div>
+          <div class="text-xl font-bold text-purple-600">
+            {{ formatCurrency(calculateTotalCredits()) }}
+          </div>
+        </div>
+
+        <!-- Balance Status -->
+        <div class="text-center">
+          <div class="text-sm text-gray-600 mb-1">Balance Status</div>
+          <div class="text-xl font-bold" [class]="getBalanceClass()">
+            {{ getBalanceText() }}
+          </div>
+          <div *ngIf="!isBalanced()" class="text-sm text-red-600 mt-1">
+            Difference: {{ formatCurrency(getAbsoluteBalanceDifference()) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance Warning -->
+      <div *ngIf="!isBalanced()" class="bg-yellow-100 border border-yellow-300 rounded-md p-4 mt-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800">Balance Required</h3>
+            <p class="text-sm text-yellow-700 mt-1">
+              In double-entry accounting, total debits must equal total credits. 
+              Please adjust the amounts to balance the entry.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex flex-col sm:flex-row justify-end gap-3">
+      <button
+        type="button"
+        (click)="cancel()"
+        class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+        Cancel
+      </button>
+      
+      <button
+        type="submit"
+        [disabled]="entryForm.invalid || !isBalanced() || loading"
+        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        <i *ngIf="loading" class="fas fa-spinner fa-spin mr-2"></i>
+        <i *ngIf="!loading" class="fas fa-save mr-2"></i>
+        {{ isEditMode ? 'Update Entry' : 'Create Entry' }}
+      </button>
+    </div>
+  </form>
+</div>
