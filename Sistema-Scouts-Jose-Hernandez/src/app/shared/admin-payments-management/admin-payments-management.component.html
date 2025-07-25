@@ -6,7 +6,7 @@
   </div>
 
   <!-- Alert -->
-  <div *ngIf="showAlert" 
+  <div *ngIf="showAlert"
        [ngClass]="alertType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'"
        class="border px-4 py-3 rounded mb-6">
     {{ alertMessage }}
@@ -15,19 +15,19 @@
   <!-- Tabs -->
   <div class="border-b border-gray-200 mb-6">
     <nav class="flex space-x-8">
-      <button 
+      <button
         (click)="changeTab('payments')"
         [class]="currentTab === 'payments' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
         class="py-4 px-1 border-b-2 font-medium text-sm">
         Pagos
       </button>
-      <button 
+      <button
         (click)="changeTab('pending-fees')"
         [class]="currentTab === 'pending-fees' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
         class="py-4 px-1 border-b-2 font-medium text-sm">
-        Fees Pendientes
+        Pagos pendientes
       </button>
-      <button 
+      <button
         (click)="changeTab('statistics')"
         [class]="currentTab === 'statistics' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
         class="py-4 px-1 border-b-2 font-medium text-sm">
@@ -42,20 +42,20 @@
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h3 class="text-lg font-medium text-gray-900">Filtros</h3>
-        <button 
+        <button
           (click)="toggleFilters()"
           class="text-sm text-blue-600 hover:text-blue-800">
           {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
         </button>
       </div>
-      
+
       <div *ngIf="showFilters" class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <!-- Member Name -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del miembro</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               [(ngModel)]="filters.memberName"
               placeholder="Buscar por nombre..."
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
@@ -64,7 +64,7 @@
           <!-- Payment Status -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select 
+            <select
               [(ngModel)]="filters.status"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
               <option value="">Todos los estados</option>
@@ -77,8 +77,8 @@
           <!-- Date From -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha desde</label>
-            <input 
-              type="date" 
+            <input
+              type="date"
               [(ngModel)]="filters.dateFrom"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
@@ -86,8 +86,8 @@
           <!-- Date To -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha hasta</label>
-            <input 
-              type="date" 
+            <input
+              type="date"
               [(ngModel)]="filters.dateTo"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
@@ -95,8 +95,8 @@
           <!-- Min Amount -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Monto mínimo</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               [(ngModel)]="filters.minAmount"
               min="0"
               step="100"
@@ -106,8 +106,8 @@
           <!-- Max Amount -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Monto máximo</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               [(ngModel)]="filters.maxAmount"
               min="0"
               step="100"
@@ -117,8 +117,8 @@
           <!-- Payment Method -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Método de pago</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               [(ngModel)]="filters.paymentMethod"
               placeholder="ej: visa, mastercard..."
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
@@ -127,8 +127,8 @@
           <!-- Member ID -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">ID de miembro</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               [(ngModel)]="filters.memberId"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
@@ -136,12 +136,12 @@
 
         <!-- Filter Actions -->
         <div class="mt-6 flex justify-end space-x-3">
-          <button 
+          <button
             (click)="clearFilters()"
             class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400">
             Limpiar
           </button>
-          <button 
+          <button
             (click)="applyFilters()"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             Aplicar filtros
@@ -215,7 +215,7 @@
                 {{ formatCurrency(payment.amount) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span [ngClass]="getStatusClass(payment.status)" 
+                <span [ngClass]="getStatusClass(payment.status)"
                       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                   {{ getStatusText(payment.status) }}
                 </span>
@@ -224,17 +224,17 @@
                 {{ payment.paymentMethod || 'N/A' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                <button 
+                <button
                   (click)="openPaymentDetails(payment)"
                   class="text-blue-600 hover:text-blue-900">
                   Detalles
                 </button>
-                <button 
+                <button
                   (click)="openEditStatusModal(payment)"
                   class="text-indigo-600 hover:text-indigo-900">
                   Editar
                 </button>
-                <button 
+                <button
                   *ngIf="payment.status === 'completed'"
                   (click)="downloadReceipt(payment)"
                   class="text-green-600 hover:text-green-900">
@@ -256,13 +256,13 @@
       <!-- Pagination -->
       <div *ngIf="totalPages > 1" class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
         <div class="flex-1 flex justify-between sm:hidden">
-          <button 
+          <button
             [disabled]="currentPage === 1"
             (click)="changePage(currentPage - 1)"
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
             Anterior
           </button>
-          <button 
+          <button
             [disabled]="currentPage === totalPages"
             (click)="changePage(currentPage + 1)"
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
@@ -272,26 +272,26 @@
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Mostrando 
+              Mostrando
               <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-              a 
+              a
               <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span>
-              de 
+              de
               <span class="font-medium">{{ totalItems }}</span>
               resultados
             </p>
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button 
+              <button
                 [disabled]="currentPage === 1"
                 (click)="changePage(currentPage - 1)"
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
                 Anterior
               </button>
-              
+
               <ng-container *ngFor="let page of [].constructor(Math.min(totalPages, 5)); let i = index">
-                <button 
+                <button
                   (click)="changePage(i + 1)"
                   [class]="i + 1 === currentPage ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'"
                   class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
@@ -299,7 +299,7 @@
                 </button>
               </ng-container>
 
-              <button 
+              <button
                 [disabled]="currentPage === totalPages"
                 (click)="changePage(currentPage + 1)"
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
@@ -318,20 +318,20 @@
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h3 class="text-lg font-medium text-gray-900">Filtros</h3>
-        <button 
+        <button
           (click)="togglePendingFeesFilters()"
           class="text-sm text-blue-600 hover:text-blue-800">
           {{ showPendingFeesFilters ? 'Ocultar' : 'Mostrar' }} filtros
         </button>
       </div>
-      
+
       <div *ngIf="showPendingFeesFilters" class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <!-- Member Name -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del miembro</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               [(ngModel)]="pendingFeesFilters.memberName"
               placeholder="Buscar por nombre..."
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
@@ -340,7 +340,7 @@
           <!-- Section -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Sección</label>
-            <select 
+            <select
               [(ngModel)]="pendingFeesFilters.sectionId"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
               <option value="">Todas las secciones</option>
@@ -353,8 +353,8 @@
           <!-- Min Amount -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Monto mínimo</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               [(ngModel)]="pendingFeesFilters.minAmount"
               min="0"
               step="100"
@@ -364,8 +364,8 @@
           <!-- Max Amount -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Monto máximo</label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               [(ngModel)]="pendingFeesFilters.maxAmount"
               min="0"
               step="100"
@@ -375,8 +375,8 @@
           <!-- Period -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Período</label>
-            <input 
-              type="month" 
+            <input
+              type="month"
               [(ngModel)]="pendingFeesFilters.period"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
           </div>
@@ -384,12 +384,12 @@
 
         <!-- Filter Actions -->
         <div class="mt-6 flex justify-end space-x-3">
-          <button 
+          <button
             (click)="clearPendingFeesFilters()"
             class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400">
             Limpiar
           </button>
-          <button 
+          <button
             (click)="applyPendingFeesFilters()"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             Aplicar filtros
@@ -474,13 +474,13 @@
       <!-- Pagination -->
       <div *ngIf="totalPendingFeesPages > 1" class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
         <div class="flex-1 flex justify-between sm:hidden">
-          <button 
+          <button
             [disabled]="currentPendingFeesPage === 1"
             (click)="changePendingFeesPage(currentPendingFeesPage - 1)"
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
             Anterior
           </button>
-          <button 
+          <button
             [disabled]="currentPendingFeesPage === totalPendingFeesPages"
             (click)="changePendingFeesPage(currentPendingFeesPage + 1)"
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
@@ -490,26 +490,26 @@
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Mostrando 
+              Mostrando
               <span class="font-medium">{{ (currentPendingFeesPage - 1) * pendingFeesItemsPerPage + 1 }}</span>
-              a 
+              a
               <span class="font-medium">{{ Math.min(currentPendingFeesPage * pendingFeesItemsPerPage, totalPendingFeesItems) }}</span>
-              de 
+              de
               <span class="font-medium">{{ totalPendingFeesItems }}</span>
               resultados
             </p>
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button 
+              <button
                 [disabled]="currentPendingFeesPage === 1"
                 (click)="changePendingFeesPage(currentPendingFeesPage - 1)"
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
                 Anterior
               </button>
-              
+
               <ng-container *ngFor="let page of [].constructor(Math.min(totalPendingFeesPages, 5)); let i = index">
-                <button 
+                <button
                   (click)="changePendingFeesPage(i + 1)"
                   [class]="i + 1 === currentPendingFeesPage ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'"
                   class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
@@ -517,7 +517,7 @@
                 </button>
               </ng-container>
 
-              <button 
+              <button
                 [disabled]="currentPendingFeesPage === totalPendingFeesPages"
                 (click)="changePendingFeesPage(currentPendingFeesPage + 1)"
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50">
@@ -705,7 +705,7 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-500">Estado</label>
-            <span [ngClass]="getStatusClass(selectedPayment.status)" 
+            <span [ngClass]="getStatusClass(selectedPayment.status)"
                   class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
               {{ getStatusText(selectedPayment.status) }}
             </span>
@@ -728,12 +728,12 @@
       </div>
 
       <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
-        <button 
+        <button
           (click)="closePaymentModal()"
           class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100">
           Cerrar
         </button>
-        <button 
+        <button
           *ngIf="selectedPayment?.status === 'completed'"
           (click)="downloadReceipt(selectedPayment)"
           class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -753,7 +753,7 @@
       <div class="p-6">
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-2">Nuevo Estado</label>
-          <select 
+          <select
             [(ngModel)]="newPaymentStatus"
             class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
             <option *ngFor="let status of statusOptions" [value]="status.value">
@@ -764,7 +764,7 @@
 
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-2">Razón del cambio (opcional)</label>
-          <textarea 
+          <textarea
             [(ngModel)]="statusChangeReason"
             rows="3"
             placeholder="Explica el motivo del cambio de estado..."
@@ -773,12 +773,12 @@
       </div>
 
       <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
-        <button 
+        <button
           (click)="closeEditStatusModal()"
           class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100">
           Cancelar
         </button>
-        <button 
+        <button
           (click)="updatePaymentStatus()"
           class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
           Actualizar Estado

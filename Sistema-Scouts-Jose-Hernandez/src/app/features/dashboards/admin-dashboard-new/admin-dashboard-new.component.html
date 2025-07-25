@@ -117,13 +117,7 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold text-gray-900">Distribución por Secciones</h2>
           <div class="flex items-center space-x-2">
-            <label class="flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                [(ngModel)]="showEducators"
-                (change)="toggleMemberType()"
-                class="sr-only"
-              >
+            <label class="flex items-center cursor-pointer" (click)="toggleMemberType()">
               <div class="relative">
                 <div class="block bg-gray-600 w-14 h-8 rounded-full" 
                      [class.bg-blue-600]="showEducators"></div>
