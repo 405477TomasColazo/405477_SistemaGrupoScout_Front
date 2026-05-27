@@ -1,10 +1,11 @@
 <nav class="bg-blue-700 text-white shadow-lg">
-  <div class="px-4">
-    <div class="flex justify-between items-center py-4">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-3 sm:py-4">
       <div class="flex items-center space-x-2">
         <!-- Logo -->
-        <img src='media/lis.jpg' alt="Logo Scout" class="h-12 w-12 rounded-full cursor-pointer" (click)="navigateTo('/home')">
-        <span class="font-bold text-xl cursor-pointer" (click)="navigateTo('/home')">Grupo Scout José Hernández</span>
+        <img src='media/lis.jpg' alt="Logo Scout" class="h-10 w-10 sm:h-12 sm:w-12 rounded-full cursor-pointer" (click)="navigateTo('/home')">
+        <span class="font-bold text-base sm:text-xl cursor-pointer hidden sm:block" (click)="navigateTo('/home')">Grupo Scout José Hernández</span>
+        <span class="font-bold text-sm cursor-pointer sm:hidden" (click)="navigateTo('/home')">G.S. José Hernández</span>
       </div>
 
       <div class="flex items-center space-x-6">
@@ -73,6 +74,9 @@
             >
               Mi Panel
             </button>
+
+            <!-- Notification Bell -->
+            <app-notification-bell></app-notification-bell>
 
             <!-- User dropdown -->
             <div class="relative group">
@@ -174,12 +178,120 @@
           </div>
         </ng-container>
 
-        <!-- Mobile menu button (for future mobile implementation) -->
-        <button class="md:hidden p-2">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Mobile menu button -->
+        <button (click)="toggleMobileMenu()" class="md:hidden p-2 rounded-md hover:bg-blue-600 transition">
+          <svg *ngIf="!isMobileMenuOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
+          <svg *ngIf="isMobileMenuOpen" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu dropdown -->
+  <div *ngIf="isMobileMenuOpen" class="md:hidden bg-blue-800 border-t border-blue-600">
+    <div class="px-4 py-3 space-y-1">
+      <!-- Navigation Items -->
+      <ng-container *ngFor="let item of navigationItems">
+        <ng-container *ngIf="shouldShowItem(item)">
+          <!-- Item without children -->
+          <ng-container *ngIf="!item.children">
+            <button
+              (click)="navigateToMobile(item.route)"
+              class="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-blue-700 transition"
+            >
+              {{ item.label }}
+            </button>
+          </ng-container>
+
+          <!-- Item with children (collapsible) -->
+          <ng-container *ngIf="item.children">
+            <div class="space-y-1">
+              <div class="px-3 py-2 text-green-300 font-semibold text-sm">
+                {{ item.label }}
+              </div>
+              <div class="pl-4 space-y-1">
+                <ng-container *ngFor="let child of item.children">
+                  <ng-container *ngIf="shouldShowItem(child)">
+                    <button
+                      (click)="navigateToMobile(child.route)"
+                      class="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-blue-700 transition text-sm"
+                    >
+                      {{ child.label }}
+                    </button>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+
+      <!-- Authentication Section for Mobile -->
+      <div class="border-t border-blue-600 pt-3 mt-3">
+        <ng-container *ngIf="!isLoggedIn">
+          <!-- Not logged in: Login button -->
+          <button
+            (click)="goToLogin(); closeMobileMenu()"
+            class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-center"
+          >
+            Iniciar Sesión
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="isLoggedIn">
+          <!-- Logged in: User info and actions -->
+          <div class="space-y-2">
+            <!-- User info -->
+            <div class="flex items-center px-3 py-2">
+              <div class="h-8 w-8 rounded-full border-2 border-green-400 overflow-hidden mr-3">
+                <img 
+                  *ngIf="user?.avatar && user?.avatar !== 'default'" 
+                  [src]="getAvatarUrl(user?.avatar)" 
+                  [alt]="user?.lastName || 'Avatar'"
+                  class="w-full h-full object-cover">
+                <div 
+                  *ngIf="!user?.avatar || user?.avatar === 'default'" 
+                  class="w-full h-full bg-green-100 flex items-center justify-center">
+                  <span class="text-green-600 font-medium text-xs">
+                    {{ getInitials(user?.lastName || '') }}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div class="text-white font-medium">{{ user?.lastName }}</div>
+                <div class="text-blue-200 text-sm">{{ user?.email }}</div>
+              </div>
+            </div>
+
+            <!-- Dashboard button -->
+            <button
+              (click)="navigateToMobile(getDashboardRoute())"
+              class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-center"
+            >
+              Mi Panel
+            </button>
+
+            <!-- Profile button -->
+            <button
+              (click)="navigateToMobile('/profile')"
+              class="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-blue-700 transition"
+            >
+              Mi Perfil
+            </button>
+
+            <!-- Logout button -->
+            <button
+              (click)="logout(); closeMobileMenu()"
+              class="block w-full text-left px-3 py-2 rounded-md text-red-300 hover:bg-blue-700 transition"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>

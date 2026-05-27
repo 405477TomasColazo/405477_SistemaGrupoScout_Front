@@ -1,0 +1,140 @@
+/* Accounting Dashboard Styles */
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Quick action buttons */
+.quick-action-btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Status indicators */
+.status-positive {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.status-negative {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.status-balanced {
+  color: #2563eb;
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+/* Metric cards animation */
+.metric-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.metric-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.metric-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.metric-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Alert styles */
+.alert-warning {
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading spinner */
+.loading-spinner {
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Icon colors */
+.icon-blue {
+  color: #2563eb;
+}
+
+.icon-green {
+  color: #16a34a;
+}
+
+.icon-purple {
+  color: #9333ea;
+}
+
+.icon-yellow {
+  color: #ca8a04;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .metric-card {
+    margin-bottom: 1rem;
+  }
+  
+  .quick-action-btn {
+    padding: 0.75rem;
+  }
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .dark-mode .card-hover {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .dark-mode .quick-action-btn {
+    background-color: #374151;
+  }
+  
+  .dark-mode .quick-action-btn:hover {
+    background-color: #4b5563;
+  }
+}

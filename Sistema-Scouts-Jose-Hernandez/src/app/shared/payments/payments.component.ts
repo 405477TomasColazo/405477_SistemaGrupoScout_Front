@@ -339,14 +339,43 @@ export class PaymentsComponent implements OnInit, OnDestroy {
     return member ? `${member.name} ${member.lastName}` : 'Miembro no encontrado';
   }
 
-  getStatusText(status: "completed" | "processing" | "failed" | "pending"): string {
+  getStatusText(status: "completed" | "processing" | "failed" | "pending" | "refunded" | "unknown"): string {
     const statusMap = {
-      completed: "Completado",
+      completed: "Realizado",
       processing: "Procesando",
       pending: "Pendiente",
-      failed: "Fallido"
+      failed: "Fallido",
+      refunded: "Reembolsado",
+      unknown: "Desconocido"
     };
-    return statusMap[status];
+    return statusMap[status as keyof typeof statusMap] || "Estado desconocido";
+  }
+
+  getPaymentMethodText(paymentMethod: string | undefined): string {
+    if (!paymentMethod) return "Método no especificado";
+    
+    // Si ya viene traducido del backend, lo retornamos tal como está
+    if (paymentMethod.includes("Tarjeta") || paymentMethod.includes("Efectivo") || 
+        paymentMethod.includes("Transferencia") || paymentMethod.includes("Billetera") ||
+        paymentMethod.includes("Balance")) {
+      return paymentMethod;
+    }
+    
+    // Fallback para casos donde el backend no traduzca
+    const methodMap: { [key: string]: string } = {
+      'card': 'Tarjeta de crédito/débito',
+      'ticket': 'Efectivo',
+      'bank_transfer': 'Transferencia bancaria',
+      'digital_wallet': 'Billetera digital',
+      'account_money': 'Dinero en cuenta',
+      'account_balance': 'Balance de cuenta',
+      'atm': 'Cajero automático',
+      'visa': 'Tarjeta Visa',
+      'mastercard': 'Tarjeta Mastercard',
+      'american_express': 'Tarjeta American Express'
+    };
+    
+    return methodMap[paymentMethod.toLowerCase()] || paymentMethod;
   }
 
   showAlertMessage(type: 'success' | 'error', text: string): void {
@@ -830,13 +859,23 @@ export class PaymentsComponent implements OnInit, OnDestroy {
   }
 
   applyBalanceToSelectedFees(): void {
+    console.log('Starting applyBalanceToSelectedFees');
+    console.log('Selected member:', this.selectedMember);
+    console.log('Selected fees:', this.selectedFees);
+    console.log('Member balance:', this.memberBalance);
+    console.log('Can apply balance:', this.canApplyBalance());
+
     if (!this.selectedMember?.id || !this.canApplyBalance()) {
+      console.error('Cannot apply balance - validation failed');
       this.showAlertMessage('error', 'No se puede aplicar balance en este momento');
       return;
     }
 
     const totalAmount = this.calculateTotalAmount();
     const balanceToUse = Math.min(this.memberBalance, totalAmount);
+    
+    console.log('Total amount:', totalAmount);
+    console.log('Balance to use:', balanceToUse);
     
     // Mostrar confirmación
     const message = `¿Aplicar $${balanceToUse} de tu balance a las cuotas seleccionadas?\n\n` +
@@ -845,30 +884,49 @@ export class PaymentsComponent implements OnInit, OnDestroy {
                    `${balanceToUse < totalAmount ? `Restante a pagar: $${totalAmount - balanceToUse}` : 'Las cuotas quedarán completamente pagadas'}`;
     
     if (!confirm(message)) {
+      console.log('User cancelled operation');
       return;
     }
 
+    console.log('Calling payment service...');
+    
     this.paymentService.applyBalanceToFees(this.selectedMember.id, this.selectedFees).subscribe({
       next: (response) => {
-        if (response.status === 'success') {
-          this.showAlertMessage('success', response.message);
+        console.log('Apply balance response:', response);
+        
+        if (response && response.status === 'success') {
+          this.showAlertMessage('success', response.message || 'Balance aplicado exitosamente');
           
           // Actualizar datos
-          this.memberBalance = response.remainingBalance;
+          this.memberBalance = response.remainingBalance || 0;
           this.loadPendingFees(); // Recargar cuotas para ver los cambios
           this.selectedFees = []; // Limpiar selección
           
-          if (response.feesPaidCompletely > 0) {
-            this.showAlertMessage('success', 
-              `¡${response.feesPaidCompletely} cuota(s) pagada(s) completamente con balance!`);
+          if (response.feesPaidCompletely && response.feesPaidCompletely > 0) {
+            setTimeout(() => {
+              this.showAlertMessage('success', 
+                `¡${response.feesPaidCompletely} cuota(s) pagada(s) completamente con balance!`);
+            }, 2000);
           }
         } else {
-          this.showAlertMessage('error', response.message);
+          console.error('Apply balance failed:', response);
+          this.showAlertMessage('error', response?.message || 'Error al aplicar balance');
         }
       },
       error: (error) => {
-        console.error('Error applying balance:', error);
-        this.showAlertMessage('error', 'Error al aplicar balance a las cuotas');
+        console.error('Error applying balance - Full error:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
+        
+        let errorMessage = 'Error al aplicar balance a las cuotas';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        this.showAlertMessage('error', errorMessage);
       }
     });
   }

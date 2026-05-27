@@ -14,7 +14,7 @@ export interface Payment {
   memberLastName?: string;
   amount: number;
   paymentDate: string;
-  status: 'completed' | 'processing' | 'failed' | 'pending';
+  status: 'completed' | 'processing' | 'failed' | 'pending' | 'refunded' | 'unknown';
   referenceId?: string; // Referencia externa del pago (ej: ID de MercadoPago)
   paymentMethod?: string;
   items: PaymentItem[]; // Cuotas incluidas en este pago
@@ -136,7 +136,9 @@ export interface FeeGenerationLog {
   id: number;
   generationType: 'AUTOMATIC' | 'MANUAL' | 'NEW_MEMBER' | 'GLOBAL_PRICE_UPDATE';
   executedAt: string;
+  totalMembersProcessed: number;
   totalFeesGenerated: number;
+  totalFeesUpdated: number;
   targetMonth: string;
   section?: string;
   memberId?: number;

@@ -132,24 +132,6 @@ import { AuthService } from '../../../core/auth/auth.service';
         </button>
       </form>
 
-      <!-- Demo Credentials -->
-      <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h3 class="text-sm font-medium text-gray-700 mb-3">Credenciales de Prueba:</h3>
-        <div class="space-y-2 text-xs text-gray-600">
-          <div class="flex justify-between">
-            <span class="font-medium">Admin:</span>
-            <span>admin&#64;scout.com / 123</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-medium">Educador:</span>
-            <span>educador.manada&#64;scout.com / 123</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-medium">Familia:</span>
-            <span>familia.gonzalez&#64;email.com / 123</span>
-          </div>
-        </div>
-      </div>
 
       <!-- Footer Links -->
       <div class="mt-6 text-center">

@@ -1,14 +1,14 @@
 <section class="bg-blue-600 text-white">
-  <div class="px-16 py-16">
+  <div class="px-4 sm:px-8 lg:px-16 py-8 sm:py-12 lg:py-16">
     <div class="flex flex-col md:flex-row items-center">
       <div class="md:w-1/2 mb-8 md:mb-0">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Bienvenido a nuestro Grupo Scout</h1>
-        <p class="text-xl mb-6">Formando jóvenes, construyendo un mundo mejor</p>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Bienvenido a nuestro Grupo Scout</h1>
+        <p class="text-lg sm:text-xl mb-6">Formando jóvenes, construyendo un mundo mejor</p>
         <div class="space-y-3">
-          <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition block">
+          <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition block w-full sm:w-auto">
             ¡Únete a nosotros!
           </button>
-          <div class="flex space-x-4 text-sm">
+          <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 text-sm">
             <button (click)="openTermsModal()" class="text-blue-200 hover:text-white underline transition">
               Términos y Condiciones
             </button>
@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="md:w-1/2">
-        <img src='/media/pañuelos.JPG' alt="Grupo Scout en acción" class="rounded-lg shadow-xl">
+        <img src='/media/pañuelos.JPG' alt="Grupo Scout en acción" class="rounded-lg shadow-xl w-full max-w-lg mx-auto">
       </div>
     </div>
   </div>
@@ -139,13 +139,13 @@
 <app-latest-news></app-latest-news>
 
 <!-- Contacto -->
-<section id="contacto" class="py-16 bg-blue-50">
+<section id="contacto" class="py-8 sm:py-16 bg-blue-50">
   <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold text-center mb-12 text-blue-800">Contacto</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-blue-800">Contacto</h2>
 
-    <div class="flex flex-col md:flex-row gap-8">
-      <div class="md:w-1/2">
-        <div class="bg-white rounded-lg shadow-md p-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+      <div class="lg:w-1/2">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-8">
           <h3 class="text-2xl font-semibold mb-6 text-green-700">Envíanos un mensaje</h3>
 
           <!-- Success Message -->
@@ -269,9 +269,9 @@
         </div>
       </div>
 
-      <div class="md:w-1/2">
-        <div class="bg-white rounded-lg shadow-md p-8 h-full">
-          <h3 class="text-2xl font-semibold mb-6 text-green-700">Información de contacto</h3>
+      <div class="lg:w-1/2">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-8 h-full">
+          <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-green-700">Información de contacto</h3>
 
           <div class="space-y-6">
             <div class="flex items-start">

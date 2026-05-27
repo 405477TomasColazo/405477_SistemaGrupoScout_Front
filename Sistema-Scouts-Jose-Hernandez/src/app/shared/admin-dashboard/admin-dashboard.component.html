@@ -22,7 +22,7 @@
   </div>
 
   <!-- Tarjetas de resumen -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
     <div *ngFor="let stat of resumenEstadisticas" class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div [ngClass]="stat.bgColor" class="p-3 rounded-full">
@@ -50,11 +50,11 @@
   </div>
 
   <!-- Sección de filtros para los gráficos -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+  <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
       <h2 class="text-lg font-semibold text-gray-800">Filtros de Dashboard</h2>
 
-      <div class="flex flex-wrap items-center gap-4">
+      <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-4 w-full lg:w-auto">
         <!-- Selector de período -->
         <div>
           <label for="periodoFilter" class="block text-sm font-medium text-gray-700 mb-1">Período</label>
@@ -69,7 +69,7 @@
         </div>
 
         <!-- Botones de filtro rápido -->
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button
             *ngFor="let filtro of filtrosRapidos"
             (click)="seleccionarFiltroRapido(filtro.valor)"
@@ -105,7 +105,7 @@
   </div>
 
   <!-- Gráficos con menús de opciones -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
     <!-- Gráfico de pagos de cuotas -->
     <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
       <div class="flex items-center justify-between mb-4">
@@ -180,7 +180,7 @@
   </div>
 
   <!-- Próximos eventos y Notificaciones -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
     <!-- Próximos eventos -->
     <div class="bg-white rounded-lg shadow-md lg:col-span-2">
       <div class="px-6 py-4 border-b border-gray-200">
@@ -207,18 +207,22 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hora</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lugar</th>
+              <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
+              <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Fecha</th>
+              <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Hora</th>
+              <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Lugar</th>
             </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
             <tr *ngFor="let evento of eventosProximos">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ evento.titulo }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.fecha }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.hora }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ evento.lugar }}</td>
+              <td class="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
+                <div class="font-medium">{{ evento.titulo }}</div>
+                <div class="text-gray-500 text-xs sm:hidden">{{ evento.fecha }} - {{ evento.hora }}</div>
+                <div class="text-gray-500 text-xs sm:hidden">{{ evento.lugar }}</div>
+              </td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">{{ evento.fecha }}</td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">{{ evento.hora }}</td>
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">{{ evento.lugar }}</td>
             </tr>
             </tbody>
           </table>

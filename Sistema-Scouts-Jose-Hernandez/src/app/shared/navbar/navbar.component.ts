@@ -3,6 +3,7 @@ import { CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
 import {User} from '../../core/models/user.model';
 import {AuthService} from '../../core/auth/auth.service';
+import { NotificationBellComponent } from '../components/notification-bell/notification-bell.component';
 
 interface NavigationItem {
   label: string;
@@ -18,7 +19,8 @@ interface NavigationItem {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    NotificationBellComponent
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
@@ -28,6 +30,7 @@ export class NavbarComponent implements OnInit {
   user: User | null = null;
   authService: AuthService = inject(AuthService);
   router: Router = inject(Router);
+  isMobileMenuOpen: boolean = false;
 
   // Define navigation structure based on roles
   navigationItems: NavigationItem[] = [
@@ -53,8 +56,13 @@ export class NavbarComponent implements OnInit {
           roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
         },
         {
-          label: 'Panel Administrador',
+          label: 'Dashboard Administrador',
           route: '/admin/dashboard',
+          roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Dashboard Contable',
+          route: '/accounting/dashboard',
           roles: ['ROLE_ADMIN']
         }
       ]
@@ -88,8 +96,18 @@ export class NavbarComponent implements OnInit {
           roles: ['ROLE_ADMIN']
         },
         {
+          label: 'Eventos',
+          route: '/events/manage',
+          roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
+        },
+        {
           label: 'Cuotas Mensuales',
           route: '/admin/monthly-fees',
+          roles: ['ROLE_ADMIN']
+        },
+        {
+          label: 'Libro Diario',
+          route: '/accounting/journal',
           roles: ['ROLE_ADMIN']
         }
       ]
@@ -101,11 +119,6 @@ export class NavbarComponent implements OnInit {
           label: 'Ver Eventos',
           route: '/events',
           roles: ['ROLE_FAMILY', 'ROLE_EDUCATOR', 'ROLE_ADMIN']
-        },
-        {
-          label: 'Gestionar Eventos',
-          route: '/events/manage',
-          roles: ['ROLE_EDUCATOR', 'ROLE_ADMIN']
         },
         {
           label: 'Progresión Personal',
@@ -207,5 +220,20 @@ export class NavbarComponent implements OnInit {
       return `https://api.dicebear.com/9.x/lorelei-neutral/svg?seed=${avatar}`;
     }
     return '';
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+  }
+
+  navigateToMobile(route?: string): void {
+    if (route) {
+      this.router.navigate([route]);
+    }
+    this.closeMobileMenu();
   }
 }

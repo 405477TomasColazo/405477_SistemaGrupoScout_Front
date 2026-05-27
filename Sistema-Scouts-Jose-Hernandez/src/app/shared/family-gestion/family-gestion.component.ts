@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {FamilyGroup, Member, MemberProtagonist, Relationship, Tutor} from '../../core/models/family-group.model';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {FamilyGroupService} from '../../core/services/family-group.service';
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../../core/auth/auth.service';
+import {map, Observable, of} from 'rxjs';
 
 @Component({
   selector: 'app-family-gestion',
@@ -89,28 +90,28 @@ export class FamilyGestionComponent implements OnInit {
     this.tutorForm = this.fb.group({
       id: [null],
       userId: [null],
-      name: ['', Validators.required],
-      lastName: ['', Validators.required],
-      birthdate: ['', Validators.required],
-      dni: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      contactPhone: ['', Validators.required],
-      address: ['', [Validators.required]],
-      notes: ['']
+      name: ['', [Validators.required, Validators.maxLength(50)]],
+      lastName: ['', [Validators.required, Validators.maxLength(50)]],
+      birthdate: ['', [Validators.required, this.ageRangeValidator(18, 120)]],
+      dni: ['', [Validators.required, Validators.maxLength(20)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      contactPhone: ['', [Validators.required, Validators.maxLength(20)]],
+      address: ['', [Validators.required, Validators.maxLength(200)]],
+      notes: ['', Validators.maxLength(500)]
     });
 
     // Formulario para beneficiarios (protagonistas)
     this.protagonistForm = this.fb.group({
       id: [null],
       userId: [null],
-      name: ['', Validators.required],
-      lastName: ['', Validators.required],
-      birthdate: ['', Validators.required],
-      address: ['', [Validators.required]],
-      dni: ['', Validators.required],
-      email: [''], // Optional
-      contactPhone: [''], // Optional
-      notes: ['']
+      name: ['', [Validators.required, Validators.maxLength(50)]],
+      lastName: ['', [Validators.required, Validators.maxLength(50)]],
+      birthdate: ['', [Validators.required, this.ageRangeValidator(7, 22)]],
+      address: ['', [Validators.required, Validators.maxLength(200)]],
+      dni: ['', [Validators.required, Validators.maxLength(20)], [this.uniqueDniValidator()]],
+      email: ['', [Validators.email, Validators.maxLength(100)]], // Optional
+      contactPhone: ['', Validators.maxLength(20)], // Optional
+      notes: ['', Validators.maxLength(500)]
     });
 
     // Formulario para relaciones
@@ -471,6 +472,54 @@ export class FamilyGestionComponent implements OnInit {
     this.selectedProtagonist = protagonist;
     this.infoModal = true;
     this.actualMemberType = 'beneficiario';
+  }
+
+  // Validadores personalizados
+  ageRangeValidator(minAge: number, maxAge: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null;
+      }
+
+      const birthDate = new Date(control.value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < minAge || age > maxAge) {
+        return {
+          ageRange: {
+            actualAge: age,
+            minAge: minAge,
+            maxAge: maxAge
+          }
+        };
+      }
+
+      return null;
+    };
+  }
+
+  uniqueDniValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.length < 7) {
+        return of(null);
+      }
+
+      // Si estamos editando, no validar si el DNI no cambió
+      if (this.editMode && this.miembroAEditar && 
+          this.miembroAEditar.dni === control.value) {
+        return of(null);
+      }
+
+      return this.familyGroupService.checkDniExists(control.value).pipe(
+        map(exists => exists ? { dniExists: true } : null)
+      );
+    };
   }
 
 }

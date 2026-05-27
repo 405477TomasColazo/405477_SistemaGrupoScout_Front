@@ -1,0 +1,260 @@
+<div class="p-6 space-y-6">
+  <!-- Header -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Panel de Contabilidad</h1>
+        <p class="text-gray-600">Resumen financiero de {{ getCurrentMonthName() }}</p>
+      </div>
+      <div class="flex gap-3 mt-4 md:mt-0">
+        <button
+          routerLink="/accounting/entries/new"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+          <i class="fas fa-plus mr-2"></i>
+          Nueva Entrada
+        </button>
+        <button
+          routerLink="/accounting/journal"
+          class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+          <i class="fas fa-book mr-2"></i>
+          Libro Diario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error && stats">
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Entries -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+              <i class="fas fa-receipt text-blue-600"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total de Entradas</dt>
+              <dd class="text-lg font-medium text-gray-900">{{ stats.totalEntries }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Debits -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+              <i class="fas fa-arrow-up text-green-600"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Débitos</dt>
+              <dd class="text-lg font-medium text-gray-900">{{ formatCurrency(stats.totalDebits) }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Credits -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+              <i class="fas fa-arrow-down text-purple-600"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Créditos</dt>
+              <dd class="text-lg font-medium text-gray-900">{{ formatCurrency(stats.totalCredits) }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center">
+              <i [class]="getBalanceIcon() + ' text-gray-600'"></i>
+            </div>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Balance</dt>
+              <dd [class]="'text-lg font-medium ' + getBalanceClass()">
+                {{ formatCurrency(stats.balanceDifference) }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            routerLink="/accounting/entries/new"
+            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-plus text-blue-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-gray-900">Nueva Entrada</div>
+              <div class="text-sm text-gray-500">Crear entrada contable manual</div>
+            </div>
+          </button>
+
+          <button
+            routerLink="/accounting/journal"
+            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-book text-green-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-gray-900">Libro Diario</div>
+              <div class="text-sm text-gray-500">Ver todas las entradas contables</div>
+            </div>
+          </button>
+
+          <button
+            routerLink="/accounting/entries"
+            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-list text-purple-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-gray-900">Gestionar Entradas</div>
+              <div class="text-sm text-gray-500">Editar y gestionar entradas</div>
+            </div>
+          </button>
+
+          <button
+            routerLink="/admin/payments"
+            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-credit-card text-yellow-600"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-gray-900">Pagos</div>
+              <div class="text-sm text-gray-500">Ver historial de pagos</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Info -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Información Resumida</h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Período:</span>
+            <span class="font-medium">{{ getCurrentMonthName() }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Cuentas con Movimientos:</span>
+            <span class="font-medium">{{ stats.accountsWithMovements }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Entradas Automáticas:</span>
+            <span class="font-medium">{{ stats.automaticEntries || 'N/A' }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Entradas Manuales:</span>
+            <span class="font-medium">{{ stats.manualEntries || 'N/A' }}</span>
+          </div>
+          
+          <div class="border-t pt-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600 font-medium">Estado del Balance:</span>
+              <span [class]="'font-bold ' + getBalanceClass()">
+                {{ stats.balanceDifference === 0 ? 'Balanceado' : (stats.balanceDifference > 0 ? 'Positivo' : 'Negativo') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Debit vs Credit Donut Chart -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución Débitos vs Créditos</h3>
+        <div class="h-64 flex items-center justify-center">
+          <canvas #debitCreditChart></canvas>
+        </div>
+      </div>
+
+      <!-- Balance Comparison Chart -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Comparación de Montos</h3>
+        <div class="h-64 flex items-center justify-center">
+          <canvas #balanceChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Alert (if not balanced) -->
+    <div *ngIf="stats.balanceDifference !== 0" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">
+            Alerta de Balance Contable
+          </h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>
+              El balance contable no es cero. Los débitos y créditos totales deben ser iguales.
+              Diferencia del balance: <strong>{{ formatCurrency(stats.balanceDifference) }}</strong>
+            </p>
+          </div>
+          <div class="mt-4">
+            <button
+              routerLink="/accounting/journal"
+              class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm transition-colors">
+              Revisar Entradas del Diario
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && !stats" class="text-center py-12">
+    <div class="text-gray-500">
+      <i class="fas fa-chart-line text-4xl mb-4"></i>
+      <p class="text-lg">No hay datos contables disponibles</p>
+      <p class="text-sm">Comience creando su primera entrada contable</p>
+      <button
+        routerLink="/accounting/entries/new"
+        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+        Crear Primera Entrada
+      </button>
+    </div>
+  </div>
+</div>

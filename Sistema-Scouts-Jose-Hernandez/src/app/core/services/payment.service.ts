@@ -14,6 +14,7 @@ import {
   UpdatePaymentStatusRequest
 } from '../models/payments.model';
 import {Observable} from 'rxjs';
+import {tap, catchError} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 
 @Injectable({
@@ -154,6 +155,28 @@ export class PaymentService {
 
   applyBalanceToFees(memberId: number, feeIds: number[]): Observable<any> {
     const request = { memberId, feeIds };
-    return this.client.post<any>(`${this.url}/apply-balance`, request);
+    const fullUrl = `${this.url}/apply-balance`;
+    
+    console.log('=== APPLY BALANCE DEBUG ===');
+    console.log('Member ID:', memberId);
+    console.log('Fee IDs:', feeIds);
+    console.log('Request object:', request);
+    console.log('Service URL property:', this.url);
+    console.log('Full URL:', fullUrl);
+    console.log('Environment API URL:', environment.apiUrl);
+    console.log('=============================');
+    
+    return this.client.post<any>(fullUrl, request).pipe(
+      tap(response => {
+        console.log('✅ Apply balance SUCCESS response:', response);
+      }),
+      catchError(error => {
+        console.error('❌ Apply balance HTTP ERROR:', error);
+        console.error('Error status:', error.status);
+        console.error('Error statusText:', error.statusText);
+        console.error('Error body:', error.error);
+        throw error;
+      })
+    );
   }
 }

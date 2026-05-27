@@ -17,12 +17,14 @@ import { RegistryComponent } from './shared/registry/registry.component';
 import { PaymentsComponent } from './shared/payments/payments.component';
 import { NewsListComponent } from './shared/news/news-list/news-list.component';
 import { NewsDetailComponent } from './shared/news/news-detail/news-detail.component';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
 
 // Guards
 import { AuthGuard } from './core/auth/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { EducatorGuard } from './core/guards/educator.guard';
 import { FamilyGuard } from './core/guards/family.guard';
+import { guestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
   // Auth Routes (no layout, uses AuthLayoutComponent)
@@ -30,10 +32,10 @@ export const routes: Routes = [
     path: 'auth',
     component: AuthLayoutComponent,
     children: [
-      { path: 'login', component: LoginComponent },
+      { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
       { path: 'logout', component: LogoutComponent },
-      { path: 'forgot-password', component: ForgotPasswordComponent },
-      { path: 'reset-password', component: ResetPasswordComponent },
+      { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard] },
+      { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
@@ -48,7 +50,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'noticias', component: NewsListComponent },
       { path: 'noticias/:slug', component: NewsDetailComponent },
-      { path: 'registro', component: RegistryComponent },
+      { path: 'registro', component: RegistryComponent, canActivate: [guestGuard] },
 
       // Admin Routes (Lazy Loaded with Standalone Components)
       {
@@ -85,6 +87,13 @@ export const routes: Routes = [
         loadChildren: () => import('./features/progression/progression.routes').then(m => m.progressionRoutes)
       },
 
+      // Accounting Routes (Lazy Loaded with Standalone Components)
+      {
+        path: 'accounting',
+        canActivate: [AdminGuard],
+        loadChildren: () => import('./features/accounting/accounting.routes').then(m => m.accountingRoutes)
+      },
+
       {
         path: 'payments',
         component: PaymentsComponent,
@@ -94,6 +103,12 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+        canActivate: [AuthGuard]
+      },
+
+      {
+        path: 'notifications',
+        component: NotificationsComponent,
         canActivate: [AuthGuard]
       },
 
